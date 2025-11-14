@@ -1,0 +1,43 @@
+[build-system]
+requires      = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name        = "onteaulogy"
+version     = "0.1.0"
+description = "Add your description here"
+readme      = "README.md"
+authors     = [{name="Jean-David Therrien", email="jeandavid.therrien@ugent.be"}]
+keywords    = ["ontology", "owl", "water reuse"]
+requires-python = ">=3.12"
+dependencies = [
+    "rdflib>=7.0",
+    "pyshacl>=0.30",
+    "marimo[mcp]>=0.2", # optional, for notebooks
+    "networkx>=3.5",
+    "matplotlib>=3.10.7",
+    "plotly>=6.3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mkdocs>=1.5",
+    "mkdocs-material>=9.0",
+    "pytest>=7.4",
+    "mypy>=1.8",
+    "pre-commit>=3.7",
+]
+
+[tool.ruff]
+line-length = 88
+lint.select = ["E", "F", "I001"]
+
+[dependency-groups]
+dev = [
+    "anthropic>=0.71.0",
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6.21",
+    "pytest>=8.4.2",
+    "ruff>=0.14.1",
+    "ty>=0.0.1a23",
+]

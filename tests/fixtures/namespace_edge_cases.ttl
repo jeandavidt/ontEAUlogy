@@ -1,0 +1,16 @@
+@prefix : <http://mismatch.example.org/test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Ontology with mismatched declaration URI
+# Default prefix uses one URI, declaration uses another
+<http://different.example.org/test> rdf:type owl:Ontology ;
+    rdfs:label "Namespace Edge Case"@en .
+
+# Entities use the default prefix
+:EdgeCaseClass rdf:type owl:Class ;
+    rdfs:label "Edge Case Class"@en .
+
+:EdgeCaseProperty rdf:type owl:ObjectProperty ;
+    rdfs:label "Edge Case Property"@en .

@@ -1,0 +1,43 @@
+name: Docs
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Install deps
+        run: uv sync --dev
+      - name: Build docs from OWL
+        run: |
+          # convert the .ttl to Markdown (simple example)
+          uv run rdflib --in data/ontology/my_ontology.ttl \
+                         --out docs/index.md \
+                         --format markdown
+          # or use a custom script if you need richer formatting
+      - name: Export marimo notebook
+        run: |
+          uvx marimo export html-wasm notebooks/explore_ontology.py -o webnotebook/index.html
+      - name: Copy notebook to docs
+        run: |
+          mkdir -p docs/notebook
+          cp -r webnotebook/* docs/notebook/
+      - name: Build MkDocs site
+        run: uv run mkdocs build
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

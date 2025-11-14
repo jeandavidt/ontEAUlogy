@@ -1,0 +1,103 @@
+/* Custom styles for ontEAUlogy documentation */
+
+/* Make h2 entity headings stand out with background and larger text */
+.md-typeset h2 {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
+    margin-top: 2.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.8em;
+    font-weight: 700;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Adjust anchor links in h2 to be white */
+.md-typeset h2 a {
+    color: white;
+    opacity: 0.8;
+}
+
+.md-typeset h2 a:hover {
+    opacity: 1;
+}
+
+/* Make h3 subsection headings distinct with color and border */
+.md-typeset h3 {
+    color: #5e72e4;
+    font-size: 1.3em;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 2px solid #e3e8ff;
+}
+
+/* Style the horizontal rules between entities */
+.md-typeset hr {
+    margin: 3rem 0;
+    border: none;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ddd, transparent);
+}
+
+/* Make the table of contents stand out */
+.md-typeset h2:first-of-type {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+/* Better spacing for lists in entity documentation */
+.md-typeset ul li {
+    margin: 0.4rem 0;
+}
+
+/* Make property values more readable */
+.md-typeset ul li strong {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+/* Style code elements (URIs, external references) */
+.md-typeset code {
+    background-color: #f4f5f7;
+    color: #e83e8c;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+/* Better link styling for internal entity links */
+.md-typeset a:not(.md-content__button) {
+    color: #5e72e4;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.md-typeset a:not(.md-content__button):hover {
+    border-bottom-color: #5e72e4;
+}
+
+/* Dark mode adjustments */
+[data-md-color-scheme="slate"] .md-typeset h2 {
+    background: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%);
+}
+
+[data-md-color-scheme="slate"] .md-typeset h3 {
+    color: #8f94fb;
+    border-bottom-color: #2d3748;
+}
+
+[data-md-color-scheme="slate"] .md-typeset code {
+    background-color: #2d3748;
+    color: #f687b3;
+}
+
+[data-md-color-scheme="slate"] .md-typeset a:not(.md-content__button) {
+    color: #8f94fb;
+}
+
+[data-md-color-scheme="slate"] .md-typeset a:not(.md-content__button):hover {
+    border-bottom-color: #8f94fb;
+}

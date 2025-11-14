@@ -1,0 +1,103 @@
+site_name: ontEAUlogy Documentation
+site_description: Automated documentation for the ontEAUlogy ontology, providing comprehensive
+  information about all entities, classes, properties, and relationships.
+site_author: Jean-David Therrien (BioMATH UGent)
+site_url: https://jeandavidt.github.io/ontEAUlogy/
+repo_url: https://github.com/jeandavidt/ontEAUlogy
+repo_name: jeandavidt/ontEAUlogy
+edit_uri: edit/main/docs/
+copyright: Copyright &copy; 2025 Jean-David Therrien
+use_directory_urls: true
+theme:
+  name: material
+  palette:
+  - media: (prefers-color-scheme)
+    toggle:
+      icon: material/brightness-auto
+      name: Switch to light mode
+  - media: '(prefers-color-scheme: light)'
+    scheme: default
+    primary: blue
+    accent: indigo
+    toggle:
+      icon: material/brightness-7
+      name: Switch to dark mode
+  - media: '(prefers-color-scheme: dark)'
+    scheme: slate
+    primary: blue
+    accent: indigo
+    toggle:
+      icon: material/brightness-4
+      name: Switch to system preference
+  # Uncomment to use an icon instead of a logo image:
+  # icon:
+  #   logo: material/water
+  logo: assets/logo.png
+  favicon: assets/icon.svg
+  features:
+  - announce.dismiss
+  - content.action.edit
+  - content.action.view
+  - content.code.annotate
+  - content.code.copy
+  - content.code.select
+  - content.footnote.tooltips
+  - content.tabs.link
+  - content.tooltips
+  - navigation.expand
+  - navigation.footer
+  - navigation.indexes
+  - navigation.instant
+  - navigation.instant.prefetch
+  - navigation.instant.progress
+  - navigation.sections
+  - navigation.tabs
+  - navigation.tabs.sticky
+  - navigation.top
+  - navigation.tracking
+  - search.highlight
+  - search.share
+  - search.suggest
+  - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+    previous: fontawesome/solid/angle-left
+    next: fontawesome/solid/angle-right
+extra:
+  version:
+    provider: mike
+    default: latest
+markdown_extensions:
+- abbr
+- admonition
+- attr_list
+- def_list
+- footnotes
+- md_in_html
+- meta
+- tables
+- toc:
+    permalink: true
+    toc_depth: 2
+- pymdownx.highlight:
+    anchor_linenums: true
+- pymdownx.superfences
+plugins:
+- search:
+    separator: '[\s\u200b\-_,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+nav:
+- Home: index.md
+- Entities: entities.md
+- Explore Ontology: notebook/index.html
+watch:
+- data/ontology/
+- scripts/
+- src/
+extra_css:
+- stylesheets/extra.css
+extra_javascript:
+- javascripts/extra.js
+hooks:
+  - scripts/hooks/generate_docs_hook.py
