@@ -18,13 +18,6 @@ jobs:
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
       - name: Install deps
         run: uv sync --dev
-      - name: Build docs from OWL
-        run: |
-          # convert the .ttl to Markdown (simple example)
-          uv run rdflib --in data/ontology/my_ontology.ttl \
-                         --out docs/index.md \
-                         --format markdown
-          # or use a custom script if you need richer formatting
       - name: Export marimo notebook
         run: |
           uvx marimo export html-wasm notebooks/explore_ontology.py -o webnotebook/index.html
