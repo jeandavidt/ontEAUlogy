@@ -35,7 +35,7 @@ def _(Path, mo):
     ontology_input = mo.ui.text(
         label="Ontology Path or URI",
         full_width=True,
-        value="",
+        value="https://raw.githubusercontent.com/UGentBiomath/ontology/refs/heads/main/index.ttl",
         placeholder="Enter file path or URI (e.g., http://example.org/ontology.ttl)"
     )
     ontology_input
