@@ -3,14 +3,16 @@
 # dependencies = [
 #     "networkx==3.5",
 #     "numpy==2.3.4",
-#     "plotly==6.4.0",
 #     "rdflib==7.4.0",
+#     "marimo",
+#     "anywidget",
+#     "traitlets",
 # ]
 # ///
 
 import marimo
 
-__generated_with = "0.17.0"
+__generated_with = "0.17.8"
 app = marimo.App(width="medium")
 
 
@@ -18,14 +20,13 @@ app = marimo.App(width="medium")
 def _():
     import marimo as mo
     import rdflib
-    import sys
     from pathlib import Path
-    import numpy as np
     from rdflib import Graph, URIRef
     from rdflib.namespace import DC, OWL, RDF, RDFS, SKOS
     import networkx as nx
-    import plotly.graph_objects as go
-    return OWL, Path, RDF, RDFS, go, mo, nx, rdflib
+    import json
+    import anywidget
+    return OWL, Path, RDF, RDFS, anywidget, json, mo, nx, rdflib
 
 
 @app.cell
@@ -34,7 +35,7 @@ def _(Path, mo):
     ontology_input = mo.ui.text(
         label="Ontology Path or URI",
         full_width=True,
-        value=str(Path(__file__).parent.parent / "data/ontology/onteaulogy.ttl"),
+        value="",
         placeholder="Enter file path or URI (e.g., http://example.org/ontology.ttl)"
     )
     ontology_input
@@ -78,9 +79,9 @@ def _(Path, mo, ontology_input, rdflib):
 
 
 @app.cell
-def _(OWL, RDF, RDFS, graph, nx):
+def _(OWL, RDF, RDFS, graph, nx, rdflib):
     # Convert RDF graph to NetworkX with type information
-    def rdf_to_networkx(rdf_graph):
+    def rdf_to_networkx(rdf_graph, skip_blank_nodes=True):
         G = nx.DiGraph()
 
         # Define meta-level URIs (ontology vocabulary)
@@ -93,11 +94,12 @@ def _(OWL, RDF, RDFS, graph, nx):
             str(OWL.TransitiveProperty), str(OWL.SymmetricProperty),
             # RDF and RDFS terms
             str(RDF.Property), str(RDFS.Resource),
-            str(RDF.Statement), str(RDF.List), str(RDF.Seq), str(RDF.Bag), str(RDF.Alt),
+            str(RDF.Statement), str(RDF.List), str(RDF.Seq),
+            str(RDF.Bag), str(RDF.Alt),
             str(RDFS.Literal), str(RDFS.Container),
         }
 
-        # Also check by namespace prefix for any RDF/RDFS/OWL/W3C vocabulary terms
+        # Also check by namespace prefix for any RDF/RDFS/OWL/W3C vocabulary
         meta_namespaces = [
             'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
             'http://www.w3.org/2000/01/rdf-schema#',
@@ -107,9 +109,17 @@ def _(OWL, RDF, RDFS, graph, nx):
             'https://www.w3.org/TR/',
         ]
 
-        # First pass: identify node types
+        # First pass: identify node types and blank nodes
         node_types = {}
         ontology_nodes = set()
+        blank_nodes = set()
+
+        # Identify blank nodes
+        for s, p, o in rdf_graph:
+            if isinstance(s, rdflib.BNode):
+                blank_nodes.add(str(s))
+            if isinstance(o, rdflib.BNode):
+                blank_nodes.add(str(o))
 
         for s, p, o in rdf_graph:
             s_uri = str(s)
@@ -141,13 +151,23 @@ def _(OWL, RDF, RDFS, graph, nx):
                 node_types[o_uri] = 'datatype'
 
             # Check for RDF datatypes (like rdf:JSON, rdf:HTML, etc.)
-            if '#' in s_uri and s_uri.split('#')[0] in [ns.rstrip('#') for ns in meta_namespaces]:
+            if '#' in s_uri and s_uri.split('#')[0] in [
+                ns.rstrip('#') for ns in meta_namespaces
+            ]:
                 _fragment = s_uri.split('#')[1].lower()
-                if any(dt in _fragment for dt in ['json', 'html', 'xml', 'plainliteral', 'langstring']):
+                if any(
+                    dt in _fragment
+                    for dt in ['json', 'html', 'xml', 'plainliteral', 'langstring']
+                ):
                     node_types[s_uri] = 'datatype'
-            if '#' in o_uri and o_uri.split('#')[0] in [ns.rstrip('#') for ns in meta_namespaces]:
+            if '#' in o_uri and o_uri.split('#')[0] in [
+                ns.rstrip('#') for ns in meta_namespaces
+            ]:
                 _fragment = o_uri.split('#')[1].lower()
-                if any(dt in _fragment for dt in ['json', 'html', 'xml', 'plainliteral', 'langstring']):
+                if any(
+                    dt in _fragment
+                    for dt in ['json', 'html', 'xml', 'plainliteral', 'langstring']
+                ):
                     node_types[o_uri] = 'datatype'
 
             # Check if subject is a class, property, or individual
@@ -167,447 +187,466 @@ def _(OWL, RDF, RDFS, graph, nx):
             p_uri = str(p)
             o_uri = str(o)
 
+            # Skip blank nodes if requested
+            if skip_blank_nodes:
+                if s_uri in blank_nodes or o_uri in blank_nodes:
+                    continue
+
             s_label = s_uri.split('/')[-1].split('#')[-1]
             p_label = p_uri.split('/')[-1].split('#')[-1]
             o_label = o_uri.split('/')[-1].split('#')[-1]
 
             # Determine node types
-            s_type = node_types.get(s_uri, 'unknown')
+            if s_uri in blank_nodes:
+                s_type = 'blank'
+            else:
+                s_type = node_types.get(s_uri, 'unknown')
 
             # For objects, check if it's a literal (doesn't start with http)
-            if o_uri.startswith('http'):
-                o_type = node_types.get(o_uri, 'unknown')
+            if o_uri.startswith('http') or o_uri.startswith('_:'):
+                if o_uri in blank_nodes:
+                    o_type = 'blank'
+                else:
+                    o_type = node_types.get(o_uri, 'unknown')
             else:
                 o_type = 'literal'
 
             # Add nodes with type information
             if s_uri not in G.nodes:
-                G.add_node(s_uri, label=s_label, uri=s_uri, node_type=s_type)
+                G.add_node(
+                    s_uri,
+                    label=s_label,
+                    uri=s_uri,
+                    node_type=s_type,
+                    is_blank=s_uri in blank_nodes,
+                )
             if o_uri not in G.nodes:
-                G.add_node(o_uri, label=o_label, uri=o_uri, node_type=o_type)
+                G.add_node(
+                    o_uri,
+                    label=o_label,
+                    uri=o_uri,
+                    node_type=o_type,
+                    is_blank=o_uri in blank_nodes,
+                )
 
             # Add edge with predicate info
             G.add_edge(s_uri, o_uri, predicate=p_label, predicate_uri=p_uri)
 
         return G
 
-    nx_graph = rdf_to_networkx(graph)
+    # Always include blank nodes in the graph structure
+    # The UI filter will control visibility
+    nx_graph = rdf_to_networkx(graph, skip_blank_nodes=False)
     return (nx_graph,)
 
 
 @app.cell
-def _():
-    return
-
-
-@app.cell
-def _(graph, mo):
-    # Extract all namespaces from the graph
-    def extract_namespaces(rdf_graph):
-        """Extract unique namespace prefixes from all URIs in the graph"""
-        _namespaces = {}
-
-        for s, p, o in rdf_graph:
-            for _uri in [str(s), str(p), str(o)]:
-                if _uri.startswith('http://') or _uri.startswith('https://'):
-                    # Split on # or the last / to get the actual namespace
-                    if '#' in _uri:
-                        # For URIs with #, the namespace includes the #
-                        _ns = _uri.rsplit('#', 1)[0] + '#'
-                    elif _uri.count('/') > 2:  # More than just http://domain
-                        # For URIs with /, take everything up to and including the last /
-                        # But only if there's actual path content
-                        _ns = _uri.rsplit('/', 1)[0] + '/'
-                    else:
-                        # Just the base domain
-                        continue  # Skip base domains without paths
-
-                    # Try to get a nice prefix name
-                    if _ns not in _namespaces:
-                        # Check if it's a known namespace from rdflib
-                        _prefix = None
-                        for _p, _n in rdf_graph.namespaces():
-                            if str(_n) == _ns:
-                                _prefix = _p
-                                break
-
-                        # If no prefix found, create one from the URI
-                        if not _prefix:
-                            if 'w3.org' in _ns:
-                                if 'XMLSchema' in _ns:
-                                    _prefix = 'xsd'
-                                elif 'rdf-schema' in _ns:
-                                    _prefix = 'rdfs'
-                                elif '1999/02/22' in _ns:
-                                    _prefix = 'rdf'
-                                elif 'owl' in _ns:
-                                    _prefix = 'owl'
-                                elif 'skos' in _ns:
-                                    _prefix = 'skos'
-                                else:
-                                    _prefix = 'w3'
-                            else:
-                                # Extract a meaningful name from the URI
-                                # For http://example.org/onteaulogy#, use 'onteaulogy'
-                                _uri_parts = _ns.replace('http://', '').replace('https://', '').rstrip('/#').split('/')
-                                if len(_uri_parts) > 1:
-                                    _prefix = _uri_parts[-1]  # Last meaningful part
-                                else:
-                                    _prefix = _uri_parts[0].split('.')[0]  # Domain
-
-                        _namespaces[_ns] = _prefix if _prefix else 'unknown'
-
-        return _namespaces
-
-    _namespaces_extracted = extract_namespaces(graph)
-
-    # Create a dictionary UI element that groups all checkboxes
-    namespace_filter = mo.ui.dictionary({
-        _ns: mo.ui.checkbox(
-            label=f"{_prefix} ({_ns[:50]}...)" if len(_ns) > 50 else f"{_prefix} ({_ns})",
-            value=True
-        )
-        for _ns, _prefix in sorted(_namespaces_extracted.items(), key=lambda x: x[1])
-    })
-
-    # Display namespace filters
-    _ns_items = list(namespace_filter.items())
-    _ns_display = [mo.md("**Filter by namespace:**")]
-    for _i in range(0, len(_ns_items), 2):
-        _row = [_ns_items[_i][1]]
-        if _i + 1 < len(_ns_items):
-            _row.append(_ns_items[_i + 1][1])
-        _ns_display.append(mo.hstack(_row))
-
-    mo.vstack(_ns_display)
-    return (namespace_filter,)
-
-
-@app.cell
 def _(mo):
-    # Search box for filtering nodes
-    search_box = mo.ui.text(
-        label="Search nodes (filter by label or URI)",
-        placeholder="Type to filter nodes..."
-    )
-
-    # Create checkboxes for filtering node types
-    show_ontology = mo.ui.checkbox(label="Show Ontology", value=True)
+    # Filter controls
+    show_blank_nodes = mo.ui.checkbox(label="Show Blank Nodes", value=False)
     show_meta = mo.ui.checkbox(label="Show Meta-level Terms", value=True)
     show_datatypes = mo.ui.checkbox(label="Show Datatypes (XSD)", value=True)
-    show_classes = mo.ui.checkbox(label="Show Classes", value=True)
-    show_object_properties = mo.ui.checkbox(label="Show Object Properties", value=True)
-    show_datatype_properties = mo.ui.checkbox(label="Show Datatype Properties", value=True)
-    show_individuals = mo.ui.checkbox(label="Show Individuals", value=True)
     show_literals = mo.ui.checkbox(label="Show Literals", value=True)
-    show_unknown = mo.ui.checkbox(label="Show Unknown", value=True)
-    k_slider = mo.ui.slider(start=0.1, step=0.05, stop=3,label="Neighbour distance")
+
+    # Layout selection - use list so value is the actual layout name
+    layout_options = mo.ui.dropdown(
+        options=["fcose", "cose", "cola", "breadthfirst", "circle", "concentric", "grid"],
+        value="fcose",
+        label="Layout Algorithm"
+    )
+
+    # Refresh button - forces re-render and fits to view
+    refresh_button = mo.ui.button(
+        value=0,
+        on_click=lambda value: value + 1,
+        label="🔄 Refresh & Fit to View"
+    )
+
     mo.vstack([
-        search_box,
-        mo.md("**Filter by node type:**"),
-        mo.hstack([show_ontology, show_meta, show_datatypes]),
-        mo.hstack([show_classes, show_object_properties, show_datatype_properties]),
-        mo.hstack([show_individuals, show_literals, show_unknown]),
-        k_slider
+        mo.md("**Filter Options:**"),
+        mo.hstack([show_blank_nodes, show_meta, show_datatypes, show_literals]),
+        layout_options,
+        refresh_button
     ])
     return (
-        k_slider,
-        search_box,
-        show_classes,
-        show_datatype_properties,
+        layout_options,
+        refresh_button,
+        show_blank_nodes,
         show_datatypes,
-        show_individuals,
         show_literals,
         show_meta,
-        show_object_properties,
-        show_ontology,
-        show_unknown,
     )
 
 
 @app.cell
 def _(
-    go,
-    k_slider,
+    anywidget,
+    json,
+    layout_options,
     mo,
-    namespace_filter,
-    nx,
     nx_graph,
-    search_box,
-    show_classes,
-    show_datatype_properties,
+    refresh_button,
+    show_blank_nodes,
     show_datatypes,
-    show_individuals,
     show_literals,
     show_meta,
-    show_object_properties,
-    show_ontology,
-    show_unknown,
 ):
-    # Define colors and sizes for different node types
-    node_styles = {
-        'ontology': {'color': '#8e44ad', 'size': 18, 'symbol': 'star'},
-        'meta': {'color': '#34495e', 'size': 14, 'symbol': 'diamond'},
-        'datatype': {'color': '#16a085', 'size': 12, 'symbol': 'hexagon'},
-        'class': {'color': '#3498db', 'size': 15, 'symbol': 'circle'},
-        'object_property': {'color': '#2ecc71', 'size': 12, 'symbol': 'diamond'},
-        'datatype_property': {'color': '#f39c12', 'size': 12, 'symbol': 'square'},
-        'individual': {'color': '#9b59b6', 'size': 10, 'symbol': 'circle'},
-        'literal': {'color': '#95a5a6', 'size': 8, 'symbol': 'circle'},
-        'unknown': {'color': '#e74c3c', 'size': 10, 'symbol': 'x'}
-    }
 
-    # Map checkboxes to node types
-    node_type_filters = {
-        'ontology': show_ontology.value,
-        'meta': show_meta.value,
-        'datatype': show_datatypes.value,
-        'class': show_classes.value,
-        'object_property': show_object_properties.value,
-        'datatype_property': show_datatype_properties.value,
-        'individual': show_individuals.value,
-        'literal': show_literals.value,
-        'unknown': show_unknown.value
-    }
 
-    # Define edge styles for different predicates
-    edge_styles = {
-        'type': {'color': '#34495e', 'width': 2, 'dash': 'solid'},
-        'subClassOf': {'color': '#3498db', 'width': 2, 'dash': 'solid'},
-        'domain': {'color': '#27ae60', 'width': 1.5, 'dash': 'dot'},
-        'range': {'color': '#e67e22', 'width': 1.5, 'dash': 'dot'},
-        'label': {'color': '#bdc3c7', 'width': 0.5, 'dash': 'dash'},
-        'comment': {'color': '#bdc3c7', 'width': 0.5, 'dash': 'dash'},
-        'default': {'color': '#888', 'width': 1, 'dash': 'solid'}
-    }
-    # Store edge_styles for use in legend
-    current_edge_styles = edge_styles
-    # Create layout
-    pos = nx.spring_layout(nx_graph, k=k_slider.value, iterations=50, seed=64)
+    # Convert NetworkX graph to Cytoscape format
+    def nx_to_cytoscape(G, filters):
+        """Convert NetworkX graph to Cytoscape.js format with filters"""
+        elements = []
 
-    # Start with all nodes
-    all_nodes = list(nx_graph.nodes())
+        # Node type filters
+        skip_types = set()
+        if not filters['show_blank']:
+            skip_types.add('blank')
+        if not filters['show_meta']:
+            skip_types.add('meta')
+        if not filters['show_datatypes']:
+            skip_types.add('datatype')
+        if not filters['show_literals']:
+            skip_types.add('literal')
 
-    # Apply node type filter first
-    type_filtered_nodes = [n for n in all_nodes 
-                           if node_type_filters.get(nx_graph.nodes[n]['node_type'], True)]
+        # Add nodes
+        for node_id, node_data in G.nodes(data=True):
+            node_type = node_data.get('node_type', 'unknown')
 
-    # Apply namespace filter
-    _selected_namespaces = {_ns for _ns, _checked in namespace_filter.value.items() if _checked}
-
-    if _selected_namespaces:
-        namespace_filtered_nodes = []
-        for _n in type_filtered_nodes:
-            _node_uri = _n
-            # Keep literals (non-URIs)
-            if not _node_uri.startswith('http'):
-                namespace_filtered_nodes.append(_n)
+            # Skip filtered types
+            if node_type in skip_types:
                 continue
 
-            # Check if node belongs to a selected namespace
-            for _ns in _selected_namespaces:
-                if _node_uri.startswith(_ns):
-                    namespace_filtered_nodes.append(_n)
-                    break
+            elements.append({
+                'data': {
+                    'id': node_id,
+                    'label': node_data.get('label', node_id),
+                    'type': node_type,
+                    'uri': node_data.get('uri', node_id),
+                }
+            })
 
-        visible_nodes = namespace_filtered_nodes
-    else:
-        visible_nodes = type_filtered_nodes
+        # Get visible node IDs
+        visible_nodes = {el['data']['id'] for el in elements}
 
-    # Apply search filter (should be last to include neighbors)
-    _search_query = search_box.value.lower().strip()
-    if _search_query:
-        # Find nodes that match the search
-        _matching_nodes = {
-            n for n in visible_nodes
-            if _search_query in nx_graph.nodes[n]['label'].lower() 
-            or _search_query in nx_graph.nodes[n]['uri'].lower()
-        }
+        # Add edges (only if both nodes are visible)
+        for source, target, edge_data in G.edges(data=True):
+            if source in visible_nodes and target in visible_nodes:
+                elements.append({
+                    'data': {
+                        'id': f"{source}-{target}",
+                        'source': source,
+                        'target': target,
+                        'label': edge_data.get('predicate', ''),
+                        'predicate': edge_data.get('predicate', ''),
+                    }
+                })
 
-        # Include direct neighbors of matching nodes
-        _nodes_with_neighbors = set(_matching_nodes)
-        for _node in _matching_nodes:
-            _nodes_with_neighbors.update(nx_graph.successors(_node))
-            _nodes_with_neighbors.update(nx_graph.predecessors(_node))
+        return elements
 
-        # Keep only neighbors that pass the other filters
-        visible_nodes = [n for n in _nodes_with_neighbors if n in visible_nodes or n in _matching_nodes]
+    # Prepare filters from current UI values
+    _filters = {
+        'show_blank': show_blank_nodes.value,
+        'show_meta': show_meta.value,
+        'show_datatypes': show_datatypes.value,
+        'show_literals': show_literals.value,
+    }
 
-    # Group nodes by type for separate traces
-    node_traces = []
-    for _node_type, _style in node_styles.items():
-        if not node_type_filters.get(_node_type, True):
-            continue
+    # Get elements with current filters
+    _cyto_elements = nx_to_cytoscape(nx_graph, _filters)
 
-        _nodes_of_type = [n for n in visible_nodes if nx_graph.nodes[n]['node_type'] == _node_type]
-        if not _nodes_of_type:
-            continue
+    # Get the selected layout from the dropdown
+    _selected_layout = layout_options.value
 
-        _node_x = [pos[n][0] for n in _nodes_of_type]
-        _node_y = [pos[n][1] for n in _nodes_of_type]
-        _node_labels = [nx_graph.nodes[n]['label'] for n in _nodes_of_type]
+    # Note: refresh_button is included as a dependency (even though not accessed directly)
+    # so clicking it re-runs this cell, recreating the widget with a fresh layout
+    _ = refresh_button.value  # Acknowledge dependency
 
-        _hover_text = [f"<b>{nx_graph.nodes[n]['label']}</b><br>Type: {_node_type}<br>URI: {n}" 
-                      for n in _nodes_of_type]
+    # Create the widget HTML directly with JavaScript
+    _esm_code = f"""
+    async function render({{ model, el }}) {{
+        try {{
+            // Import Cytoscape and extensions from CDN
+            const cytoscapeModule = await import('https://cdn.jsdelivr.net/npm/cytoscape@3.28.1/+esm');
+            const cytoscape = cytoscapeModule.default;
 
-        _trace = go.Scatter(
-            x=_node_x, y=_node_y,
-            mode='markers+text',
-            text=_node_labels,
-            textposition="top center",
-            hovertext=_hover_text,
-            hoverinfo='text',
-            marker=dict(
-                size=_style['size'],
-                color=_style['color'],
-                symbol=_style['symbol'],
-                line_width=2),
-            name=_node_type.replace('_', ' ').title(),
-            showlegend=True
-        )
-        node_traces.append(_trace)
+        // Import layout extensions
+        try {{
+            const fcoseModule = await import('https://cdn.jsdelivr.net/npm/cytoscape-fcose@2.2.0/+esm');
+            cytoscape.use(fcoseModule.default);
+        }} catch (e) {{
+            console.error('fcose layout not available:', e);
+        }}
 
-    # Filter edges - only show edges where both nodes are visible
-    edge_traces = []
-    edges_by_predicate = {}
-    for _s, _t in nx_graph.edges():
-        if _s in visible_nodes and _t in visible_nodes:
-            _pred = nx_graph.edges[_s, _t]['predicate']
-            if _pred not in edges_by_predicate:
-                edges_by_predicate[_pred] = []
-            edges_by_predicate[_pred].append((_s, _t))
+        try {{
+            const colaModule = await import('https://cdn.jsdelivr.net/npm/cytoscape-cola@2.5.1/+esm');
+            cytoscape.use(colaModule.default);
+        }} catch (e) {{
+            console.error('cola layout not available:', e);
+        }}
 
-    for _pred, _edges in edges_by_predicate.items():
-        _edge_x = []
-        _edge_y = []
-        for _s, _t in _edges:
-            _x0, _y0 = pos[_s]
-            _x1, _y1 = pos[_t]
-            _edge_x.extend([_x0, _x1, None])
-            _edge_y.extend([_y0, _y1, None])
+        // Create container
+        const container = document.createElement('div');
+        container.style.cssText = 'position: relative; width: 100%; height: 750px;';
 
-        _style = edge_styles.get(_pred, edge_styles['default'])
+        const cyDiv = document.createElement('div');
+        cyDiv.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 1px solid #ccc; background: #fafafa;';
+        container.appendChild(cyDiv);
 
-        _trace = go.Scatter(
-            x=_edge_x, y=_edge_y,
-            mode='lines',
-            line=dict(width=_style['width'], color=_style['color'], dash=_style['dash']),
-            hoverinfo='none',
-            showlegend=False
-        )
-        edge_traces.append(_trace)
+        const infoDiv = document.createElement('div');
+        infoDiv.style.cssText = 'position: absolute; top: 10px; left: 10px; background: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 300px; font-family: Arial, sans-serif; font-size: 12px; display: none;';
+        container.appendChild(infoDiv);
 
-    # Create figure
-    fig = go.Figure(data=edge_traces + node_traces,
-                 layout=go.Layout(
-                    showlegend=True,
-                    hovermode='closest',
-                    clickmode='event+select',
-                    margin=dict(b=0,l=0,r=0,t=40),
-                    xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                    yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                    height=600,
-                    legend=dict(x=0, y=1, bgcolor='rgba(255,255,255,0.8)')
-                    ))
+        el.appendChild(container);
 
-    graph_plot = mo.ui.plotly(fig)
-    graph_plot
-    return current_edge_styles, graph_plot, pos
+        // Color scheme for different node types
+        const nodeColors = {{
+            'ontology': '#8e44ad',
+            'meta': '#34495e',
+            'datatype': '#16a085',
+            'class': '#3498db',
+            'object_property': '#2ecc71',
+            'datatype_property': '#f39c12',
+            'individual': '#9b59b6',
+            'literal': '#95a5a6',
+            'blank': '#ff6b6b',
+            'unknown': '#e74c3c'
+        }};
 
+        const nodeSizes = {{
+            'ontology': 60,
+            'meta': 45,
+            'datatype': 35,
+            'class': 50,
+            'object_property': 40,
+            'datatype_property': 40,
+            'individual': 30,
+            'literal': 25,
+            'blank': 25,
+            'unknown': 30
+        }};
 
-@app.cell
-def _(current_edge_styles, mo, nx_graph):
-    # Create edge style legend from the actual edge_styles used in the plot
-    _edge_legend_md = """
-    ## Edge Styles Legend
+        const nodeShapes = {{
+            'ontology': 'star',
+            'meta': 'diamond',
+            'datatype': 'hexagon',
+            'class': 'ellipse',
+            'object_property': 'round-diamond',
+            'datatype_property': 'round-rectangle',
+            'individual': 'round-octagon',
+            'literal': 'round-tag',
+            'blank': 'triangle',
+            'unknown': 'vee'
+        }};
 
-    The edges (connections) in the graph are styled based on the predicate (relationship type):
+        // Get layout and elements from Python
+        const layoutName = '{_selected_layout}';
+        const elements = {json.dumps(_cyto_elements)};
 
-    | Predicate | Color | Width | Dash Style |
-    |-----------|-------|-------|------------|
+        console.log('DEBUG: JavaScript using layout =', layoutName);
+        console.log('DEBUG: Elements count =', elements.length);
+
+        const layoutConfig = {{
+            name: layoutName,
+            animate: true,
+            animationDuration: 500,
+            nodeDimensionsIncludeLabels: true,
+        }};
+
+        // Add layout-specific parameters
+        if (layoutName === 'fcose' || layoutName === 'cose') {{
+            Object.assign(layoutConfig, {{
+                idealEdgeLength: 100,
+                nodeRepulsion: 8000,
+                edgeElasticity: 0.45,
+                nestingFactor: 0.1,
+                gravity: 0.25,
+                numIter: 2500,
+                tile: true,
+                randomize: false
+            }});
+        }} else if (layoutName === 'cola') {{
+            Object.assign(layoutConfig, {{
+                edgeLength: 100,
+                nodeSpacing: 50,
+                animate: true,
+                randomize: false,
+                maxSimulationTime: 2000
+            }});
+        }}
+
+        // Initialize Cytoscape with the layout from Python
+        const cy = cytoscape({{
+            container: cyDiv,
+            elements: elements,
+            layout: layoutConfig,
+            style: [
+                {{
+                    selector: 'node',
+                    style: {{
+                        'background-color': function(ele) {{
+                            return nodeColors[ele.data('type')] || '#95a5a6';
+                        }},
+                        'label': 'data(label)',
+                        'width': function(ele) {{
+                            return nodeSizes[ele.data('type')] || 30;
+                        }},
+                        'height': function(ele) {{
+                            return nodeSizes[ele.data('type')] || 30;
+                        }},
+                        'shape': function(ele) {{
+                            return nodeShapes[ele.data('type')] || 'ellipse';
+                        }},
+                        'text-valign': 'center',
+                        'text-halign': 'center',
+                        'font-size': '10px',
+                        'color': '#333',
+                        'text-outline-color': '#fff',
+                        'text-outline-width': 2,
+                        'border-width': 2,
+                        'border-color': function(ele) {{
+                            const color = nodeColors[ele.data('type')] || '#95a5a6';
+                            return color;
+                        }},
+                        'border-opacity': 0.7
+                    }}
+                }},
+                {{
+                    selector: 'edge',
+                    style: {{
+                        'width': 2,
+                        'line-color': '#999',
+                        'target-arrow-color': '#999',
+                        'target-arrow-shape': 'triangle',
+                        'curve-style': 'bezier',
+                        'label': 'data(predicate)',
+                        'font-size': '8px',
+                        'text-rotation': 'autorotate',
+                        'text-margin-y': -10,
+                        'color': '#666',
+                        'text-background-color': '#fff',
+                        'text-background-opacity': 0.8,
+                        'text-background-padding': '2px'
+                    }}
+                }},
+                {{
+                    selector: 'node:selected',
+                    style: {{
+                        'border-width': 4,
+                        'border-color': '#000',
+                        'background-color': function(ele) {{
+                            const color = nodeColors[ele.data('type')] || '#95a5a6';
+                            return color;
+                        }}
+                    }}
+                }},
+                {{
+                    selector: 'edge:selected',
+                    style: {{
+                        'width': 4,
+                        'line-color': '#000',
+                        'target-arrow-color': '#000'
+                    }}
+                }},
+                {{
+                    selector: '.highlighted',
+                    style: {{
+                        'background-color': '#FFD700',
+                        'line-color': '#FFD700',
+                        'target-arrow-color': '#FFD700',
+                        'transition-property': 'background-color, line-color, target-arrow-color',
+                        'transition-duration': '0.5s'
+                    }}
+                }}
+            ]
+        }});
+
+        // Node interaction
+        cy.on('tap', 'node', function(evt) {{
+            const node = evt.target;
+            const data = node.data();
+
+            const edges = node.connectedEdges();
+            const incoming = edges.filter(e => e.target().id() === node.id());
+            const outgoing = edges.filter(e => e.source().id() === node.id());
+
+            let infoHTML = '<h3 style="margin: 0 0 10px 0;">' + data.label + '</h3>';
+            infoHTML += '<div><strong>Type:</strong> ' + data.type + '</div>';
+            infoHTML += '<div><strong>URI:</strong><br/><small>' + data.uri.substring(0, 60);
+            if (data.uri.length > 60) infoHTML += '...';
+            infoHTML += '</small></div>';
+            infoHTML += '<div style="margin-top: 5px;"><strong>Incoming:</strong> ' + incoming.length + '</div>';
+            infoHTML += '<div><strong>Outgoing:</strong> ' + outgoing.length + '</div>';
+
+            infoDiv.innerHTML = infoHTML;
+            infoDiv.style.display = 'block';
+
+            cy.elements().removeClass('highlighted');
+            node.addClass('highlighted');
+            node.neighborhood().addClass('highlighted');
+        }});
+
+        cy.on('tap', function(evt) {{
+            if (evt.target === cy) {{
+                infoDiv.style.display = 'none';
+                cy.elements().removeClass('highlighted');
+            }}
+        }});
+
+        cy.on('dbltap', 'node', function(evt) {{
+            const node = evt.target;
+            cy.animate({{
+                fit: {{
+                    eles: node.neighborhood(),
+                    padding: 50
+                }},
+                duration: 500
+            }});
+        }});
+        }} catch (error) {{
+            console.error('ERROR in Cytoscape widget:', error);
+            el.innerHTML = '<div style="color: red; padding: 20px; font-family: monospace;">Error rendering graph:<br>' + error.message + '<br><br>Check console for details.</div>';
+        }}
+    }}
+    export default {{ render }};
     """
 
-    # Add rows for each defined edge style
-    for _pred, _style in current_edge_styles.items():
-        if _pred == 'default':
-            _pred_display = "**other predicates**"
-        else:
-            _pred_display = f"**{_pred}**"
+    # Create simple widget class with the JavaScript code
+    class CytoscapeWidget(anywidget.AnyWidget):
+        _esm = _esm_code
 
-        _edge_legend_md += f"| {_pred_display} | {_style['color']} | {_style['width']} | {_style['dash']} |\n"
+    cyto_widget = CytoscapeWidget()
+    graph_viz = mo.ui.anywidget(cyto_widget)
 
-    _edge_legend_md += "\n### Predicates present in this graph:\n\n"
-
-    # List all unique predicates in the current graph
-    _predicates_in_graph = set()
-    for _s, _t in nx_graph.edges():
-        _predicates_in_graph.add(nx_graph.edges[_s, _t]['predicate'])
-
-    _edge_legend_md += "\n".join([f"- `{_pred}`" for _pred in sorted(_predicates_in_graph)])
-
-    mo.md(_edge_legend_md)
+    mo.vstack([
+        mo.md(f"**Showing {len(_cyto_elements)} elements** (Layout: {_selected_layout})"),
+        graph_viz
+    ])
     return
 
 
 @app.cell
-def _(graph_plot, mo, nx_graph, pos):
-    # Handle range-based selection
-    selected_node_uris = []
-    if graph_plot.ranges:
-        x_range = graph_plot.ranges.get('x', [])
-        y_range = graph_plot.ranges.get('y', [])
+def _(mo, nx, nx_graph):
+    # Graph statistics
+    _stats = f"""
+    ## Graph Statistics
 
-        if x_range and y_range:
-            for _node_uri in nx_graph.nodes():
-                node_pos = pos[_node_uri]
-                if (x_range[0] <= node_pos[0] <= x_range[1] and 
-                    y_range[0] <= node_pos[1] <= y_range[1]):
-                    selected_node_uris.append(_node_uri)
+    - **Nodes**: {nx_graph.number_of_nodes()}
+    - **Edges**: {nx_graph.number_of_edges()}
+    - **Density**: {nx.density(nx_graph):.4f}
 
-    if selected_node_uris:
-        _t = f"## Selected {len(selected_node_uris)} node(s)\n"
+    ### Node Types Distribution
+    """
 
-        for _node_uri in selected_node_uris:
-            _node_data = nx_graph.nodes[_node_uri]
-            _node_label = _node_data['label']
-            _node_type = _node_data['node_type']
+    _node_types = {}
+    for _, node_data in nx_graph.nodes(data=True):
+        _type = node_data.get('node_type', 'unknown')
+        _node_types[_type] = _node_types.get(_type, 0) + 1
 
-            # Get relationships
-            _outgoing = [(nx_graph.nodes[_node_uri]['label'], 
-                        nx_graph.edges[_node_uri, target]['predicate'], 
-                        nx_graph.nodes[target]['label']) 
-                        for target in nx_graph.successors(_node_uri)]
-            _incoming = [(nx_graph.nodes[source]['label'],
-                        nx_graph.edges[source, _node_uri]['predicate'], 
-                        nx_graph.nodes[_node_uri]['label'])
-                        for source in nx_graph.predecessors(_node_uri)]
+    for _type, _count in sorted(_node_types.items(), key=lambda x: -x[1]):
+        _stats += f"\n- **{_type}**: {_count}"
 
-            _t += f"\n---\n\n### {_node_label}\n\n"
-            _t += f"**Type:** `{_node_type}`\n\n"
-            _t += f"**URI:** `{_node_data['uri']}`\n\n"
-
-            _t += "**Incoming:**\n\n"
-            if _incoming:
-                for _subj_label, _pred, _ in _incoming:
-                    _t += f"- {_subj_label} → **{_pred}**\n"
-            else:
-                _t += "_None_\n"
-
-            _t += "\n**Outgoing:**\n\n"
-            if _outgoing:
-                for _, _pred, _obj_label in _outgoing:
-                    _t += f"- **{_pred}** → {_obj_label}\n"
-            else:
-                _t += "_None_\n"
-
-    else:
-        _t = "_Use box select or lasso select to choose nodes and see their details_"
-    mo.md(_t)
-    return
-
-
-@app.cell
-def _():
+    mo.md(_stats)
     return
 
 

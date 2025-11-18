@@ -24,3 +24,5 @@ tests/**/tmp_*
 .coverage
 htmlcov/
 webnotebook/*
+
+__marimo__/*
