@@ -1,0 +1,347 @@
+@prefix housecase1: <https://ugentbiomath.github.io/ontology/index.ttl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# -------- Classes --------------
+housecase1:WaterSource a owl:Class .
+housecase1:WaterUsagePoint a owl:Class .
+housecase1:WaterTreatmentProcess a owl:Class .
+housecase1:WaterStorage a owl:Class .
+housecase1:Flowrate a owl:Class .
+housecase1:Coefficient a owl:Class .
+housecase1:DataFile a owl:Class .
+housecase1:Household a owl:Class ;
+    rdfs:subClassOf geo:SpatialThing .
+
+# ----------- Properties ------------
+housecase1:hasUsagePoint a owl:ObjectProperty ;
+    rdfs:domain housecase1:Household ;
+    rdfs:range housecase1:WaterUsagePoint .
+
+housecase1:flowsTo a owl:ObjectProperty ;
+    rdfs:domain [ 
+        a owl:Class ;
+        owl:unionOf (
+            housecase1:WaterUsagePoint 
+            housecase1:WaterTreatmentProcess 
+            housecase1:WaterStorage
+        )
+    ] ;
+    rdfs:range [ 
+        a owl:Class ;
+        owl:unionOf (
+            housecase1:WaterUsagePoint 
+            housecase1:WaterTreatmentProcess 
+            housecase1:WaterStorage
+        )
+    ] .
+
+housecase1:collectedFrom a owl:ObjectProperty ;
+    rdfs:domain housecase1:WaterStorage ;
+    rdfs:range housecase1:WaterSource .
+
+housecase1:hasCoefficient a owl:ObjectProperty ;
+    rdfs:domain [ 
+        a owl:Class ;
+        owl:unionOf (
+            housecase1:WaterStorage 
+            housecase1:WaterTreatmentProcess
+        )
+    ] ;
+    rdfs:range housecase1:Coefficient .
+
+# Removed hasCapacity and hasThreshold properties
+# since capacities are being adjusted and numerical values are removed
+
+housecase1:hasFlowrate a owl:ObjectProperty ;
+    rdfs:domain [ 
+        a owl:Class ;
+        owl:unionOf (
+            housecase1:WaterStorage 
+            housecase1:WaterTreatmentProcess
+        )
+    ] ;
+    rdfs:range housecase1:Flowrate .
+
+# Removed flowrateValue property as it represents numerical values
+housecase1:flowrateUnit a owl:DatatypeProperty ;
+    rdfs:domain housecase1:Flowrate ;
+    rdfs:range xsd:string .
+
+# ----------------- Instances and their types ---------------
+# Water usage points
+housecase1:Bath_and_Shower a housecase1:WaterUsagePoint .
+housecase1:Bathroom_sink a housecase1:WaterUsagePoint .
+housecase1:Washing_machine_and_Handwash_clothes a housecase1:WaterUsagePoint .
+housecase1:Dishwasher a housecase1:WaterUsagePoint .
+housecase1:Kitchen_sink a housecase1:WaterUsagePoint .
+housecase1:Toilet a housecase1:WaterUsagePoint .
+housecase1:Cleaning a housecase1:WaterUsagePoint .
+housecase1:Gardening_reuse a housecase1:WaterUsagePoint .
+
+# Water sources and storage
+housecase1:Rainwater a housecase1:WaterSource .
+housecase1:Rainwater_storage a housecase1:WaterStorage .
+housecase1:Potable_water_storage a housecase1:WaterStorage .
+housecase1:Purified_greywater_storage a housecase1:WaterStorage .
+housecase1:Blackwater_storage a housecase1:WaterStorage .
+
+# Water treatment processes
+housecase1:Membrane_bioreactor a housecase1:WaterTreatmentProcess .
+housecase1:Reverse_osmosis a housecase1:WaterTreatmentProcess .
+housecase1:Infiltration a housecase1:WaterTreatmentProcess .
+
+# Coefficients
+housecase1:Coefficient_RO_rec a housecase1:Coefficient .
+housecase1:Coefficient_MBR_rec a housecase1:Coefficient .
+housecase1:Coefficient_Roof_Area a housecase1:Coefficient .
+
+
+# Household instance
+housecase1:house a housecase1:Household ;
+    dcterms:source housecase1:Household_Location_DataFile ;
+    housecase1:hasUsagePoint 
+        housecase1:Bath_and_Shower ,
+        housecase1:Bathroom_sink ,
+        housecase1:Washing_machine_and_Handwash_clothes ,
+        housecase1:Dishwasher ,
+        housecase1:Kitchen_sink ,
+        housecase1:Toilet ,
+        housecase1:Cleaning .
+
+# Data file for household location
+housecase1:Household_Location_DataFile a housecase1:DataFile ;
+    rdfs:label "Household Location Data File (Excel)" ;
+    rdfs:comment "Data file containing latitude and longitude data for the household" ;
+    time:hasTime housecase1:SaveTime_Household .
+
+housecase1:SaveTime_Household a time:Instant ;
+    time:inXSDDateTime "2023-01-01T12:00:00Z"^^xsd:dateTime .
+
+# ----------------- Relationships --------------
+# Flows between components
+housecase1:Bath_and_Shower housecase1:flowsTo housecase1:Membrane_bioreactor .
+housecase1:Bathroom_sink housecase1:flowsTo housecase1:Membrane_bioreactor .
+housecase1:Washing_machine_and_Handwash_clothes housecase1:flowsTo housecase1:Membrane_bioreactor .
+housecase1:Dishwasher housecase1:flowsTo housecase1:Membrane_bioreactor .
+housecase1:Kitchen_sink housecase1:flowsTo housecase1:Membrane_bioreactor .
+housecase1:Cleaning housecase1:flowsTo housecase1:Membrane_bioreactor .
+housecase1:Toilet housecase1:flowsTo housecase1:Blackwater_storage .
+housecase1:Membrane_bioreactor housecase1:flowsTo housecase1:Purified_greywater_storage .
+housecase1:Purified_greywater_storage housecase1:flowsTo 
+    housecase1:Bath_and_Shower ,
+    housecase1:Bathroom_sink ,
+    housecase1:Washing_machine_and_Handwash_clothes ,
+    housecase1:Dishwasher ,
+    housecase1:Toilet .
+housecase1:Rainwater_storage housecase1:flowsTo 
+    housecase1:Reverse_osmosis ,
+    housecase1:Gardening_reuse ,
+    housecase1:Cleaning .
+housecase1:Reverse_osmosis housecase1:flowsTo 
+    housecase1:Purified_greywater_storage ,
+    housecase1:Potable_water_storage .
+housecase1:Potable_water_storage housecase1:flowsTo housecase1:Kitchen_sink .
+housecase1:Blackwater_storage housecase1:flowsTo housecase1:Infiltration .
+housecase1:Purified_greywater_storage housecase1:flowsTo housecase1:Infiltration .
+housecase1:Rainwater_storage housecase1:flowsTo housecase1:Purified_greywater_storage .
+
+
+#----------------------Time and Files related triples ------------------------------
+# Define the data file for Blackwater Storage
+housecase1:Blackwater_DataFile a housecase1:DataFile ;
+    rdfs:label "Blackwater Storage Data File (Excel)" ;
+    rdfs:comment "Data file containing flow rate measurements for the Blackwater storage" ;
+    time:hasTime housecase1:SaveTime_BS .
+
+# Define the timestamp for the last save time of the file
+housecase1:SaveTime_BS a time:Instant ;
+    time:inXSDDateTime "2023-01-01T12:00:00Z"^^xsd:dateTime .
+
+# Link Blackwater Storage to the data file as the source of its data
+housecase1:Blackwater_storage dcterms:source housecase1:Blackwater_DataFile .
+
+
+#-----------------------Additional triples for Household -----------------------------------
+# -------- Simulation Parameters (DatatypeProperties) --------
+# Hydrologic & demographic coefficients
+housecase1:rain_cf a owl:DatatypeProperty ;
+    rdfs:label       "Rainfall capture coefficient" ;
+    rdfs:comment     "Fraction of roof runoff captured (unitless)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:num_people a owl:DatatypeProperty ;
+    rdfs:label       "Number of people per household" ;
+    rdfs:comment     "Household occupancy (persons)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+# Treatment recovery & removal efficiencies
+housecase1:ro_recovery_eff a owl:DatatypeProperty ;
+    rdfs:label       "RO recovery efficiency" ;
+    rdfs:comment     "Fraction of feed recovered by reverse osmosis" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:mbr_recovery_eff a owl:DatatypeProperty ;
+    rdfs:label       "MBR recovery efficiency" ;
+    rdfs:comment     "Fraction of greywater recovered by MBR" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:ro_removal_eff a owl:DatatypeProperty ;
+    rdfs:label       "RO removal efficiency" ;
+    rdfs:comment     "Contaminant removal fraction by RO" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:mbr_system a owl:DatatypeProperty ;
+    rdfs:label       "MBR system" ;
+    rdfs:comment     "Existance of MBR system (unitless)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:mbr_removal_eff a owl:DatatypeProperty ;
+    rdfs:label       "MBR removal efficiency" ;
+    rdfs:comment     "Contaminant removal fraction by MBR" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+# Energy use
+housecase1:e_mbr_kwh_per_m3 a owl:DatatypeProperty ;
+    rdfs:label       "MBR energy per m³ treated" ;
+    rdfs:comment     "Electricity demand of MBR (kWh/m³)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:lvl_of_PW a owl:DatatypeProperty ;
+    rdfs:label       "Level of PW" ;
+    rdfs:comment     "Minimum Level of PW (unitless)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+
+# Thresholds & counters
+housecase1:bw_emptying_fraction a owl:DatatypeProperty ;
+    rdfs:label       "Blackwater emptying threshold (fraction)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:excess_rw a owl:DatatypeProperty ;
+    rdfs:label       "Excess rainwater (m³)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:rw_refill_count a owl:DatatypeProperty ;
+    rdfs:label       "Rainwater tank refill counter" ;
+    rdfs:comment     "Number of external refills (count)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:integer .
+
+# Contamination parameters
+housecase1:rw_concentration a owl:DatatypeProperty ;
+    rdfs:label       "Rainwater contaminant concentration (g/m³)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:init_contamination_pgw a owl:DatatypeProperty ;
+    rdfs:label       "Initial PGW tank contamination (g/m³)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+
+housecase1:c_pgw_limit a owl:DatatypeProperty ;
+    rdfs:label       "PGW contaminant concentration limit (g/m³)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+# Usage‐point concentrations (g/m³)  # -------------------------no mapping for this subcategory
+housecase1:bath_shower_concentration a owl:DatatypeProperty ;
+    rdfs:label       "Bath & shower concentration (g/m³)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:shower_head_concentration a owl:DatatypeProperty ;
+    rdfs:label       "Shower head concentration (g/m³)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:bathroom_sink_concentration a owl:DatatypeProperty ;
+    rdfs:label       "Bathroom sink concentration (g/m³)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:washing_machine_concentration a owl:DatatypeProperty ;
+    rdfs:label       "Washing machine concentration (g/m³)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:dishwasher_concentration a owl:DatatypeProperty ;
+    rdfs:label       "Dishwasher concentration (g/m³)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:kitchen_sink_concentration a owl:DatatypeProperty ;
+    rdfs:label       "Kitchen sink concentration (g/m³)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+# Process rates & pumping parameters
+housecase1:infiltration_rate a owl:DatatypeProperty ;
+    rdfs:label       "Infiltration rate (m³/d)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:max_purge_rate a owl:DatatypeProperty ;
+    rdfs:label       "Maximum purge rate (unitless)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:max_refill_rate a owl:DatatypeProperty ;
+    rdfs:label       "Maximum refill rate (unitless)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:purge a owl:DatatypeProperty ;
+    rdfs:label       "Purge  (m³/d)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+# Physical constants & pump specs
+housecase1:water_density a owl:DatatypeProperty ;
+    rdfs:label       "Water density (kg/m³)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:gravity_constant a owl:DatatypeProperty ;
+    rdfs:label       "Gravity constant (m/s²)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:head_rw a owl:DatatypeProperty ;
+    rdfs:label       "Dynamic head for RW pump (m)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:head_pw a owl:DatatypeProperty ;
+    rdfs:label       "Dynamic head for PW pump (m)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:head_pgw a owl:DatatypeProperty ;
+    rdfs:label       "Dynamic head for PGW pump (m)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+housecase1:pump_efficiency a owl:DatatypeProperty ;
+    rdfs:label       "Pump efficiency (unitless)" ;
+    rdfs:domain      housecase1:Household ;
+    rdfs:range       xsd:decimal .
+
+
