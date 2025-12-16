@@ -27,3 +27,4 @@ webnotebook/*
 
 __marimo__/*
 *DS_Store
+*uv.lock
