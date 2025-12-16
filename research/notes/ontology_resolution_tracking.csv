@@ -1,0 +1,57 @@
+Ontology Name,Category,Priority,Auto-Resolution Status,Automated URL,Repository Found,Manual Search Status,Manual URL/Notes,OWL File Location,Loadable,Triple Count,Documentation Quality,Maintenance Status,Decision,Notes
+SSN,Monitoring,HIGH,RESOLVED,http://www.w3.org/ns/ssn/,https://github.com/w3c/vsso,,,http://www.w3.org/ns/ssn/,YES,520,,,EVALUATE,W3C standard for sensor networks
+SOSA,Monitoring,HIGH,RESOLVED,http://www.w3.org/ns/sosa/,https://github.com/w3c/vsso,,,http://www.w3.org/ns/sosa/,YES,345,,,EVALUATE,W3C standard for observations
+HOW,Monitoring,MEDIUM,RESOLVED,https://opengeospatial.org/def/how,,,,https://opengeospatial.org/def/how,YES,,,,EVALUATE,OGC Hydrologic Ontology for the Web
+SAREF,Smart Water,MEDIUM,RESOLVED,https://saref.etsi.org/core/,,,,https://saref.etsi.org/core/,YES,1324,,,EVALUATE,ETSI smart applications standard
+WaWO,Wastewater,CRITICAL,PARTIAL,,https://github.com/luisjoliva/wawo-plus,,,,,,,,MANUAL_SEARCH,Check GitHub repo for OWL files
+WaWO+,Wastewater,CRITICAL,PARTIAL,,https://github.com/luisjoliva/wawo-plus,,,,,,,,MANUAL_SEARCH,Check GitHub repo for OWL files
+ViWaT,Wastewater,HIGH,UNREACHABLE,,,,,,,,,,MANUAL_SEARCH,Search academic literature
+OntoWEDSS,Wastewater,HIGH,UNREACHABLE,,,,,,,,,,MANUAL_SEARCH,Search academic literature
+Waste Treatment Technology Ontology,Wastewater,HIGH,PARTIAL,,,,,,,,,,MANUAL_SEARCH,
+Process Model Ontology,Wastewater,MEDIUM,PARTIAL,,https://github.com/alephdata/followthemoney,,,,,,,,MANUAL_SEARCH,False positive likely - verify
+WER,Water Reuse,CRITICAL,UNREACHABLE,,,,,,,,,,MANUAL_SEARCH,Ontology of Water Reuse Strategies
+Water Reuse Ontology,Water Reuse,CRITICAL,PARTIAL,,,,,,,,,,MANUAL_SEARCH,
+OntoAgent,Agents,CRITICAL,UNREACHABLE,,,,,,,,,,MANUAL_SEARCH,Cambridge CARES TWA - may need contact
+OntoDerivation,Agents,HIGH,UNREACHABLE,,,,,,,,,,MANUAL_SEARCH,Cambridge CARES TWA - may need contact
+OntoSoft,Agents,MEDIUM,PARTIAL,,https://github.com/ontosoft-earthcube/ontosoft,,,,,,,,MANUAL_SEARCH,
+SAREF4WATR,Smart Water,HIGH,UNREACHABLE,,,,,,,,,,MANUAL_SEARCH,SAREF water extension
+Smart-Water Domain Ontology,Smart Water,MEDIUM,PARTIAL,,,,,,,,,,MANUAL_SEARCH,
+Weather Ontology,Smart Water,LOW,PARTIAL,,,,,,,,,,MANUAL_SEARCH,TU Wien
+Hydrological Sensor Web Ontology,Monitoring,MEDIUM,PARTIAL,,,,,,,,,,MANUAL_SEARCH,
+Hydrological Monitoring Ontology,Monitoring,MEDIUM,PARTIAL,,,,,,,,,,MANUAL_SEARCH,
+OPO,Monitoring,LOW,PARTIAL,,,,,,,,,,MANUAL_SEARCH,Observational Process Ontology
+Ontology for Hydro-Meteorological Observation Network,Monitoring,LOW,PARTIAL,,,,,,,,,,MANUAL_SEARCH,
+WMO/WHOS Hydrology Ontology,Monitoring,MEDIUM,PARTIAL,,,,,,,,,,MANUAL_SEARCH,
+HyFO,Foundational,HIGH,UNREACHABLE,,,,,,,,,,MANUAL_SEARCH,Hydrologic Feature Ontology
+SWEET,Foundational,HIGH,PARTIAL,,https://github.com/ESIPFed/sweet,,,,,,,,MANUAL_SEARCH,Semantic Web for Earth and Environmental Terminology
+HY_Features,Foundational,HIGH,UNREACHABLE,,,,,,,,,,MANUAL_SEARCH,OGC HY_Features standard
+INSPIRE Hydrography,Foundational,MEDIUM,PARTIAL,,,,,,,,,,MANUAL_SEARCH,EU INSPIRE Directive
+hydrOntology,Foundational,MEDIUM,UNREACHABLE,,,,,,,,,,MANUAL_SEARCH,
+SWO,Foundational,MEDIUM,PARTIAL,,https://github.com/allysonlister/swo,,,,,,,,MANUAL_SEARCH,USGS Surface Water Ontology
+SWOP,Foundational,MEDIUM,UNREACHABLE,,,,,,,,,,MANUAL_SEARCH,
+Upper-Level Ontology for Digital Watersheds,Foundational,LOW,PARTIAL,,,,,,,,,,MANUAL_SEARCH,
+Water Resources Community Ontology,Foundational,MEDIUM,PARTIAL,,,,,,,,,,MANUAL_SEARCH,
+Arctic Hydrology Ontology,Foundational,LOW,PARTIAL,,,,,,,,,,MANUAL_SEARCH,
+WSN Water Quality Ontology,Water Quality,HIGH,PARTIAL,,,,,,,,,,MANUAL_SEARCH,Wireless Sensor Network context
+River Water Quality Ontology,Water Quality,MEDIUM,PARTIAL,,,,,,,,,,MANUAL_SEARCH,
+Fuzzy Water Quality Ontology,Water Quality,LOW,PARTIAL,,,,,,,,,,MANUAL_SEARCH,
+EHMP Ontology,Water Quality,MEDIUM,PARTIAL,,,,,,,,,,MANUAL_SEARCH,Health-e-Waterways
+OntoWE,Water Quality,MEDIUM,UNREACHABLE,,,,,,,,,,MANUAL_SEARCH,Water Environment Ontology
+OntoCAPE,Process Engineering,HIGH,EVALUATED,,,EVALUATED,research/ontologies/ontoCAPE/,research/ontologies/ontoCAPE/ontocape_kg.ttl,YES,,See evaluation_report.md,See evaluation_report.md,IN_PROGRESS,Example evaluation completed
+OntoCAPE-Process,Process Engineering,HIGH,PARTIAL,,,,,,,,,,MANUAL_SEARCH,Process-specific module
+WISDOM,Infrastructure,MEDIUM,PARTIAL,,https://github.com/Aryia-Behroziuan/References,,,,,,,,MANUAL_SEARCH,Water Information System
+Water Value Chain Ontology,Infrastructure,MEDIUM,PARTIAL,,,,,,,,,,MANUAL_SEARCH,
+Water-Supply Ontology,Infrastructure,MEDIUM,PARTIAL,,,,,,,,,,MANUAL_SEARCH,Escobar et al.
+OntoDaphidro,Infrastructure,LOW,UNREACHABLE,,,,,,,,,,MANUAL_SEARCH,
+WEF Nexus Domain Ontology Database,Infrastructure,LOW,PARTIAL,,,,,,,,,,MANUAL_SEARCH,Water-Energy-Food nexus
+FEWsOnt,Infrastructure,LOW,UNREACHABLE,,,,,,,,,,MANUAL_SEARCH,Food-Energy-Water systems
+OntoEIP,Infrastructure,LOW,PARTIAL,,https://github.com/chuanzhang1990/OntoEIP,,,,,,,,MANUAL_SEARCH,Eco-Industrial Parks
+WSIS,Infrastructure,LOW,PARTIAL,,https://github.com/Applied-Artificial-Intelligence-Eurecat/WSISOntology,,,,,,,,MANUAL_SEARCH,Water Smart Industrial Symbiosis
+OntoCityGML,Urban,LOW,UNREACHABLE,,,,,,,,,,MANUAL_SEARCH,
+Urban Hydrological Simulation Ontology Library,Urban,MEDIUM,PARTIAL,,,,,,,,,,MANUAL_SEARCH,
+Stormwater/Streamflow Forecasting Ontology,Urban,LOW,PARTIAL,,,,,,,,,,MANUAL_SEARCH,
+Drought Ontology,Environmental,LOW,PARTIAL,,https://github.com/yinchar/Indigenous-Knowledge-on-Drought-Domain-Ontology,,,,,,,,MANUAL_SEARCH,
+EIA Ontology,Environmental,LOW,PARTIAL,,,,,,,,,,MANUAL_SEARCH,Environmental Impact Assessment
+Singapore Harbour GHG & Dispersion,Environmental,LOW,UNREACHABLE,,,,,,,,,,MANUAL_SEARCH,Cambridge CARES TWA
+Automated Flood Assessment/Prediction,Environmental,LOW,PARTIAL,,,,,,,,,,MANUAL_SEARCH,Cambridge CARES TWA
+OntoAgro-Hidro,Agriculture,LOW,UNREACHABLE,,,,,,,,,,MANUAL_SEARCH,Agriculture-hydrology
