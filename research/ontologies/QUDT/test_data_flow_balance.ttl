@@ -1,0 +1,278 @@
+@prefix : <http://example.org/waterFRAME/> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix qk: <http://qudt.org/vocab/quantitykind/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ==============================================================================
+# CQ-QUDT-1: Sum flows in different volumetric units
+# ==============================================================================
+
+# Network nodes
+:Junction1 a :Junction ;
+    rdfs:label "Main junction receiving three inflows" ;
+    :receivesFlowFrom :SourceA, :SourceB, :SourceC .
+
+# Source A: Reports in cubic meters per day
+:SourceA a :WaterSource ;
+    rdfs:label "Industrial source A" .
+
+:obs_SourceA_Flow_2025_01_15 a sosa:Observation ;
+    rdfs:label "Flow measurement at Source A" ;
+    sosa:hasFeatureOfInterest :SourceA ;
+    sosa:observedProperty :FlowRate ;
+    sosa:resultTime "2025-01-15T09:00:00Z"^^xsd:dateTime ;
+    sosa:hasResult :result_SourceA_Flow .
+
+:result_SourceA_Flow a qudt:QuantityValue ;
+    qudt:numericValue "10000"^^xsd:decimal ;
+    qudt:unit unit:M3-PER-DAY ;
+    qudt:quantityKind qk:VolumeFlowRate ;
+    rdfs:comment "10,000 cubic meters per day" .
+
+# Source B: Reports in liters per second
+:SourceB a :WaterSource ;
+    rdfs:label "Residential source B" .
+
+:obs_SourceB_Flow_2025_01_15 a sosa:Observation ;
+    rdfs:label "Flow measurement at Source B" ;
+    sosa:hasFeatureOfInterest :SourceB ;
+    sosa:observedProperty :FlowRate ;
+    sosa:resultTime "2025-01-15T09:00:00Z"^^xsd:dateTime ;
+    sosa:hasResult :result_SourceB_Flow .
+
+:result_SourceB_Flow a qudt:QuantityValue ;
+    qudt:numericValue "100"^^xsd:decimal ;
+    qudt:unit unit:L-PER-SEC ;
+    qudt:quantityKind qk:VolumeFlowRate ;
+    rdfs:comment "100 liters per second = 8,640 m³/day" .
+
+# Source C: Reports in million gallons per day (MGD)
+:SourceC a :WaterSource ;
+    rdfs:label "Municipal source C" .
+
+:obs_SourceC_Flow_2025_01_15 a sosa:Observation ;
+    rdfs:label "Flow measurement at Source C" ;
+    sosa:hasFeatureOfInterest :SourceC ;
+    sosa:observedProperty :FlowRate ;
+    sosa:resultTime "2025-01-15T09:00:00Z"^^xsd:dateTime ;
+    sosa:hasResult :result_SourceC_Flow .
+
+:result_SourceC_Flow a qudt:QuantityValue ;
+    qudt:numericValue "1.5"^^xsd:decimal ;
+    qudt:unit unit:MillionGAL-PER-DAY ;
+    qudt:quantityKind qk:VolumeFlowRate ;
+    rdfs:comment "1.5 million gallons per day ≈ 5,678 m³/day" .
+
+# Expected total: 10,000 + 8,640 + 5,678 = 24,318 m³/day
+
+# ==============================================================================
+# CQ-QUDT-2 & CQ-QUDT-3: Mass loading calculations
+# ==============================================================================
+
+# Observable properties
+:FlowRate a sosa:ObservableProperty ;
+    rdfs:label "Volumetric flow rate" ;
+    qudt:applicableQuantityKind qk:VolumeFlowRate .
+
+:BOD_Concentration a sosa:ObservableProperty ;
+    rdfs:label "BOD5 concentration" ;
+    qudt:applicableQuantityKind qk:MassPerVolume .
+
+# Stream A: mg/L concentration
+:StreamA a :WastewaterStream ;
+    rdfs:label "Wastewater stream A" .
+
+:obs_StreamA_Flow a sosa:Observation ;
+    sosa:hasFeatureOfInterest :StreamA ;
+    sosa:observedProperty :FlowRate ;
+    sosa:resultTime "2025-01-15T10:00:00Z"^^xsd:dateTime ;
+    sosa:hasResult [
+        a qudt:QuantityValue ;
+        qudt:numericValue "5000"^^xsd:decimal ;
+        qudt:unit unit:M3-PER-DAY ;
+        qudt:quantityKind qk:VolumeFlowRate
+    ] .
+
+:obs_StreamA_BOD a sosa:Observation ;
+    sosa:hasFeatureOfInterest :StreamA ;
+    sosa:observedProperty :BOD_Concentration ;
+    sosa:resultTime "2025-01-15T10:00:00Z"^^xsd:dateTime ;
+    sosa:hasResult [
+        a qudt:QuantityValue ;
+        qudt:numericValue "200"^^xsd:decimal ;
+        qudt:unit unit:MilliGM-PER-L ;
+        qudt:quantityKind qk:MassPerVolume ;
+        rdfs:comment "200 mg/L BOD"
+    ] .
+
+# Expected mass loading: 5000 m³/day × 200 mg/L = 1,000,000,000 mg/day = 1,000 kg/day
+
+# Stream B: g/L concentration
+:StreamB a :WastewaterStream ;
+    rdfs:label "Wastewater stream B" .
+
+:obs_StreamB_Flow a sosa:Observation ;
+    sosa:hasFeatureOfInterest :StreamB ;
+    sosa:observedProperty :FlowRate ;
+    sosa:resultTime "2025-01-15T10:00:00Z"^^xsd:dateTime ;
+    sosa:hasResult [
+        a qudt:QuantityValue ;
+        qudt:numericValue "50"^^xsd:decimal ;
+        qudt:unit unit:L-PER-SEC ;
+        qudt:quantityKind qk:VolumeFlowRate ;
+        rdfs:comment "50 L/s = 4,320 m³/day"
+    ] .
+
+:obs_StreamB_BOD a sosa:Observation ;
+    sosa:hasFeatureOfInterest :StreamB ;
+    sosa:observedProperty :BOD_Concentration ;
+    sosa:resultTime "2025-01-15T10:00:00Z"^^xsd:dateTime ;
+    sosa:hasResult [
+        a qudt:QuantityValue ;
+        qudt:numericValue "0.15"^^xsd:decimal ;
+        qudt:unit unit:GM-PER-L ;
+        qudt:quantityKind qk:MassPerVolume ;
+        rdfs:comment "0.15 g/L = 150 mg/L BOD"
+    ] .
+
+# Expected mass loading: 4,320 m³/day × 150 mg/L = 648 kg/day
+
+# Stream C: ppm (parts per million, equivalent to mg/L for water)
+:StreamC a :WastewaterStream ;
+    rdfs:label "Wastewater stream C" .
+
+:obs_StreamC_Flow a sosa:Observation ;
+    sosa:hasFeatureOfInterest :StreamC ;
+    sosa:observedProperty :FlowRate ;
+    sosa:resultTime "2025-01-15T10:00:00Z"^^xsd:dateTime ;
+    sosa:hasResult [
+        a qudt:QuantityValue ;
+        qudt:numericValue "0.5"^^xsd:decimal ;
+        qudt:unit unit:MillionGAL-PER-DAY ;
+        qudt:quantityKind qk:VolumeFlowRate ;
+        rdfs:comment "0.5 MGD ≈ 1,893 m³/day"
+    ] .
+
+:obs_StreamC_BOD a sosa:Observation ;
+    sosa:hasFeatureOfInterest :StreamC ;
+    sosa:observedProperty :BOD_Concentration ;
+    sosa:resultTime "2025-01-15T10:00:00Z"^^xsd:dateTime ;
+    sosa:hasResult [
+        a qudt:QuantityValue ;
+        qudt:numericValue "180"^^xsd:decimal ;
+        qudt:unit unit:PPM ;
+        qudt:quantityKind qk:MassPerVolume ;
+        rdfs:comment "180 ppm ≈ 180 mg/L BOD for water"
+    ] .
+
+# Expected mass loading: 1,893 m³/day × 180 mg/L = 340.7 kg/day
+# Total BOD loading: 1,000 + 648 + 340.7 = 1,988.7 kg/day
+
+# ==============================================================================
+# CQ-QUDT-4: Dimensional compatibility check
+# ==============================================================================
+
+:Temperature a sosa:ObservableProperty ;
+    rdfs:label "Water temperature" ;
+    qudt:applicableQuantityKind qk:Temperature .
+
+:obs_Invalid_Mix a sosa:Observation ;
+    rdfs:label "Invalid observation mixing incompatible dimensions" ;
+    rdfs:comment "This should fail validation: cannot add temperature to flow rate" ;
+    sosa:hasFeatureOfInterest :StreamA ;
+    sosa:observedProperty :Temperature ;
+    sosa:hasResult [
+        a qudt:QuantityValue ;
+        qudt:numericValue "20"^^xsd:decimal ;
+        qudt:unit unit:DEG_C ;
+        qudt:quantityKind qk:Temperature
+    ] .
+
+# Test: Can the system detect that:
+# result_SourceA_Flow (VolumeFlowRate) + obs_Invalid_Mix result (Temperature)
+# are dimensionally incompatible?
+
+# ==============================================================================
+# CQ-QUDT-5: Mass balance at junction
+# ==============================================================================
+
+:Junction2 a :Junction ;
+    rdfs:label "Junction for mass balance test" ;
+    :receivesFlowFrom :InflowPipe1, :InflowPipe2 ;
+    :sendsFlowTo :OutflowPipe3 .
+
+:TotalNitrogen a sosa:ObservableProperty ;
+    rdfs:label "Total Nitrogen concentration" ;
+    qudt:applicableQuantityKind qk:MassPerVolume .
+
+# Inflow Pipe 1
+:InflowPipe1 a :Pipe ;
+    rdfs:label "Inflow pipe 1" .
+
+:obs_Pipe1_Flow a sosa:Observation ;
+    sosa:hasFeatureOfInterest :InflowPipe1 ;
+    sosa:observedProperty :FlowRate ;
+    sosa:resultTime "2025-01-15T11:00:00Z"^^xsd:dateTime ;
+    sosa:hasResult [
+        a qudt:QuantityValue ;
+        qudt:numericValue "8000"^^xsd:decimal ;
+        qudt:unit unit:M3-PER-DAY ;
+        qudt:quantityKind qk:VolumeFlowRate
+    ] .
+
+:obs_Pipe1_TN a sosa:Observation ;
+    sosa:hasFeatureOfInterest :InflowPipe1 ;
+    sosa:observedProperty :TotalNitrogen ;
+    sosa:resultTime "2025-01-15T11:00:00Z"^^xsd:dateTime ;
+    sosa:hasResult [
+        a qudt:QuantityValue ;
+        qudt:numericValue "150"^^xsd:decimal ;
+        qudt:unit unit:MilliGM-PER-L ;
+        qudt:quantityKind qk:MassPerVolume
+    ] .
+
+# TN loading Pipe 1: 8000 m³/day × 150 mg/L = 1,200 kg/day
+
+# Inflow Pipe 2
+:InflowPipe2 a :Pipe ;
+    rdfs:label "Inflow pipe 2" .
+
+:obs_Pipe2_Flow a sosa:Observation ;
+    sosa:hasFeatureOfInterest :InflowPipe2 ;
+    sosa:observedProperty :FlowRate ;
+    sosa:resultTime "2025-01-15T11:00:00Z"^^xsd:dateTime ;
+    sosa:hasResult [
+        a qudt:QuantityValue ;
+        qudt:numericValue "75"^^xsd:decimal ;
+        qudt:unit unit:L-PER-SEC ;
+        qudt:quantityKind qk:VolumeFlowRate ;
+        rdfs:comment "75 L/s = 6,480 m³/day"
+    ] .
+
+:obs_Pipe2_TN a sosa:Observation ;
+    sosa:hasFeatureOfInterest :InflowPipe2 ;
+    sosa:observedProperty :TotalNitrogen ;
+    sosa:resultTime "2025-01-15T11:00:00Z"^^xsd:dateTime ;
+    sosa:hasResult [
+        a qudt:QuantityValue ;
+        qudt:numericValue "0.12"^^xsd:decimal ;
+        qudt:unit unit:GM-PER-L ;
+        qudt:quantityKind qk:MassPerVolume ;
+        rdfs:comment "0.12 g/L = 120 mg/L"
+    ] .
+
+# TN loading Pipe 2: 6,480 m³/day × 120 mg/L = 777.6 kg/day
+
+# Expected at Junction:
+# Total flow: 8,000 + 6,480 = 14,480 m³/day
+# Total TN loading: 1,200 + 777.6 = 1,977.6 kg/day
+# Average concentration: 1,977.6 kg/day / 14,480 m³/day = 136.6 mg/L
+
+:OutflowPipe3 a :Pipe ;
+    rdfs:label "Outflow pipe 3 (should carry combined flow)" .
+
+# Mass balance test: Query should verify mass in = mass out
