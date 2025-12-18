@@ -21,6 +21,10 @@ jobs:
       - name: Export marimo notebook
         run: |
           uvx marimo export html-wasm notebooks/explore_ontology.py -o webnotebook/index.html
+      - name: Create directories for the ontology if they don't exist
+        run: |
+          mkdir -p data/ontology/bridges
+          mkdir -p data/ontology/modules
       - name: Copy notebook to docs
         run: |
           mkdir -p docs/notebook
