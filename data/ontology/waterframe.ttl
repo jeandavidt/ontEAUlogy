@@ -1,0 +1,39 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+
+<https://ugentbiomath.github.io/waterframe>
+    a owl:Ontology ;
+    dc:title "waterFRAME: Modular Water Reuse Ontology" ;
+    dc:description "A BFO-grounded modular ontology for household water reuse systems following Alan Rector normalization principles" ;
+    dc:creator "Jean-David Therrien" ;
+    dc:version "0.1.0" ;
+    rdfs:label "waterFRAME"@en ;
+    rdfs:comment "A modular ontology for water reuse systems with BFO alignment and support for agent-based optimization queries"@en ;
+    owl:versionInfo "0.1.0" ;
+    rdfs:seeAlso <https://github.com/jeandavidt/ontEAUlogy> ;
+    
+    # Import core modules (currently available)
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/material_entities> ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/properties> ;
+    
+    # Future module imports (placeholder for when modules are created)
+    # owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/qualities> ;
+    # owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/processes> ;
+    # owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/roles> ;
+    # owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/information> ;
+    
+    # Bridge module imports (placeholder)
+    # owl:imports <https://ugentbiomath.github.io/waterframe/bridges/sosa_alignment> ;
+    # owl:imports <https://ugentbiomath.github.io/waterframe/bridges/prov_alignment> ;
+    # owl:imports <https://ugentbiomath.github.io/waterframe/bridges/qudt_alignment> .
+    
+    # Module organization annotations
+    rdfs:comment "Core modules available: material_entities, properties" ;
+    rdfs:comment "Planned modules: qualities, processes, roles, information" ;
+    rdfs:comment "Bridge modules: SOSA (observations), PROV-O (provenance), QUDT (units)" ;
+    
+    # Competency question scope
+    rdfs:comment "Currently answers CQ1 (system topology), CQ2-5 (flow connections)" ;
+    rdfs:comment "Target: Answer all 36 competency questions across system topology, treatment, water quality, model metadata, and optimization domains" .
