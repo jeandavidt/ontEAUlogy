@@ -1,0 +1,332 @@
+# OntoCAPE SPARQL Query Test Suite
+# Testing competency questions against OntoCAPE structure
+
+PREFIX : <http://example.org/ontocape-test/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX system: <file:///C:/OntoCAPE/OntoCAPE/upper_level/system.owl#>
+PREFIX tech: <file:///C:/OntoCAPE/OntoCAPE/upper_level/technical_system.owl#>
+PREFIX net: <file:///C:/OntoCAPE/OntoCAPE/upper_level/network_system.owl#>
+PREFIX phase: <file:///C:/OntoCAPE/OntoCAPE/material/phase_system/phase_system.owl#>
+PREFIX substance: <file:///C:/OntoCAPE/OntoCAPE/material/substance/substance.owl#>
+PREFIX chemical: <file:///C:/OntoCAPE/OntoCAPE/material/substance/chemical_species.owl#>
+PREFIX process: <file:///C:/OntoCAPE/OntoCAPE/chemical_process_system/CPS_function/process.owl#>
+PREFIX behavior: <file:///C:/OntoCAPE/OntoCAPE/chemical_process_system/CPS_behavior/behavior.owl#>
+PREFIX plant: <file:///C:/OntoCAPE/OntoCAPE/chemical_process_system/CPS_realization/plant.owl#>
+PREFIX apparatus: <file:///C:/OntoCAPE/OntoCAPE/chemical_process_system/CPS_realization/plant_equipment/apparatus.owl#>
+PREFIX reactor: <file:///C:/OntoCAPE/OntoCAPE/chemical_process_system/process_units/chemical_reactor.owl#>
+PREFIX model: <file:///C:/OntoCAPE/OntoCAPE/model/mathematical_model.owl#>
+PREFIX pmodel: <file:///C:/OntoCAPE/OntoCAPE/model/process_model.owl#>
+PREFIX software: <file:///C:/OntoCAPE/OntoCAPE/software_system/software_system.owl#>
+PREFIX derived: <file:///C:/OntoCAPE/OntoCAPE/supporting_concepts/SI_unit/derived_SI_units.owl#>
+
+# ========== SYSTEM TOPOLOGY (CQ1-CQ5) ==========
+
+# CQ1: What are all the nodes (plants, sources, junctions, sinks) in a given catchment?
+# Status: ✅ SUPPORTED - Direct SPARQL query
+SELECT ?node ?nodeLabel
+WHERE {
+    ?node a net:Node ;
+          rdfs:label ?nodeLabel ;
+          net:partOfNetwork :WastewaterCatchment_Network .
+}
+ORDER BY ?nodeLabel
+
+# CQ2: What flows connect Node A to Node B? (directed edges, flow type)
+# Status: ✅ SUPPORTED - Direct SPARQL query
+SELECT ?flow ?flowLabel ?fromNode ?fromLabel ?toNode ?toLabel
+WHERE {
+    ?flow a net:DirectedConnection ;
+          rdfs:label ?flowLabel ;
+          net:connectsFrom ?fromNode ;
+          net:connectsTo ?toNode .
+    ?fromNode rdfs:label ?fromLabel .
+    ?toNode rdfs:label ?toLabel .
+}
+ORDER BY ?fromLabel ?toLabel
+
+# CQ3: What are the possible input sources for Plant X?
+# Status: ✅ SUPPORTED - Direct SPARQL query
+SELECT ?flow ?sourceNode ?sourceLabel
+WHERE {
+    ?flow net:connectsTo :SecondaryTreatmentPlant ;
+          net:connectsFrom ?sourceNode .
+    ?sourceNode rdfs:label ?sourceLabel .
+}
+
+# CQ4: What downstream nodes receive effluent from Plant X?
+# Status: ✅ SUPPORTED - Direct SPARQL query
+SELECT ?flow ?downstreamNode ?downstreamLabel
+WHERE {
+    ?flow net:connectsFrom :SecondaryTreatmentPlant ;
+          net:connectsTo ?downstreamNode .
+    ?downstreamNode rdfs:label ?downstreamLabel .
+}
+
+# CQ5: What is the complete flow path from Source S to Sink K?
+# Status: ✅ SUPPORTED - SPARQL property paths
+SELECT ?pathStart ?pathEnd ?intermediateNodes
+WHERE {
+    # Using property path for transitive connections
+    :Household_Source ^net:connectsFrom+ ?intermediateNode .
+    ?intermediateNode net:connectsFrom+ :AgriculturalReuse .
+    ?intermediateNode rdfs:label ?intermediateNodes .
+    :Household_Source rdfs:label ?pathStart .
+    :AgriculturalReuse rdfs:label ?pathEnd .
+}
+
+# ========== TREATMENT CONFIGURATION (CQ6-CQ9) ==========
+
+# CQ6: What unit processes comprise the treatment train at Plant X?
+# Status: ✅ SUPPORTED - Direct SPARQL query
+SELECT ?process ?processLabel
+WHERE {
+    ?process a process:ProcessStep ;
+            rdfs:label ?processLabel .
+    # This would be enhanced with plant:hasProcessStep property in full implementation
+}
+ORDER BY ?processLabel
+
+# CQ7: What is the sequence/topology of unit processes within Plant X?
+# Status: ⚠️ PARTIAL - Needs additional properties for sequencing
+SELECT ?upstreamProcess ?downstreamProcess
+WHERE {
+    # This would need process:followedBy or similar sequencing property
+    ?upstreamProcess a process:ProcessStep .
+    ?downstreamProcess a process:ProcessStep .
+    # ?upstreamProcess process:followedBy ?downstreamProcess .  # Property not defined
+}
+
+# CQ8: What treatment technologies are available for a given contaminant removal objective?
+# Status: ⚠️ PARTIAL - Uses extension property process:removesContaminant
+SELECT ?technology ?techLabel ?contaminant ?contaminantLabel
+WHERE {
+    ?technology a process:ProcessStep ;
+                rdfs:label ?techLabel .
+    OPTIONAL {
+        ?technology process:removesContaminant ?contaminant .
+        ?contaminant rdfs:label ?contaminantLabel .
+    }
+}
+
+# CQ9: What is the design capacity of Unit Process U?
+# Status: ✅ SUPPORTED - Direct SPARQL query
+SELECT ?unit ?unitLabel ?capacity ?capacityValue ?capacityUnit
+WHERE {
+    {
+        # Check tanks and apparatus
+        ?unit a plant:PlantItem ;
+              rdfs:label ?unitLabel ;
+              plant:hasCapacity ?capacity .
+    } UNION {
+        # Check reactors with capacity
+        ?unit a reactor:ChemicalReactor ;
+              rdfs:label ?unitLabel ;
+              plant:hasCapacity ?capacity .
+    }
+    ?capacity system:numericalValue ?capacityValue ;
+             system:hasUnit ?capacityUnit .
+    FILTER (?unit = :PrimaryClarifier_Unit)
+}
+
+# ========== WATER QUALITY AND FITNESS-FOR-PURPOSE (CQ10-CQ13) ==========
+
+# CQ10: What quality parameters characterize the water at Node N?
+# Status: ✅ SUPPORTED - Direct SPARQL query
+SELECT ?stream ?streamLabel ?component ?componentLabel ?concentration ?concValue ?concUnit
+WHERE {
+    ?stream a phase:LiquidMaterialStream ;
+           rdfs:label ?streamLabel ;
+           phase:containsPhase ?phase .
+    ?phase phase:containsComponent ?component .
+    ?component rdfs:label ?componentLabel .
+    OPTIONAL {
+        ?component substance:hasProperty ?property .
+        ?property system:numericalValue ?concValue ;
+                  system:hasUnit ?concUnit .
+    }
+}
+
+# CQ11: What are the regulatory limits for Parameter P for Reuse Category R?
+# Status: ❌ NOT SUPPORTED - Requires regulatory ontology extension
+# Query placeholder for future extension:
+SELECT ?parameter ?reuseCategory ?limitValue ?limitUnit
+WHERE {
+    # This would require water_reuse:RegulatoryLimit class
+    # ?parameter water_reuse:hasRegulatoryLimit ?limit .
+    # ?limit water_reuse:forReuseCategory ?reuseCategory ;
+    #       water_reuse:hasValue ?limitValue ;
+    #       water_reuse:hasUnit ?limitUnit .
+}
+
+# CQ12: Does the effluent quality at Plant X meet the requirements for agricultural reuse?
+# Status: ❌ NOT SUPPORTED - Requires regulatory comparison reasoning
+# This needs:
+# 1. Regulatory standards extension
+# 2. Comparison reasoning rules
+# 3. Model invocation for actual values
+
+# CQ13: What contaminants are present in Source S above threshold T?
+# Status: ⚠️ PARTIAL - Can identify contaminants, threshold comparison needs reasoning
+SELECT ?contaminant ?contaminantLabel ?concentration ?value ?unit
+WHERE {
+    ?stream phase:containsPhase ?phase .
+    ?phase phase:containsComponent ?contaminant .
+    ?contaminant rdfs:label ?contaminantLabel ;
+                substance:hasProperty ?property .
+    ?property system:numericalValue ?value ;
+              system:hasUnit ?unit .
+    FILTER (?value > 50)  # Hard-coded threshold - should be parameterized
+}
+
+# ========== SOURCE/STREAM CLASSIFICATION (CQ14-CQ16) ==========
+
+# CQ14: Is Stream S classified as greywater or blackwater?
+# Status: ❌ NOT SUPPORTED - Requires water classification ontology
+SELECT ?stream ?streamLabel ?classification
+WHERE {
+    # This would require water_reuse:hasClassification property
+    # ?stream water_reuse:hasClassification ?classification .
+}
+
+# CQ15: What sources in the catchment are classified as fit-for-purpose Category C?
+# Status: ❌ NOT SUPPORTED - Requires fit-for-purpose classification extension
+
+# CQ16: What treatment is required to upgrade water from Quality Class Q1 to Q2?
+# Status: ❌ NOT SUPPORTED - Requires quality classification and treatment mapping
+
+# ========== MODEL METADATA (CQ17-CQ24) ==========
+
+# CQ17: What computational model is associated with Unit Process U?
+# Status: ✅ SUPPORTED - Direct SPARQL query
+SELECT ?unit ?unitLabel ?model ?modelLabel
+WHERE {
+    ?unit a plant:PlantItem ;
+          rdfs:label ?unitLabel .
+    ?model a model:MathematicalModel ;
+           rdfs:label ?modelLabel ;
+           model:models ?unit .
+}
+
+# CQ18: What are the input variables for Model M?
+# Status: ✅ SUPPORTED - Direct SPARQL query
+SELECT ?model ?modelLabel ?inputVar ?inputVarLabel
+WHERE {
+    ?model a pmodel:ProcessModel ;
+           rdfs:label ?modelLabel ;
+           pmodel:hasInputVariable ?inputVar .
+    ?inputVar rdfs:label ?inputVarLabel .
+}
+
+# CQ19: What are the output variables for Model M?
+# Status: ✅ SUPPORTED - Direct SPARQL query
+SELECT ?model ?modelLabel ?outputVar ?outputVarLabel
+WHERE {
+    ?model a pmodel:ProcessModel ;
+           rdfs:label ?modelLabel ;
+           pmodel:hasOutputVariable ?outputVar .
+    ?outputVar rdfs:label ?outputVarLabel .
+}
+
+# CQ20: Which parameters of Model M are fixed vs. manipulable (decision variables)?
+# Status: ⚠️ PARTIAL - Uses extension property model:isManipulable
+SELECT ?model ?modelLabel ?parameter ?paramLabel ?isManipulable ?value ?unit
+WHERE {
+    ?model a model:MathematicalModel ;
+           rdfs:label ?modelLabel ;
+           model:hasParameter ?parameter .
+    ?parameter rdfs:label ?paramLabel .
+    OPTIONAL {
+        ?parameter model:isManipulable ?isManipulable .
+    }
+    OPTIONAL {
+        ?parameter model:hasValue ?value .
+        ?parameter model:hasUnit ?unit .
+    }
+}
+
+# CQ21: What is the valid range for Parameter P in Model M?
+# Status: ❌ NOT SUPPORTED - Requires parameter range properties
+# Would need model:hasMinValue and model:hasMaxValue properties
+
+# CQ22: How is Model M invoked? (API endpoint, function signature, agent reference)
+# Status: ⚠️ PARTIAL - Uses extension property software:hasAPIEndpoint
+SELECT ?software ?softwareLabel ?model ?modelLabel ?endpoint ?version
+WHERE {
+    ?software a software:ProcessModelingSoftware ;
+              rdfs:label ?softwareLabel ;
+              software:canExecute ?model .
+    ?model rdfs:label ?modelLabel .
+    OPTIONAL {
+        ?software software:hasAPIEndpoint ?endpoint ;
+                  software:hasVersion ?version .
+    }
+}
+
+# CQ23: What mass/quality balances does Model M compute?
+# Status: ✅ SUPPORTED - Direct SPARQL query
+SELECT ?model ?modelLabel ?behavior ?behaviorLabel ?balanceType
+WHERE {
+    ?model model:models ?process .
+    ?process tech:hasBehaviorAspect ?behavior .
+    ?behavior rdfs:label ?behaviorLabel .
+    ?behavior behavior:governedBy ?equation .
+    ?equation a ?balanceType .
+    ?balanceType rdfs:subClassOf behavior:MassBalance .
+}
+
+# CQ24: What time resolution does Model M operate at?
+# Status: ❌ NOT SUPPORTED - Requires temporal resolution properties
+# Would need model:hasTimeResolution property
+
+# ========== OPTIMIZATION AGENT METADATA (CQ25-CQ29) ==========
+
+# CQ25-CQ29: Agent-related queries
+# Status: ❌ NOT SUPPORTED - Requires agent optimization ontology extension
+# These would need an agent ontology layer similar to OntoAgent
+
+# ========== OPTIMIZATION PROBLEM FORMULATION (CQ30-CQ33) ==========
+
+# CQ30: For a given objective, which nodes have relevant decision variables?
+# Status: ⚠️ PARTIAL - Can identify manipulable parameters, objective linking needs extension
+SELECT ?node ?nodeLabel ?parameter ?paramLabel
+WHERE {
+    ?node a net:Node ;
+          rdfs:label ?nodeLabel .
+    ?model model:models ?node ;
+           model:hasParameter ?parameter .
+    ?parameter model:isManipulable "true"^^xsd:boolean ;
+              rdfs:label ?paramLabel .
+}
+
+# CQ31: What constraints link the outputs of upstream nodes to the inputs of downstream nodes?
+# Status: ⚠️ PARTIAL - Can identify connections, constraint semantics need extension
+SELECT ?upstreamNode ?upstreamLabel ?downstreamNode ?downstreamLabel ?flow
+WHERE {
+    ?flow net:connectsFrom ?upstreamNode ;
+          net:connectsTo ?downstreamNode .
+    ?upstreamNode rdfs:label ?upstreamLabel .
+    ?downstreamNode rdfs:label ?downstreamLabel .
+}
+
+# CQ32: What is the set of decision variables for a catchment-wide source selection problem?
+# Status: ⚠️ PARTIAL - Can identify manipulable parameters, problem formulation needs context
+
+# CQ33: What models must be invoked to evaluate a candidate solution?
+# Status: ✅ SUPPORTED - Direct SPARQL query
+SELECT DISTINCT ?model ?modelLabel
+WHERE {
+    ?model a model:MathematicalModel ;
+           rdfs:label ?modelLabel .
+}
+
+# ========== PROVENANCE AND METADATA (CQ34-CQ36) ==========
+
+# CQ34-CQ36: Provenance queries
+# Status: ❌ NOT SUPPORTED - Requires PROV-O or similar provenance ontology
+# These would need integration with PROV-O for:
+# - prov:generatedAtTime (when data was updated)
+# - prov:wasDerivedFrom (data sources)
+# - prov:wasAttributedTo (responsibility)

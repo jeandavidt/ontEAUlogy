@@ -1,0 +1,129 @@
+@prefix : <http://example.org/ontocape-test/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Basic OntoCAPE structure for reasoning test
+@prefix system: <http://ontocape.org/upper_level/system#> .
+@prefix net: <http://ontocape.org/upper_level/network_system#> .
+@prefix phase: <http://ontocape.org/material/phase_system#> .
+@prefix substance: <http://ontocape.org/material/substance#> .
+@prefix model: <http://ontocape.org/model/mathematical_model#> .
+
+# ========== BASIC CLASSES ==========
+
+system:System a owl:Class .
+system:TechnicalSystem a owl:Class ; rdfs:subClassOf system:System .
+system:ScalarQuantity a owl:Class .
+
+net:NetworkSystem a owl:Class ; rdfs:subClassOf system:System .
+net:Node a owl:Class ; rdfs:subClassOf system:System .
+net:Connection a owl:Class .
+net:DirectedConnection a owl:Class ; rdfs:subClassOf net:Connection .
+
+phase:LiquidMaterialStream a owl:Class .
+phase:LiquidPhase a owl:Class .
+
+substance:Substance a owl:Class .
+substance:ChemicalSpecies a owl:Class ; rdfs:subClassOf substance:Substance .
+
+model:MathematicalModel a owl:Class .
+model:ModelVariable a owl:Class .
+model:Parameter a owl:Class .
+model:StateVariable a owl:Class ; rdfs:subClassOf model:ModelVariable .
+
+# ========== PROPERTIES ==========
+
+net:partOfNetwork a owl:ObjectProperty ; rdfs:domain net:Node ; rdfs:range net:NetworkSystem .
+net:connectsFrom a owl:ObjectProperty ; rdfs:domain net:DirectedConnection ; rdfs:range net:Node .
+net:connectsTo a owl:ObjectProperty ; rdfs:domain net:DirectedConnection ; rdfs:range net:Node .
+
+phase:containsPhase a owl:ObjectProperty ; rdfs:domain phase:LiquidMaterialStream ; rdfs:range phase:LiquidPhase .
+phase:containsComponent a owl:ObjectProperty ; rdfs:domain phase:LiquidPhase ; rdfs:range substance:Substance .
+
+system:numericalValue a owl:DatatypeProperty ; rdfs:domain system:ScalarQuantity ; rdfs:range xsd:double .
+system:hasUnit a owl:ObjectProperty ; rdfs:domain system:ScalarQuantity .
+system:hasProperty a owl:ObjectProperty .
+
+model:models a owl:ObjectProperty .
+model:hasModelVariable a owl:ObjectProperty ; rdfs:domain model:MathematicalModel ; rdfs:range model:ModelVariable .
+model:hasParameter a owl:ObjectProperty ; rdfs:domain model:MathematicalModel ; rdfs:range model:Parameter .
+model:isManipulable a owl:DatatypeProperty ; rdfs:domain model:Parameter ; rdfs:range xsd:boolean .
+
+# ========== TEST INSTANCES ==========
+
+# Network structure
+:WastewaterNetwork a net:NetworkSystem ;
+    rdfs:label "Wastewater Treatment Network" .
+
+:SourceNode a net:Node ;
+    rdfs:label "Wastewater Source" ;
+    net:partOfNetwork :WastewaterNetwork .
+
+:TreatmentNode a net:Node ;
+    rdfs:label "Treatment Plant" ;
+    net:partOfNetwork :WastewaterNetwork .
+
+:ReuseNode a net:Node ;
+    rdfs:label "Agricultural Reuse" ;
+    net:partOfNetwork :WastewaterNetwork .
+
+:Flow1 a net:DirectedConnection ;
+    rdfs:label "Raw wastewater flow" ;
+    net:connectsFrom :SourceNode ;
+    net:connectsTo :TreatmentNode .
+
+:Flow2 a net:DirectedConnection ;
+    rdfs:label "Treated water flow" ;
+    net:connectsFrom :TreatmentNode ;
+    net:connectsTo :ReuseNode .
+
+# Material streams
+:InflowStream a phase:LiquidMaterialStream ;
+    rdfs:label "Wastewater inflow" ;
+    phase:containsPhase :AqueousPhase .
+
+:AqueousPhase a phase:LiquidPhase ;
+    rdfs:label "Aqueous phase" ;
+    phase:containsComponent :WaterComponent ;
+    phase:containsComponent :CODComponent .
+
+:WaterComponent a substance:ChemicalSpecies ;
+    rdfs:label "Water" .
+
+:CODComponent a substance:ChemicalSpecies ;
+    rdfs:label "Chemical Oxygen Demand" .
+
+# Quantities
+:FlowRate_5000 a system:ScalarQuantity ;
+    rdfs:label "Flow rate: 5000 m³/day" ;
+    system:numericalValue "5000.0"^^xsd:double .
+
+# Mathematical model
+:ASM1 a model:MathematicalModel ;
+    rdfs:label "Activated Sludge Model No. 1" ;
+    model:models :TreatmentNode ;
+    model:hasModelVariable :SubstrateVar ;
+    model:hasParameter :HRT_Param ;
+    model:hasParameter :MuMax_Param .
+
+:SubstrateVar a model:StateVariable ;
+    rdfs:label "Substrate concentration" .
+
+:HRT_Param a model:Parameter ;
+    rdfs:label "Hydraulic retention time" ;
+    model:isManipulable "true"^^xsd:boolean .
+
+:MuMax_Param a model:Parameter ;
+    rdfs:label "Maximum growth rate" ;
+    model:isManipulable "false"^^xsd:boolean .
+
+# Test for potential inconsistencies
+:InconsistentClass a owl:Class ;
+    owl:equivalentClass [
+        a owl:Class ;
+        owl:intersectionOf (system:System owl:Nothing )
+    ] .
+
+:TestIndividual system:System , owl:Nothing .

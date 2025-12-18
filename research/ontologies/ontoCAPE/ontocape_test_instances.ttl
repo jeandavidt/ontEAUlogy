@@ -1,0 +1,354 @@
+@prefix : <http://example.org/ontocape-test/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix system: <file:///C:/OntoCAPE/OntoCAPE/upper_level/system.owl#> .
+@prefix tech: <file:///C:/OntoCAPE/OntoCAPE/upper_level/technical_system.owl#> .
+@prefix net: <file:///C:/OntoCAPE/OntoCAPE/upper_level/network_system.owl#> .
+@prefix phase: <file:///C:/OntoCAPE/OntoCAPE/material/phase_system/phase_system.owl#> .
+@prefix substance: <file:///C:/OntoCAPE/OntoCAPE/material/substance/substance.owl#> .
+@prefix chemical: <file:///C:/OntoCAPE/OntoCAPE/material/substance/chemical_species.owl#> .
+@prefix process: <file:///C:/OntoCAPE/OntoCAPE/chemical_process_system/CPS_function/process.owl#> .
+@prefix behavior: <file:///C:/OntoCAPE/OntoCAPE/chemical_process_system/CPS_behavior/behavior.owl#> .
+@prefix plant: <file:///C:/OntoCAPE/OntoCAPE/chemical_process_system/CPS_realization/plant.owl#> .
+@prefix apparatus: <file:///C:/OntoCAPE/OntoCAPE/chemical_process_system/CPS_realization/plant_equipment/apparatus.owl#> .
+@prefix reactor: <file:///C:/OntoCAPE/OntoCAPE/chemical_process_system/process_units/chemical_reactor.owl#> .
+@prefix model: <file:///C:/OntoCAPE/OntoCAPE/model/mathematical_model.owl#> .
+@prefix pmodel: <file:///C:/OntoCAPE/OntoCAPE/model/process_model.owl#> .
+@prefix software: <file:///C:/OntoCAPE/OntoCAPE/software_system/software_system.owl#> .
+@prefix derived: <file:///C:/OntoCAPE/OntoCAPE/supporting_concepts/SI_unit/derived_SI_units.owl#> .
+
+# ============= NETWORK SYSTEM (CQ1-CQ5) =============
+
+:WastewaterCatchment_Network
+    a net:NetworkSystem ;
+    rdfs:label "Wastewater Treatment Catchment Network" .
+
+:Household_Source
+    a net:Node ;
+    rdfs:label "Household Wastewater Source" ;
+    net:partOfNetwork :WastewaterCatchment_Network .
+
+:PrimaryTreatmentPlant
+    a net:Node ;
+    rdfs:label "Primary Treatment Plant" ;
+    net:partOfNetwork :WastewaterCatchment_Network .
+
+:SecondaryTreatmentPlant
+    a net:Node ;
+    rdfs:label "Secondary Treatment Plant" ;
+    net:partOfNetwork :WastewaterCatchment_Network .
+
+:AgriculturalReuse
+    a net:Node ;
+    rdfs:label "Agricultural Reuse Point" ;
+    net:partOfNetwork :WastewaterCatchment_Network .
+
+:RiverDischarge
+    a net:Node ;
+    rdfs:label "River Discharge Point" ;
+    net:partOfNetwork :WastewaterCatchment_Network .
+
+# Flow connections (CQ2)
+:RawWastewater_Flow
+    a net:DirectedConnection ;
+    rdfs:label "Raw wastewater flow" ;
+    net:connectsFrom :Household_Source ;
+    net:connectsTo :PrimaryTreatmentPlant .
+
+:PrimaryEffluent_Flow
+    a net:DirectedConnection ;
+    rdfs:label "Primary effluent flow" ;
+    net:connectsFrom :PrimaryTreatmentPlant ;
+    net:connectsTo :SecondaryTreatmentPlant .
+
+:TreatedWater_Agricultural
+    a net:DirectedConnection ;
+    rdfs:label "Treated water to agriculture" ;
+    net:connectsFrom :SecondaryTreatmentPlant ;
+    net:connectsTo :AgriculturalReuse .
+
+:TreatedWater_River
+    a net:DirectedConnection ;
+    rdfs:label "Treated water to river" ;
+    net:connectsFrom :SecondaryTreatmentPlant ;
+    net:connectsTo :RiverDischarge .
+
+# ============= MATERIAL STREAMS (CQ10, CQ13) =============
+
+:RawWastewaterStream
+    a phase:LiquidMaterialStream ;
+    rdfs:label "Raw wastewater stream" ;
+    phase:hasFlowRate :FlowRate_5000 ;
+    phase:hasTemperature :Temperature_20C ;
+    phase:containsPhase :RawWastewaterPhase .
+
+:RawWastewaterPhase
+    a phase:LiquidPhase ;
+    rdfs:label "Raw wastewater liquid phase" ;
+    phase:containsComponent chemical:Water ;
+    phase:containsComponent :COD_Component ;
+    phase:containsComponent :NH3_Component ;
+    phase:containsComponent :E_coli_Component .
+
+:COD_Component
+    a substance:ChemicalSpecies ;
+    rdfs:label "Chemical Oxygen Demand" ;
+    substance:name "Chemical Oxygen Demand (COD)" .
+
+:NH3_Component
+    a chemical:ChemicalSpecies ;
+    rdfs:label "Ammonia" .
+
+:E_coli_Component
+    a substance:ChemicalSpecies ;
+    rdfs:label "E. coli bacteria" .
+
+# Quantities
+:FlowRate_5000
+    a system:ScalarQuantity ;
+    rdfs:label "Flow rate: 5000 m³/day" ;
+    system:numericalValue "5000.0"^^xsd:double ;
+    system:hasUnit derived:m3_per_day .
+
+:Temperature_20C
+    a system:ScalarQuantity ;
+    rdfs:label "Temperature: 20°C" ;
+    system:numericalValue "20.0"^^xsd:double ;
+    system:hasUnit derived:degree_Celsius .
+
+:COD_Conc_300
+    a system:ScalarQuantity ;
+    rdfs:label "COD: 300 mg/L" ;
+    system:numericalValue "300.0"^^xsd:double ;
+    system:hasUnit derived:mg_per_L .
+
+:NH3_Conc_40
+    a system:ScalarQuantity ;
+    rdfs:label "Ammonia: 40 mg/L" ;
+    system:numericalValue "40.0"^^xsd:double ;
+    system:hasUnit derived:mg_per_L .
+
+# ============= TREATMENT UNITS (CQ6-CQ9) =============
+
+:PrimaryTreatment_Process
+    a process:ProcessStep ;
+    rdfs:label "Primary treatment process" ;
+    process:hasInput :RawWastewaterStream ;
+    process:hasOutput :PrimaryEffluentStream .
+
+:Screening_Unit
+    a apparatus:Apparatus ;
+    rdfs:label "Screening unit" ;
+    plant:hasCapacity :Capacity_5000 ;
+    tech:hasRealizationAspect :Screening_Equipment .
+
+:PrimaryClarifier_Unit
+    a apparatus:Tank ;
+    rdfs:label "Primary clarifier" ;
+    plant:hasVolume :Volume_2000 ;
+    plant:hasCapacity :Capacity_5000 ;
+    tech:hasRealizationAspect :Clarifier_Equipment .
+
+:Capacity_5000
+    a system:ScalarQuantity ;
+    rdfs:label "Capacity: 5000 m³/day" ;
+    system:numericalValue "5000.0"^^xsd:double ;
+    system:hasUnit derived:m3_per_day .
+
+:Volume_2000
+    a system:ScalarQuantity ;
+    rdfs:label "Volume: 2000 m³" ;
+    system:numericalValue "2000.0"^^xsd:double ;
+    system:hasUnit derived:m3 .
+
+:SecondaryTreatment_Process
+    a process:ProcessStep ;
+    rdfs:label "Secondary biological treatment" ;
+    process:hasInput :PrimaryEffluentStream ;
+    process:hasOutput :TreatedEffluentStream .
+
+:ASM_Bioreactor
+    a reactor:ChemicalReactor ;
+    rdfs:label "Activated sludge bioreactor" ;
+    reactor:hasReactionType :AerobicOxidation ;
+    plant:hasVolume :Volume_1000 ;
+    tech:hasRealizationAspect :Bioreactor_Equipment .
+
+:Volume_1000
+    a system:ScalarQuantity ;
+    rdfs:label "Volume: 1000 m³" ;
+    system:numericalValue "1000.0"^^xsd:double ;
+    system:hasUnit derived:m3 .
+
+:AerobicOxidation
+    a process:ChemicalTransformation ;
+    rdfs:label "Aerobic oxidation of organic matter" .
+
+# ============= MATHEMATICAL MODELS (CQ17-CQ24) =============
+
+:ASM1_Model
+    a model:MathematicalModel ;
+    rdfs:label "Activated Sludge Model No. 1" ;
+    model:models :ASM_Bioreactor ;
+    model:hasModelVariable :Substrate_S ;
+    model:hasModelVariable :Biomass_X ;
+    model:hasModelVariable :DissolvedOxygen_SO ;
+    model:hasParameter :mu_max ;
+    model:hasParameter :Y_H ;
+    model:hasParameter :K_S ;
+    model:hasParameter :k_la ;
+    model:hasParameter :HRT .
+
+:Substrate_S
+    a model:StateVariable ;
+    rdfs:label "Substrate concentration [mg COD/L]" ;
+    model:hasUnit derived:mg_per_L .
+
+:Biomass_X
+    a model:StateVariable ;
+    rdfs:label "Biomass concentration [mg VSS/L]" ;
+    model:hasUnit derived:mg_per_L .
+
+:DissolvedOxygen_SO
+    a model:StateVariable ;
+    rdfs:label "Dissolved oxygen [mg/L]" ;
+    model:hasUnit derived:mg_per_L .
+
+# Fixed parameters
+:mu_max
+    a model:Parameter ;
+    rdfs:label "Maximum specific growth rate" ;
+    model:hasValue "0.4"^^xsd:double ;
+    model:hasUnit derived:per_day .
+
+:Y_H
+    a model:Parameter ;
+    rdfs:label "Heterotrophic yield coefficient" ;
+    model:hasValue "0.67"^^xsd:double ;
+    model:hasUnit _:mgVSS_per_mgCOD .
+
+:K_S
+    a model:Parameter ;
+    rdfs:label "Half-saturation constant" ;
+    model:hasValue "20.0"^^xsd:double ;
+    model:hasUnit derived:mg_per_L .
+
+# Manipulable parameters (decision variables for optimization)
+:k_la
+    a model:Parameter ;
+    rdfs:label "Oxygen transfer coefficient" ;
+    model:hasValue "200.0"^^xsd:double ;
+    model:hasUnit derived:per_day ;
+    model:isManipulable "true"^^xsd:boolean .
+
+:HRT
+    a model:Parameter ;
+    rdfs:label "Hydraulic retention time" ;
+    model:hasValue "8.0"^^xsd:double ;
+    model:hasUnit derived:hour ;
+    model:isManipulable "true"^^xsd:boolean .
+
+# Process model linking multiple sub-models
+:WWTP_PlantModel
+    a pmodel:ProcessModel ;
+    rdfs:label "Full WWTP model" ;
+    pmodel:models :SecondaryTreatmentPlant ;
+    pmodel:hasSubmodel :ASM1_Model ;
+    pmodel:hasInputVariable :InflowRate_Var ;
+    pmodel:hasInputVariable :InflowCOD_Var ;
+    pmodel:hasOutputVariable :EffluentCOD_Var ;
+    pmodel:hasOutputVariable :EffluentNH3_Var .
+
+:InflowRate_Var
+    a model:ModelVariable ;
+    rdfs:label "Inflow rate variable" ;
+    model:hasUnit derived:m3_per_day .
+
+:InflowCOD_Var
+    a model:ModelVariable ;
+    rdfs:label "Inflow COD variable" ;
+    model:hasUnit derived:mg_per_L .
+
+:EffluentCOD_Var
+    a model:ModelVariable ;
+    rdfs:label "Effluent COD variable" ;
+    model:hasUnit derived:mg_per_L .
+
+:EffluentNH3_Var
+    a model:ModelVariable ;
+    rdfs:label "Effluent ammonia variable" ;
+    model:hasUnit derived:mg_per_L .
+
+# ============= SOFTWARE SYSTEM (CQ22) =============
+
+:BioWin_Simulator
+    a software:ProcessModelingSoftware ;
+    rdfs:label "BioWin WWTP simulator" ;
+    software:canExecute :ASM1_Model ;
+    software:hasVersion "6.1" ;
+    software:hasAPIEndpoint "https://api.biowin.com/simulate" .
+
+:GPS_X_Simulator
+    a software:ProcessModelingSoftware ;
+    rdfs:label "GPS-X simulator" ;
+    software:canExecute :ASM1_Model ;
+    software:hasVersion "10.0" ;
+    software:hasAPIEndpoint "https://api.gpsx.com/run" .
+
+# ============= BEHAVIORAL ASPECTS (CQ23) =============
+
+:ASM_Behavior
+    a behavior:ContinuousProcess ;
+    rdfs:label "ASM bioreactor behavior" ;
+    behavior:hasInflowRate :Flow_in ;
+    behavior:hasOutflowRate :Flow_out ;
+    behavior:hasAccumulation :BiomassAccumulation ;
+    behavior:governedBy :MassBalanceEq ;
+    behavior:governedBy :OxygenBalanceEq .
+
+:Flow_in
+    a behavior:ConvectiveTransportRate ;
+    rdfs:label "Inflow rate" .
+
+:Flow_out
+    a behavior:ConvectiveTransportRate ;
+    rdfs:label "Outflow rate" .
+
+:BiomassAccumulation
+    a behavior:Accumulation ;
+    rdfs:label "Biomass accumulation rate" .
+
+:MassBalanceEq
+    a behavior:MassBalance ;
+    rdfs:comment "dS/dt = (Q_in/V)*S_in - (Q_out/V)*S - (1/Y_H)*mu_H*X" .
+
+:OxygenBalanceEq
+    a behavior:MassBalance ;
+    rdfs:comment "dSO/dt = k_la*(SO_sat - SO) - (1/Y_H)*mu_H*X - OUR" .
+
+# ============= TREATMENT TECHNOLOGIES (CQ8) =============
+
+:COD_Removal_Tech
+    a process:PhysicalTransformation ;
+    rdfs:label "COD removal technology" ;
+    process:removesContaminant :COD_Component .
+
+:NH3_Removal_Tech
+    a process:ChemicalTransformation ;
+    rdfs:label "Ammonia removal technology" ;
+    process:removesContaminant :NH3_Component .
+
+:Pathogen_Removal_Tech
+    a process:PhysicalTransformation ;
+    rdfs:label "Pathogen removal technology" ;
+    process:removesContaminant :E_coli_Component .
+
+# Extension properties (would need to be added)
+process:removesContaminant a owl:ObjectProperty .
+model:isManipulable a owl:DatatypeProperty .
+model:hasAPIEndpoint a owl:DatatypeProperty .
+model:hasUnit a owl:ObjectProperty .
+model:hasValue a owl:DatatypeProperty .
+:mgVSS_per_mgCOD a owl:NamedIndividual .
