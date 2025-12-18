@@ -1,0 +1,280 @@
+@prefix : <http://example.org/waterFRAME/> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix ssn: <http://www.w3.org/ns/ssn/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix time: <http://www.w3.org/2006/time#> .
+
+# ==============================================================================
+# Features of Interest: Water bodies and treatment plants
+# ==============================================================================
+
+:WastewaterInfluent1 a sosa:FeatureOfInterest ;
+    rdfs:label "Wastewater Treatment Plant 1 - Influent" ;
+    rdfs:comment "Influent water entering WWTP-1" .
+
+:WastewaterEffluent1 a sosa:FeatureOfInterest ;
+    rdfs:label "Wastewater Treatment Plant 1 - Effluent" ;
+    rdfs:comment "Treated effluent from WWTP-1" .
+
+:GreywaterSource1 a sosa:FeatureOfInterest ;
+    rdfs:label "Residential Greywater Collection Point 1" ;
+    rdfs:comment "Greywater from residential building complex" .
+
+:RiverSample1 a sosa:Sample, sosa:FeatureOfInterest ;
+    rdfs:label "River Sample from Station R1" ;
+    sosa:isSampleOf :RiverR1 ;
+    rdfs:comment "Water sample collected from river monitoring station R1" .
+
+:RiverR1 a sosa:FeatureOfInterest ;
+    rdfs:label "River R1" ;
+    rdfs:comment "Receiving water body" .
+
+# ==============================================================================
+# Observable Properties: Water Quality Parameters
+# ==============================================================================
+
+:BOD5 a sosa:ObservableProperty , ssn:Property ;
+    rdfs:label "5-day Biochemical Oxygen Demand" ;
+    rdfs:comment "BOD5 - oxygen demand over 5 days at 20°C" ;
+    :hasUnit unit:MilliGM-PER-L .
+
+:COD a sosa:ObservableProperty , ssn:Property ;
+    rdfs:label "Chemical Oxygen Demand" ;
+    rdfs:comment "COD - total oxygen demand" ;
+    :hasUnit unit:MilliGM-PER-L .
+
+:TSS a sosa:ObservableProperty , ssn:Property ;
+    rdfs:label "Total Suspended Solids" ;
+    rdfs:comment "TSS concentration" ;
+    :hasUnit unit:MilliGM-PER-L .
+
+:TotalNitrogen a sosa:ObservableProperty , ssn:Property ;
+    rdfs:label "Total Nitrogen" ;
+    rdfs:comment "Sum of organic and inorganic nitrogen species" ;
+    :hasUnit unit:MilliGM-PER-L .
+
+:TotalPhosphorus a sosa:ObservableProperty , ssn:Property ;
+    rdfs:label "Total Phosphorus" ;
+    rdfs:comment "Total phosphorus concentration" ;
+    :hasUnit unit:MilliGM-PER-L .
+
+:pH a sosa:ObservableProperty , ssn:Property ;
+    rdfs:label "pH" ;
+    rdfs:comment "Measure of acidity/alkalinity" ;
+    :hasUnit :pH_unit .
+
+:DissolvedOxygen a sosa:ObservableProperty , ssn:Property ;
+    rdfs:label "Dissolved Oxygen" ;
+    rdfs:comment "DO concentration" ;
+    :hasUnit unit:MilliGM-PER-L .
+
+:EColi a sosa:ObservableProperty , ssn:Property ;
+    rdfs:label "E. coli concentration" ;
+    rdfs:comment "Indicator organism for fecal contamination" ;
+    :hasUnit :CFU_per_100mL .
+
+:Temperature a sosa:ObservableProperty , ssn:Property ;
+    rdfs:label "Water Temperature" ;
+    :hasUnit unit:DEG_C .
+
+# ==============================================================================
+# Sensors and Platforms
+# ==============================================================================
+
+:MultiParameterProbe1 a sosa:Sensor , ssn:System ;
+    rdfs:label "Multi-parameter Water Quality Probe MP-1" ;
+    sosa:observes :pH, :DissolvedOxygen, :Temperature ;
+    sosa:isHostedBy :MonitoringStation1 .
+
+:LabAnalyzer_BOD a sosa:Sensor ;
+    rdfs:label "Laboratory BOD Analyzer" ;
+    sosa:observes :BOD5 ;
+    sosa:isHostedBy :WaterQualityLab1 .
+
+:LabAnalyzer_Nutrients a sosa:Sensor ;
+    rdfs:label "Laboratory Nutrient Analyzer" ;
+    sosa:observes :TotalNitrogen, :TotalPhosphorus ;
+    sosa:isHostedBy :WaterQualityLab1 .
+
+:LabAnalyzer_Microbiology a sosa:Sensor ;
+    rdfs:label "Laboratory Microbiology Testing Equipment" ;
+    sosa:observes :EColi ;
+    sosa:isHostedBy :WaterQualityLab1 .
+
+:MonitoringStation1 a sosa:Platform ;
+    rdfs:label "Effluent Monitoring Station at WWTP-1" ;
+    sosa:hosts :MultiParameterProbe1 ;
+    rdfs:comment "Continuous monitoring station at plant effluent" .
+
+:WaterQualityLab1 a sosa:Platform ;
+    rdfs:label "Central Water Quality Laboratory" ;
+    sosa:hosts :LabAnalyzer_BOD, :LabAnalyzer_Nutrients, :LabAnalyzer_Microbiology ;
+    rdfs:comment "Accredited laboratory for water quality analysis" .
+
+# ==============================================================================
+# Procedures
+# ==============================================================================
+
+:StandardMethods_BOD a sosa:Procedure ;
+    rdfs:label "Standard Methods 5210B - BOD5 Test" ;
+    rdfs:comment "5-day BOD test following Standard Methods for Examination of Water and Wastewater" ;
+    :methodology "Standard Methods 5210B" ;
+    :incubationTime "P5D"^^xsd:duration ;
+    :incubationTemperature "20"^^xsd:decimal .
+
+:StandardMethods_TN a sosa:Procedure ;
+    rdfs:label "Standard Methods 4500-N - Total Nitrogen" ;
+    :methodology "Standard Methods 4500-N" .
+
+:StandardMethods_TP a sosa:Procedure ;
+    rdfs:label "Standard Methods 4500-P - Total Phosphorus" ;
+    :methodology "Standard Methods 4500-P" .
+
+:StandardMethods_EColi a sosa:Procedure ;
+    rdfs:label "Standard Methods 9223B - E. coli enumeration" ;
+    :methodology "Standard Methods 9223B" ;
+    rdfs:comment "Enzyme substrate coliform test" .
+
+:ContinuousMonitoring_Probe a sosa:Procedure ;
+    rdfs:label "Continuous in-situ probe monitoring" ;
+    :measurementInterval "PT15M"^^xsd:duration ;
+    rdfs:comment "Automated measurements every 15 minutes" .
+
+# ==============================================================================
+# Observations: WWTP-1 Effluent Quality Monitoring
+# ==============================================================================
+
+# Observation Set 1: 2025-01-15 Effluent Sample
+:obs_effluent_20250115_BOD a sosa:Observation ;
+    sosa:hasFeatureOfInterest :WastewaterEffluent1 ;
+    sosa:observedProperty :BOD5 ;
+    sosa:madeBySensor :LabAnalyzer_BOD ;
+    sosa:usedProcedure :StandardMethods_BOD ;
+    sosa:hasSimpleResult "8.2"^^xsd:decimal ;
+    :hasUnit unit:MilliGM-PER-L ;
+    sosa:resultTime "2025-01-20T14:30:00Z"^^xsd:dateTime ;
+    sosa:phenomenonTime "2025-01-15T09:00:00Z"^^xsd:dateTime ;
+    rdfs:comment "BOD5 result for effluent sample collected 2025-01-15" .
+
+:obs_effluent_20250115_TN a sosa:Observation ;
+    sosa:hasFeatureOfInterest :WastewaterEffluent1 ;
+    sosa:observedProperty :TotalNitrogen ;
+    sosa:madeBySensor :LabAnalyzer_Nutrients ;
+    sosa:usedProcedure :StandardMethods_TN ;
+    sosa:hasSimpleResult "12.5"^^xsd:decimal ;
+    :hasUnit unit:MilliGM-PER-L ;
+    sosa:resultTime "2025-01-15T16:45:00Z"^^xsd:dateTime ;
+    sosa:phenomenonTime "2025-01-15T09:00:00Z"^^xsd:dateTime .
+
+:obs_effluent_20250115_TP a sosa:Observation ;
+    sosa:hasFeatureOfInterest :WastewaterEffluent1 ;
+    sosa:observedProperty :TotalPhosphorus ;
+    sosa:madeBySensor :LabAnalyzer_Nutrients ;
+    sosa:usedProcedure :StandardMethods_TP ;
+    sosa:hasSimpleResult "1.8"^^xsd:decimal ;
+    :hasUnit unit:MilliGM-PER-L ;
+    sosa:resultTime "2025-01-15T16:45:00Z"^^xsd:dateTime ;
+    sosa:phenomenonTime "2025-01-15T09:00:00Z"^^xsd:dateTime .
+
+:obs_effluent_20250115_EColi a sosa:Observation ;
+    sosa:hasFeatureOfInterest :WastewaterEffluent1 ;
+    sosa:observedProperty :EColi ;
+    sosa:madeBySensor :LabAnalyzer_Microbiology ;
+    sosa:usedProcedure :StandardMethods_EColi ;
+    sosa:hasSimpleResult "150"^^xsd:integer ;
+    :hasUnit :CFU_per_100mL ;
+    sosa:resultTime "2025-01-16T10:00:00Z"^^xsd:dateTime ;
+    sosa:phenomenonTime "2025-01-15T09:00:00Z"^^xsd:dateTime .
+
+# Continuous monitoring observations
+:obs_effluent_20250115_0900_pH a sosa:Observation ;
+    sosa:hasFeatureOfInterest :WastewaterEffluent1 ;
+    sosa:observedProperty :pH ;
+    sosa:madeBySensor :MultiParameterProbe1 ;
+    sosa:usedProcedure :ContinuousMonitoring_Probe ;
+    sosa:hasSimpleResult "7.2"^^xsd:decimal ;
+    sosa:resultTime "2025-01-15T09:00:00Z"^^xsd:dateTime ;
+    sosa:phenomenonTime "2025-01-15T09:00:00Z"^^xsd:dateTime .
+
+:obs_effluent_20250115_0900_DO a sosa:Observation ;
+    sosa:hasFeatureOfInterest :WastewaterEffluent1 ;
+    sosa:observedProperty :DissolvedOxygen ;
+    sosa:madeBySensor :MultiParameterProbe1 ;
+    sosa:usedProcedure :ContinuousMonitoring_Probe ;
+    sosa:hasSimpleResult "6.8"^^xsd:decimal ;
+    :hasUnit unit:MilliGM-PER-L ;
+    sosa:resultTime "2025-01-15T09:00:00Z"^^xsd:dateTime ;
+    sosa:phenomenonTime "2025-01-15T09:00:00Z"^^xsd:dateTime .
+
+:obs_effluent_20250115_0900_Temp a sosa:Observation ;
+    sosa:hasFeatureOfInterest :WastewaterEffluent1 ;
+    sosa:observedProperty :Temperature ;
+    sosa:madeBySensor :MultiParameterProbe1 ;
+    sosa:usedProcedure :ContinuousMonitoring_Probe ;
+    sosa:hasSimpleResult "18.5"^^xsd:decimal ;
+    :hasUnit unit:DEG_C ;
+    sosa:resultTime "2025-01-15T09:00:00Z"^^xsd:dateTime ;
+    sosa:phenomenonTime "2025-01-15T09:00:00Z"^^xsd:dateTime .
+
+# ==============================================================================
+# Observations: Greywater Source
+# ==============================================================================
+
+:obs_greywater_20250115_BOD a sosa:Observation ;
+    sosa:hasFeatureOfInterest :GreywaterSource1 ;
+    sosa:observedProperty :BOD5 ;
+    sosa:madeBySensor :LabAnalyzer_BOD ;
+    sosa:usedProcedure :StandardMethods_BOD ;
+    sosa:hasSimpleResult "180"^^xsd:decimal ;
+    :hasUnit unit:MilliGM-PER-L ;
+    sosa:resultTime "2025-01-20T15:00:00Z"^^xsd:dateTime ;
+    sosa:phenomenonTime "2025-01-15T10:00:00Z"^^xsd:dateTime ;
+    rdfs:comment "Typical greywater has moderate BOD" .
+
+:obs_greywater_20250115_TSS a sosa:Observation ;
+    sosa:hasFeatureOfInterest :GreywaterSource1 ;
+    sosa:observedProperty :TSS ;
+    sosa:madeBySensor :LabAnalyzer_BOD ;
+    sosa:hasSimpleResult "95"^^xsd:decimal ;
+    :hasUnit unit:MilliGM-PER-L ;
+    sosa:resultTime "2025-01-15T17:00:00Z"^^xsd:dateTime ;
+    sosa:phenomenonTime "2025-01-15T10:00:00Z"^^xsd:dateTime .
+
+:obs_greywater_20250115_EColi a sosa:Observation ;
+    sosa:hasFeatureOfInterest :GreywaterSource1 ;
+    sosa:observedProperty :EColi ;
+    sosa:madeBySensor :LabAnalyzer_Microbiology ;
+    sosa:usedProcedure :StandardMethods_EColi ;
+    sosa:hasSimpleResult "5000"^^xsd:integer ;
+    :hasUnit :CFU_per_100mL ;
+    sosa:resultTime "2025-01-16T11:00:00Z"^^xsd:dateTime ;
+    sosa:phenomenonTime "2025-01-15T10:00:00Z"^^xsd:dateTime ;
+    rdfs:comment "Greywater typically has low-moderate E. coli compared to blackwater" .
+
+# ==============================================================================
+# Observations: River Sample
+# ==============================================================================
+
+:obs_river_20250115_DO a sosa:Observation ;
+    sosa:hasFeatureOfInterest :RiverSample1 ;
+    sosa:observedProperty :DissolvedOxygen ;
+    sosa:madeBySensor :MultiParameterProbe1 ;
+    sosa:usedProcedure :ContinuousMonitoring_Probe ;
+    sosa:hasSimpleResult "8.5"^^xsd:decimal ;
+    :hasUnit unit:MilliGM-PER-L ;
+    sosa:resultTime "2025-01-15T11:00:00Z"^^xsd:dateTime ;
+    sosa:phenomenonTime "2025-01-15T11:00:00Z"^^xsd:dateTime ;
+    rdfs:comment "Healthy river DO level" .
+
+:obs_river_20250115_pH a sosa:Observation ;
+    sosa:hasFeatureOfInterest :RiverSample1 ;
+    sosa:observedProperty :pH ;
+    sosa:madeBySensor :MultiParameterProbe1 ;
+    sosa:usedProcedure :ContinuousMonitoring_Probe ;
+    sosa:hasSimpleResult "7.8"^^xsd:decimal ;
+    sosa:resultTime "2025-01-15T11:00:00Z"^^xsd:dateTime ;
+    sosa:phenomenonTime "2025-01-15T11:00:00Z"^^xsd:dateTime .

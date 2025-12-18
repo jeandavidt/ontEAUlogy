@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+   xmlns="http://example.org/waterFRAME/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+   xmlns:sosa="http://www.w3.org/ns/sosa/"
+>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/LabAnalyzer_Microbiology">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Sensor"/>
+    <rdfs:label>Laboratory Microbiology Testing Equipment</rdfs:label>
+    <sosa:observes rdf:resource="http://example.org/waterFRAME/EColi"/>
+    <sosa:isHostedBy rdf:resource="http://example.org/waterFRAME/WaterQualityLab1"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/StandardMethods_TN">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Procedure"/>
+    <rdfs:label>Standard Methods 4500-N - Total Nitrogen</rdfs:label>
+    <methodology>Standard Methods 4500-N</methodology>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/obs_river_20250115_pH">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Observation"/>
+    <sosa:hasFeatureOfInterest rdf:resource="http://example.org/waterFRAME/RiverSample1"/>
+    <sosa:observedProperty rdf:resource="http://example.org/waterFRAME/pH"/>
+    <sosa:madeBySensor rdf:resource="http://example.org/waterFRAME/MultiParameterProbe1"/>
+    <sosa:usedProcedure rdf:resource="http://example.org/waterFRAME/ContinuousMonitoring_Probe"/>
+    <sosa:hasSimpleResult rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">7.8</sosa:hasSimpleResult>
+    <sosa:resultTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T11:00:00+00:00</sosa:resultTime>
+    <sosa:phenomenonTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T11:00:00+00:00</sosa:phenomenonTime>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/WastewaterInfluent1">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/FeatureOfInterest"/>
+    <rdfs:label>Wastewater Treatment Plant 1 - Influent</rdfs:label>
+    <rdfs:comment>Influent water entering WWTP-1</rdfs:comment>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/COD">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/ObservableProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/ssn/Property"/>
+    <rdfs:label>Chemical Oxygen Demand</rdfs:label>
+    <rdfs:comment>COD - total oxygen demand</rdfs:comment>
+    <hasUnit rdf:resource="http://qudt.org/vocab/unit/MilliGM-PER-L"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/RiverR1">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/FeatureOfInterest"/>
+    <rdfs:label>River R1</rdfs:label>
+    <rdfs:comment>Receiving water body</rdfs:comment>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/WaterQualityLab1">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Platform"/>
+    <rdfs:label>Central Water Quality Laboratory</rdfs:label>
+    <sosa:hosts rdf:resource="http://example.org/waterFRAME/LabAnalyzer_BOD"/>
+    <sosa:hosts rdf:resource="http://example.org/waterFRAME/LabAnalyzer_Nutrients"/>
+    <sosa:hosts rdf:resource="http://example.org/waterFRAME/LabAnalyzer_Microbiology"/>
+    <rdfs:comment>Accredited laboratory for water quality analysis</rdfs:comment>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/GreywaterSource1">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/FeatureOfInterest"/>
+    <rdfs:label>Residential Greywater Collection Point 1</rdfs:label>
+    <rdfs:comment>Greywater from residential building complex</rdfs:comment>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/obs_effluent_20250115_0900_Temp">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Observation"/>
+    <sosa:hasFeatureOfInterest rdf:resource="http://example.org/waterFRAME/WastewaterEffluent1"/>
+    <sosa:observedProperty rdf:resource="http://example.org/waterFRAME/Temperature"/>
+    <sosa:madeBySensor rdf:resource="http://example.org/waterFRAME/MultiParameterProbe1"/>
+    <sosa:usedProcedure rdf:resource="http://example.org/waterFRAME/ContinuousMonitoring_Probe"/>
+    <sosa:hasSimpleResult rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">18.5</sosa:hasSimpleResult>
+    <hasUnit rdf:resource="http://qudt.org/vocab/unit/DEG_C"/>
+    <sosa:resultTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T09:00:00+00:00</sosa:resultTime>
+    <sosa:phenomenonTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T09:00:00+00:00</sosa:phenomenonTime>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/TotalPhosphorus">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/ObservableProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/ssn/Property"/>
+    <rdfs:label>Total Phosphorus</rdfs:label>
+    <rdfs:comment>Total phosphorus concentration</rdfs:comment>
+    <hasUnit rdf:resource="http://qudt.org/vocab/unit/MilliGM-PER-L"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/obs_greywater_20250115_BOD">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Observation"/>
+    <sosa:hasFeatureOfInterest rdf:resource="http://example.org/waterFRAME/GreywaterSource1"/>
+    <sosa:observedProperty rdf:resource="http://example.org/waterFRAME/BOD5"/>
+    <sosa:madeBySensor rdf:resource="http://example.org/waterFRAME/LabAnalyzer_BOD"/>
+    <sosa:usedProcedure rdf:resource="http://example.org/waterFRAME/StandardMethods_BOD"/>
+    <sosa:hasSimpleResult rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">180</sosa:hasSimpleResult>
+    <hasUnit rdf:resource="http://qudt.org/vocab/unit/MilliGM-PER-L"/>
+    <sosa:resultTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-20T15:00:00+00:00</sosa:resultTime>
+    <sosa:phenomenonTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T10:00:00+00:00</sosa:phenomenonTime>
+    <rdfs:comment>Typical greywater has moderate BOD</rdfs:comment>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/obs_river_20250115_DO">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Observation"/>
+    <sosa:hasFeatureOfInterest rdf:resource="http://example.org/waterFRAME/RiverSample1"/>
+    <sosa:observedProperty rdf:resource="http://example.org/waterFRAME/DissolvedOxygen"/>
+    <sosa:madeBySensor rdf:resource="http://example.org/waterFRAME/MultiParameterProbe1"/>
+    <sosa:usedProcedure rdf:resource="http://example.org/waterFRAME/ContinuousMonitoring_Probe"/>
+    <sosa:hasSimpleResult rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">8.5</sosa:hasSimpleResult>
+    <hasUnit rdf:resource="http://qudt.org/vocab/unit/MilliGM-PER-L"/>
+    <sosa:resultTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T11:00:00+00:00</sosa:resultTime>
+    <sosa:phenomenonTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T11:00:00+00:00</sosa:phenomenonTime>
+    <rdfs:comment>Healthy river DO level</rdfs:comment>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/MultiParameterProbe1">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Sensor"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/ssn/System"/>
+    <rdfs:label>Multi-parameter Water Quality Probe MP-1</rdfs:label>
+    <sosa:observes rdf:resource="http://example.org/waterFRAME/pH"/>
+    <sosa:observes rdf:resource="http://example.org/waterFRAME/DissolvedOxygen"/>
+    <sosa:observes rdf:resource="http://example.org/waterFRAME/Temperature"/>
+    <sosa:isHostedBy rdf:resource="http://example.org/waterFRAME/MonitoringStation1"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/DissolvedOxygen">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/ObservableProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/ssn/Property"/>
+    <rdfs:label>Dissolved Oxygen</rdfs:label>
+    <rdfs:comment>DO concentration</rdfs:comment>
+    <hasUnit rdf:resource="http://qudt.org/vocab/unit/MilliGM-PER-L"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/obs_greywater_20250115_TSS">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Observation"/>
+    <sosa:hasFeatureOfInterest rdf:resource="http://example.org/waterFRAME/GreywaterSource1"/>
+    <sosa:observedProperty rdf:resource="http://example.org/waterFRAME/TSS"/>
+    <sosa:madeBySensor rdf:resource="http://example.org/waterFRAME/LabAnalyzer_BOD"/>
+    <sosa:hasSimpleResult rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">95</sosa:hasSimpleResult>
+    <hasUnit rdf:resource="http://qudt.org/vocab/unit/MilliGM-PER-L"/>
+    <sosa:resultTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T17:00:00+00:00</sosa:resultTime>
+    <sosa:phenomenonTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T10:00:00+00:00</sosa:phenomenonTime>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/obs_effluent_20250115_0900_pH">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Observation"/>
+    <sosa:hasFeatureOfInterest rdf:resource="http://example.org/waterFRAME/WastewaterEffluent1"/>
+    <sosa:observedProperty rdf:resource="http://example.org/waterFRAME/pH"/>
+    <sosa:madeBySensor rdf:resource="http://example.org/waterFRAME/MultiParameterProbe1"/>
+    <sosa:usedProcedure rdf:resource="http://example.org/waterFRAME/ContinuousMonitoring_Probe"/>
+    <sosa:hasSimpleResult rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">7.2</sosa:hasSimpleResult>
+    <sosa:resultTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T09:00:00+00:00</sosa:resultTime>
+    <sosa:phenomenonTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T09:00:00+00:00</sosa:phenomenonTime>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/obs_effluent_20250115_BOD">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Observation"/>
+    <sosa:hasFeatureOfInterest rdf:resource="http://example.org/waterFRAME/WastewaterEffluent1"/>
+    <sosa:observedProperty rdf:resource="http://example.org/waterFRAME/BOD5"/>
+    <sosa:madeBySensor rdf:resource="http://example.org/waterFRAME/LabAnalyzer_BOD"/>
+    <sosa:usedProcedure rdf:resource="http://example.org/waterFRAME/StandardMethods_BOD"/>
+    <sosa:hasSimpleResult rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">8.2</sosa:hasSimpleResult>
+    <hasUnit rdf:resource="http://qudt.org/vocab/unit/MilliGM-PER-L"/>
+    <sosa:resultTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-20T14:30:00+00:00</sosa:resultTime>
+    <sosa:phenomenonTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T09:00:00+00:00</sosa:phenomenonTime>
+    <rdfs:comment>BOD5 result for effluent sample collected 2025-01-15</rdfs:comment>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/BOD5">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/ObservableProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/ssn/Property"/>
+    <rdfs:label>5-day Biochemical Oxygen Demand</rdfs:label>
+    <rdfs:comment>BOD5 - oxygen demand over 5 days at 20°C</rdfs:comment>
+    <hasUnit rdf:resource="http://qudt.org/vocab/unit/MilliGM-PER-L"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/obs_effluent_20250115_TN">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Observation"/>
+    <sosa:hasFeatureOfInterest rdf:resource="http://example.org/waterFRAME/WastewaterEffluent1"/>
+    <sosa:observedProperty rdf:resource="http://example.org/waterFRAME/TotalNitrogen"/>
+    <sosa:madeBySensor rdf:resource="http://example.org/waterFRAME/LabAnalyzer_Nutrients"/>
+    <sosa:usedProcedure rdf:resource="http://example.org/waterFRAME/StandardMethods_TN"/>
+    <sosa:hasSimpleResult rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">12.5</sosa:hasSimpleResult>
+    <hasUnit rdf:resource="http://qudt.org/vocab/unit/MilliGM-PER-L"/>
+    <sosa:resultTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T16:45:00+00:00</sosa:resultTime>
+    <sosa:phenomenonTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T09:00:00+00:00</sosa:phenomenonTime>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/LabAnalyzer_Nutrients">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Sensor"/>
+    <rdfs:label>Laboratory Nutrient Analyzer</rdfs:label>
+    <sosa:observes rdf:resource="http://example.org/waterFRAME/TotalNitrogen"/>
+    <sosa:observes rdf:resource="http://example.org/waterFRAME/TotalPhosphorus"/>
+    <sosa:isHostedBy rdf:resource="http://example.org/waterFRAME/WaterQualityLab1"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/StandardMethods_EColi">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Procedure"/>
+    <rdfs:label>Standard Methods 9223B - E. coli enumeration</rdfs:label>
+    <methodology>Standard Methods 9223B</methodology>
+    <rdfs:comment>Enzyme substrate coliform test</rdfs:comment>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/obs_effluent_20250115_EColi">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Observation"/>
+    <sosa:hasFeatureOfInterest rdf:resource="http://example.org/waterFRAME/WastewaterEffluent1"/>
+    <sosa:observedProperty rdf:resource="http://example.org/waterFRAME/EColi"/>
+    <sosa:madeBySensor rdf:resource="http://example.org/waterFRAME/LabAnalyzer_Microbiology"/>
+    <sosa:usedProcedure rdf:resource="http://example.org/waterFRAME/StandardMethods_EColi"/>
+    <sosa:hasSimpleResult rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">150</sosa:hasSimpleResult>
+    <hasUnit rdf:resource="http://example.org/waterFRAME/CFU_per_100mL"/>
+    <sosa:resultTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-16T10:00:00+00:00</sosa:resultTime>
+    <sosa:phenomenonTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T09:00:00+00:00</sosa:phenomenonTime>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/obs_greywater_20250115_EColi">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Observation"/>
+    <sosa:hasFeatureOfInterest rdf:resource="http://example.org/waterFRAME/GreywaterSource1"/>
+    <sosa:observedProperty rdf:resource="http://example.org/waterFRAME/EColi"/>
+    <sosa:madeBySensor rdf:resource="http://example.org/waterFRAME/LabAnalyzer_Microbiology"/>
+    <sosa:usedProcedure rdf:resource="http://example.org/waterFRAME/StandardMethods_EColi"/>
+    <sosa:hasSimpleResult rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">5000</sosa:hasSimpleResult>
+    <hasUnit rdf:resource="http://example.org/waterFRAME/CFU_per_100mL"/>
+    <sosa:resultTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-16T11:00:00+00:00</sosa:resultTime>
+    <sosa:phenomenonTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T10:00:00+00:00</sosa:phenomenonTime>
+    <rdfs:comment>Greywater typically has low-moderate E. coli compared to blackwater</rdfs:comment>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/WastewaterEffluent1">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/FeatureOfInterest"/>
+    <rdfs:label>Wastewater Treatment Plant 1 - Effluent</rdfs:label>
+    <rdfs:comment>Treated effluent from WWTP-1</rdfs:comment>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/LabAnalyzer_BOD">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Sensor"/>
+    <rdfs:label>Laboratory BOD Analyzer</rdfs:label>
+    <sosa:observes rdf:resource="http://example.org/waterFRAME/BOD5"/>
+    <sosa:isHostedBy rdf:resource="http://example.org/waterFRAME/WaterQualityLab1"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/obs_effluent_20250115_TP">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Observation"/>
+    <sosa:hasFeatureOfInterest rdf:resource="http://example.org/waterFRAME/WastewaterEffluent1"/>
+    <sosa:observedProperty rdf:resource="http://example.org/waterFRAME/TotalPhosphorus"/>
+    <sosa:madeBySensor rdf:resource="http://example.org/waterFRAME/LabAnalyzer_Nutrients"/>
+    <sosa:usedProcedure rdf:resource="http://example.org/waterFRAME/StandardMethods_TP"/>
+    <sosa:hasSimpleResult rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1.8</sosa:hasSimpleResult>
+    <hasUnit rdf:resource="http://qudt.org/vocab/unit/MilliGM-PER-L"/>
+    <sosa:resultTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T16:45:00+00:00</sosa:resultTime>
+    <sosa:phenomenonTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T09:00:00+00:00</sosa:phenomenonTime>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/ContinuousMonitoring_Probe">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Procedure"/>
+    <rdfs:label>Continuous in-situ probe monitoring</rdfs:label>
+    <measurementInterval rdf:datatype="http://www.w3.org/2001/XMLSchema#duration">PT15M</measurementInterval>
+    <rdfs:comment>Automated measurements every 15 minutes</rdfs:comment>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/Temperature">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/ObservableProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/ssn/Property"/>
+    <rdfs:label>Water Temperature</rdfs:label>
+    <hasUnit rdf:resource="http://qudt.org/vocab/unit/DEG_C"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/pH">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/ObservableProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/ssn/Property"/>
+    <rdfs:label>pH</rdfs:label>
+    <rdfs:comment>Measure of acidity/alkalinity</rdfs:comment>
+    <hasUnit rdf:resource="http://example.org/waterFRAME/pH_unit"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/obs_effluent_20250115_0900_DO">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Observation"/>
+    <sosa:hasFeatureOfInterest rdf:resource="http://example.org/waterFRAME/WastewaterEffluent1"/>
+    <sosa:observedProperty rdf:resource="http://example.org/waterFRAME/DissolvedOxygen"/>
+    <sosa:madeBySensor rdf:resource="http://example.org/waterFRAME/MultiParameterProbe1"/>
+    <sosa:usedProcedure rdf:resource="http://example.org/waterFRAME/ContinuousMonitoring_Probe"/>
+    <sosa:hasSimpleResult rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">6.8</sosa:hasSimpleResult>
+    <hasUnit rdf:resource="http://qudt.org/vocab/unit/MilliGM-PER-L"/>
+    <sosa:resultTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T09:00:00+00:00</sosa:resultTime>
+    <sosa:phenomenonTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-01-15T09:00:00+00:00</sosa:phenomenonTime>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/StandardMethods_BOD">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Procedure"/>
+    <rdfs:label>Standard Methods 5210B - BOD5 Test</rdfs:label>
+    <rdfs:comment>5-day BOD test following Standard Methods for Examination of Water and Wastewater</rdfs:comment>
+    <methodology>Standard Methods 5210B</methodology>
+    <incubationTime rdf:datatype="http://www.w3.org/2001/XMLSchema#duration">P5D</incubationTime>
+    <incubationTemperature rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">20</incubationTemperature>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/TotalNitrogen">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/ObservableProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/ssn/Property"/>
+    <rdfs:label>Total Nitrogen</rdfs:label>
+    <rdfs:comment>Sum of organic and inorganic nitrogen species</rdfs:comment>
+    <hasUnit rdf:resource="http://qudt.org/vocab/unit/MilliGM-PER-L"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/StandardMethods_TP">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Procedure"/>
+    <rdfs:label>Standard Methods 4500-P - Total Phosphorus</rdfs:label>
+    <methodology>Standard Methods 4500-P</methodology>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/TSS">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/ObservableProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/ssn/Property"/>
+    <rdfs:label>Total Suspended Solids</rdfs:label>
+    <rdfs:comment>TSS concentration</rdfs:comment>
+    <hasUnit rdf:resource="http://qudt.org/vocab/unit/MilliGM-PER-L"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/EColi">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/ObservableProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/ssn/Property"/>
+    <rdfs:label>E. coli concentration</rdfs:label>
+    <rdfs:comment>Indicator organism for fecal contamination</rdfs:comment>
+    <hasUnit rdf:resource="http://example.org/waterFRAME/CFU_per_100mL"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/MonitoringStation1">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Platform"/>
+    <rdfs:label>Effluent Monitoring Station at WWTP-1</rdfs:label>
+    <sosa:hosts rdf:resource="http://example.org/waterFRAME/MultiParameterProbe1"/>
+    <rdfs:comment>Continuous monitoring station at plant effluent</rdfs:comment>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/waterFRAME/RiverSample1">
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/Sample"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/sosa/FeatureOfInterest"/>
+    <rdfs:label>River Sample from Station R1</rdfs:label>
+    <sosa:isSampleOf rdf:resource="http://example.org/waterFRAME/RiverR1"/>
+    <rdfs:comment>Water sample collected from river monitoring station R1</rdfs:comment>
+  </rdf:Description>
+</rdf:RDF>
