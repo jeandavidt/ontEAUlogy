@@ -1,0 +1,193 @@
+@prefix housecase1: <https://ugentbiomath.github.io/ontology/index.ttl#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# ---------- Water Usage Points ----------
+# Bathing fixtures
+housecase1:Bath_and_Shower a wf:BathingFixture ;
+    rdfs:label "Bath and Shower" ;
+    rdfs:comment "Combined bathtub and shower fixture" .
+
+housecase1:Bathroom_sink a wf:CleaningFixture ;
+    rdfs:label "Bathroom Sink" ;
+    rdfs:comment "Sink for personal hygiene and cleaning" .
+
+# Appliances
+housecase1:Washing_machine_and_Handwash_clothes a wf:Appliance ;
+    rdfs:label "Washing Machine and Handwash Clothes" ;
+    rdfs:comment "Clothes washing appliance and handwash area" .
+
+housecase1:Dishwasher a wf:Appliance ;
+    rdfs:label "Dishwasher" ;
+    rdfs:comment "Automatic dishwashing appliance" .
+
+housecase1:Kitchen_sink a wf:CleaningFixture ;
+    rdfs:label "Kitchen Sink" ;
+    rdfs:comment "Sink for food preparation and cleaning" .
+
+# Sanitary fixtures
+housecase1:Toilet a wf:Toilet ;
+    rdfs:label "Toilet" ;
+    rdfs:comment "Water closet for human waste disposal" .
+
+# Cleaning/other usage
+housecase1:Cleaning a wf:CleaningFixture ;
+    rdfs:label "General Cleaning" ;
+    rdfs:comment "General cleaning water usage point" .
+
+housecase1:Gardening_reuse a wf:WaterUsagePoint ;
+    rdfs:label "Gardening Reuse Point" ;
+    rdfs:comment "Water application point for garden irrigation" .
+
+# ---------- Water Sources ----------
+housecase1:Rainwater a wf:RainwaterCollectionSystem ;
+    rdfs:label "Rainwater Collection System" ;
+    rdfs:comment "Roof and gutter system for rainwater collection" .
+
+# ---------- Storage Tanks ----------
+housecase1:Rainwater_storage a wf:RainwaterStorageTank ;
+    rdfs:label "Rainwater Storage Tank" ;
+    rdfs:comment "Tank for storing collected rainwater" .
+
+housecase1:Potable_water_storage a wf:PotableWaterStorageTank ;
+    rdfs:label "Potable Water Storage Tank" ;
+    rdfs:comment "Tank for storing drinking water" .
+
+housecase1:Purified_greywater_storage a wf:PurifiedGreywaterStorageTank ;
+    rdfs:label "Purified Greywater Storage Tank" ;
+    rdfs:comment "Tank for storing treated greywater for reuse" .
+
+housecase1:Blackwater_storage a wf:BlackwaterStorageTank ;
+    rdfs:label "Blackwater Storage Tank" ;
+    rdfs:comment "Tank for storing blackwater" .
+
+# ---------- Treatment Units ----------
+housecase1:Membrane_bioreactor a wf:MembraneBioreactorUnit ;
+    rdfs:label "Membrane Bioreactor" ;
+    rdfs:comment "MBR system for greywater treatment" .
+
+housecase1:Reverse_osmosis a wf:ReverseOsmosisUnit ;
+    rdfs:label "Reverse Osmosis Unit" ;
+    rdfs:comment "RO system for advanced water purification" .
+
+housecase1:Infiltration a wf:InfiltrationUnit ;
+    rdfs:label "Infiltration Unit" ;
+    rdfs:comment "Subsurface infiltration system for water disposal" .
+
+# ---------- Household ----------
+housecase1:house a wf:Household ;
+    rdfs:label "Household" ;
+    rdfs:comment "The residential building containing the water system" ;
+    dcterms:source housecase1:Household_Location_DataFile ;
+    wf:hasUsagePoint 
+        housecase1:Bath_and_Shower ,
+        housecase1:Bathroom_sink ,
+        housecase1:Washing_machine_and_Handwash_clothes ,
+        housecase1:Dishwasher ,
+        housecase1:Kitchen_sink ,
+        housecase1:Toilet ,
+        housecase1:Cleaning .
+
+# ---------- Flow Connections ----------
+# Greywater flows to MBR
+housecase1:Bath_and_Shower wf:flowsTo housecase1:Membrane_bioreactor ;
+    wf:hasFlowType wf:GreywaterFlow ;
+    wf:hasFlowDirection wf:UnidirectionalFlow .
+
+housecase1:Bathroom_sink wf:flowsTo housecase1:Membrane_bioreactor ;
+    wf:hasFlowType wf:GreywaterFlow ;
+    wf:hasFlowDirection wf:UnidirectionalFlow .
+
+housecase1:Washing_machine_and_Handwash_clothes wf:flowsTo housecase1:Membrane_bioreactor ;
+    wf:hasFlowType wf:GreywaterFlow ;
+    wf:hasFlowDirection wf:UnidirectionalFlow .
+
+housecase1:Dishwasher wf:flowsTo housecase1:Membrane_bioreactor ;
+    wf:hasFlowType wf:GreywaterFlow ;
+    wf:hasFlowDirection wf:UnidirectionalFlow .
+
+housecase1:Kitchen_sink wf:flowsTo housecase1:Membrane_bioreactor ;
+    wf:hasFlowType wf:GreywaterFlow ;
+    wf:hasFlowDirection wf:UnidirectionalFlow .
+
+housecase1:Cleaning wf:flowsTo housecase1:Membrane_bioreactor ;
+    wf:hasFlowType wf:GreywaterFlow ;
+    wf:hasFlowDirection wf:UnidirectionalFlow .
+
+# Blackwater to storage
+housecase1:Toilet wf:flowsTo housecase1:Blackwater_storage ;
+    wf:hasFlowType wf:BlackwaterFlow ;
+    wf:hasFlowDirection wf:UnidirectionalFlow .
+
+# MBR outputs
+housecase1:Membrane_bioreactor wf:flowsTo housecase1:Purified_greywater_storage ;
+    wf:hasFlowType wf:ReclaimedWaterFlow ;
+    wf:hasFlowDirection wf:UnidirectionalFlow .
+
+# Blackwater to infiltration
+housecase1:Blackwater_storage wf:flowsTo housecase1:Infiltration ;
+    wf:hasFlowType wf:BlackwaterFlow ;
+    wf:hasFlowDirection wf:UnidirectionalFlow .
+
+# Purified greywater distribution (reuse)
+housecase1:Purified_greywater_storage wf:flowsTo housecase1:Bath_and_Shower ;
+    wf:hasFlowType wf:ReclaimedWaterFlow ;
+    wf:hasFlowDirection wf:ConditionalFlow .
+
+housecase1:Purified_greywater_storage wf:flowsTo housecase1:Bathroom_sink ;
+    wf:hasFlowType wf:ReclaimedWaterFlow ;
+    wf:hasFlowDirection wf:ConditionalFlow .
+
+housecase1:Purified_greywater_storage wf:flowsTo housecase1:Washing_machine_and_Handwash_clothes ;
+    wf:hasFlowType wf:ReclaimedWaterFlow ;
+    wf:hasFlowDirection wf:ConditionalFlow .
+
+housecase1:Purified_greywater_storage wf:flowsTo housecase1:Dishwasher ;
+    wf:hasFlowType wf:ReclaimedWaterFlow ;
+    wf:hasFlowDirection wf:ConditionalFlow .
+
+housecase1:Purified_greywater_storage wf:flowsTo housecase1:Toilet ;
+    wf:hasFlowType wf:ReclaimedWaterFlow ;
+    wf:hasFlowDirection wf:ConditionalFlow .
+
+# Purified greywater overflow to infiltration
+housecase1:Purified_greywater_storage wf:flowsTo housecase1:Infiltration ;
+    wf:hasFlowType wf:ReclaimedWaterFlow ;
+    wf:hasFlowDirection wf:OverflowFlow .
+
+# Rainwater distribution
+housecase1:Rainwater_storage wf:flowsTo housecase1:Reverse_osmosis ;
+    wf:hasFlowType wf:RainwaterFlow ;
+    wf:hasFlowDirection wf:UnidirectionalFlow .
+
+housecase1:Rainwater_storage wf:flowsTo housecase1:Gardening_reuse ;
+    wf:hasFlowType wf:RainwaterFlow ;
+    wf:hasFlowDirection wf:ConditionalFlow .
+
+housecase1:Rainwater_storage wf:flowsTo housecase1:Cleaning ;
+    wf:hasFlowType wf:RainwaterFlow ;
+    wf:hasFlowDirection wf:ConditionalFlow .
+
+housecase1:Rainwater_storage wf:flowsTo housecase1:Purified_greywater_storage ;
+    wf:hasFlowType wf:RainwaterFlow ;
+    wf:hasFlowDirection wf:ConditionalFlow .
+
+# RO outputs
+housecase1:Reverse_osmosis wf:flowsTo housecase1:Purified_greywater_storage ;
+    wf:hasFlowType wf:ReclaimedWaterFlow ;
+    wf:hasFlowDirection wf:UnidirectionalFlow .
+
+housecase1:Reverse_osmosis wf:flowsTo housecase1:Potable_water_storage ;
+    wf:hasFlowType wf:PotableWaterFlow ;
+    wf:hasFlowDirection wf:UnidirectionalFlow .
+
+# Potable water usage
+housecase1:Potable_water_storage wf:flowsTo housecase1:Kitchen_sink ;
+    wf:hasFlowType wf:PotableWaterFlow ;
+    wf:hasFlowDirection wf:ConditionalFlow .

@@ -1,0 +1,114 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+
+<https://ugentbiomath.github.io/waterframe/modules/core/material_entities>
+    a owl:Ontology ;
+    owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
+    dc:title "waterFRAME: Material Entities Module" ;
+    dc:creator "Jean-David Therrien" ;
+    rdfs:comment "Physical objects in water reuse systems" .
+
+# Root alignment - Water system components are material entities
+wf:WaterSystemComponent rdfs:subClassOf bfo:BFO_0000040 ;
+    rdfs:label "Water system component" ;
+    rdfs:comment "Any physical object that is part of a water system" .
+
+# Storage tanks
+wf:StorageTank rdfs:subClassOf wf:WaterSystemComponent ;
+    rdfs:label "Storage tank" ;
+    rdfs:comment "Vessel for storing water of various types" .
+
+wf:RainwaterStorageTank rdfs:subClassOf wf:StorageTank ;
+    rdfs:label "Rainwater storage tank" ;
+    rdfs:comment "Tank specifically for collecting and storing rainwater" .
+
+wf:PotableWaterStorageTank rdfs:subClassOf wf:StorageTank ;
+    rdfs:label "Potable water storage tank" ;
+    rdfs:comment "Tank for storing drinking water" .
+
+wf:PurifiedGreywaterStorageTank rdfs:subClassOf wf:StorageTank ;
+    rdfs:label "Purified greywater storage tank" ;
+    rdfs:comment "Tank for storing treated greywater for reuse" .
+
+wf:BlackwaterStorageTank rdfs:subClassOf wf:StorageTank ;
+    rdfs:label "Blackwater storage tank" ;
+    rdfs:comment "Tank for storing blackwater (toilet waste)" .
+
+# Treatment units (physical infrastructure)
+wf:TreatmentUnit rdfs:subClassOf wf:WaterSystemComponent ;
+    rdfs:label "Treatment unit" ;
+    rdfs:comment "Physical infrastructure for water treatment processes" .
+
+wf:MembraneBioreactorUnit rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Membrane bioreactor unit" ;
+    rdfs:comment "Physical MBR system for biological treatment and membrane filtration" .
+
+wf:ReverseOsmosisUnit rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Reverse osmosis unit" ;
+    rdfs:comment "Physical RO system for advanced water purification" .
+
+wf:InfiltrationUnit rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Infiltration unit" ;
+    rdfs:comment "Physical system for subsurface water infiltration" .
+
+# Water usage points (fixtures and appliances)
+wf:WaterUsagePoint rdfs:subClassOf wf:WaterSystemComponent ;
+    rdfs:label "Water usage point" ;
+    rdfs:comment "Physical fixture or appliance where water is used" .
+
+wf:BathingFixture rdfs:subClassOf wf:WaterUsagePoint ;
+    rdfs:label "Bathing fixture" ;
+    rdfs:comment "Fixtures for bathing and showering" .
+
+wf:CleaningFixture rdfs:subClassOf wf:WaterUsagePoint ;
+    rdfs:label "Cleaning fixture" ;
+    rdfs:comment "Fixtures for cleaning activities" .
+
+wf:Appliance rdfs:subClassOf wf:WaterUsagePoint ;
+    rdfs:label "Water-using appliance" ;
+    rdfs:comment "Household appliances that use water" .
+
+wf:Toilet rdfs:subClassOf wf:WaterUsagePoint ;
+    rdfs:label "Toilet" ;
+    rdfs:comment "Sanitary fixture for human waste disposal" .
+
+# Water sources (collection infrastructure)
+wf:WaterSource rdfs:subClassOf wf:WaterSystemComponent ;
+    rdfs:label "Water source" ;
+    rdfs:comment "Physical infrastructure for water collection" .
+
+wf:RainwaterCollectionSystem rdfs:subClassOf wf:WaterSource ;
+    rdfs:label "Rainwater collection system" ;
+    rdfs:comment "Infrastructure for collecting rainwater (roof, gutters, collection)" .
+
+# Household as containing structure
+wf:Household rdfs:subClassOf bfo:BFO_0000040 ;
+    rdfs:label "Household" ;
+    rdfs:comment "A dwelling or building containing water system components" .
+
+# Conveyance (implicit pipes made explicit)
+wf:Conveyance rdfs:subClassOf wf:WaterSystemComponent ;
+    rdfs:label "Conveyance system" ;
+    rdfs:comment "Physical infrastructure for water transport between components" .
+
+# ========== PORTS (Connection Points) ==========
+# Following OntoCAPE pattern: ports are physical interfaces for material flow
+
+wf:Port a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000040 ;
+    rdfs:label "Connection port" ;
+    rdfs:comment "Physical interface point on a water system component through which material flow occurs. Based on OntoCAPE terminal/port concept (Marquardt et al. 2010)." .
+
+wf:InputPort a owl:Class ;
+    rdfs:subClassOf wf:Port ;
+    rdfs:label "Input port" ;
+    rdfs:comment "Port through which material enters a component" .
+
+wf:OutputPort a owl:Class ;
+    rdfs:subClassOf wf:Port ;
+    rdfs:label "Output port" ;
+    rdfs:comment "Port through which material exits a component" .

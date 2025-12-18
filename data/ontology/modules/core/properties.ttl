@@ -1,0 +1,168 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+
+<https://ugentbiomath.github.io/waterframe/modules/core/properties>
+    a owl:Ontology ;
+    owl:imports <https://ugentbiomath.github.io/ontEAUlogy/modules/core/material_entities> ;
+    dc:title "ontEAUlogy: Properties Module" ;
+    dc:creator "Jean-David Therrien" ;
+    rdfs:comment "Properties that connect water system components and their ports. Uses port-based modeling following OntoCAPE pattern." .
+
+# ========== PORT STRUCTURAL PROPERTIES ==========
+# Components have input and output ports (following OntoCAPE)
+
+wf:hasInputPort a owl:ObjectProperty ;
+    rdfs:label "has input port" ;
+    rdfs:comment "Component has a physical interface for receiving material flow" ;
+    rdfs:domain wf:WaterSystemComponent ;
+    rdfs:range wf:InputPort .
+
+wf:hasOutputPort a owl:ObjectProperty ;
+    rdfs:label "has output port" ;
+    rdfs:comment "Component has a physical interface for discharging material flow" ;
+    rdfs:domain wf:WaterSystemComponent ;
+    rdfs:range wf:OutputPort .
+
+# Convenience property for querying all ports of a component
+wf:hasPort a owl:ObjectProperty ;
+    rdfs:label "has port" ;
+    rdfs:comment "Component has a connection port (input or output)" ;
+    rdfs:domain wf:WaterSystemComponent ;
+    rdfs:range wf:Port .
+
+# Define hasPort as superproperty of specific port properties
+wf:hasInputPort rdfs:subPropertyOf wf:hasPort .
+wf:hasOutputPort rdfs:subPropertyOf wf:hasPort .
+
+# ========== FLOW TOPOLOGY ==========
+# Ports connect to each other to form the network topology
+
+wf:flowsTo a owl:ObjectProperty ;
+    rdfs:label "flows to" ;
+    rdfs:comment "Direct water flow connection from output port to input port" ;
+    rdfs:domain wf:OutputPort ;
+    rdfs:range wf:InputPort ;
+    owl:inverseOf wf:receivesFlowFrom .
+
+wf:receivesFlowFrom a owl:ObjectProperty ;
+    rdfs:label "receives flow from" ;
+    rdfs:comment "Input port receives material from upstream output port" ;
+    rdfs:domain wf:InputPort ;
+    rdfs:range wf:OutputPort .
+
+# ========== COMPONENT-LEVEL CONVENIENCE PROPERTIES ==========
+# These are derived from port connections but useful for high-level queries
+
+wf:hasDownstreamComponent a owl:ObjectProperty ;
+    rdfs:label "has downstream component" ;
+    rdfs:comment "Component that receives flow from this component (via port connections)" ;
+    rdfs:domain wf:WaterSystemComponent ;
+    rdfs:range wf:WaterSystemComponent .
+
+wf:hasUpstreamComponent a owl:ObjectProperty ;
+    rdfs:label "has upstream component" ;
+    rdfs:comment "Component that provides flow to this component (via port connections)" ;
+    rdfs:domain wf:WaterSystemComponent ;
+    rdfs:range wf:WaterSystemComponent ;
+    owl:inverseOf wf:hasDownstreamComponent .
+
+# Property chain: if component A has output port that flows to input port of component B,
+# then A hasDownstreamComponent B
+# This requires reasoning, but makes queries simpler
+
+# ========== FLOW CHARACTERISTICS ==========
+
+# Flow type classification
+wf:WaterFlow a owl:Class ;
+    rdfs:label "Water flow" ;
+    rdfs:comment "Classification of water flow types in the system" .
+
+wf:GreywaterFlow a owl:Class ;
+    rdfs:subClassOf wf:WaterFlow ;
+    rdfs:label "Greywater flow" ;
+    rdfs:comment "Flow from non-toilet fixtures (showers, sinks, washing machines)" .
+
+wf:BlackwaterFlow a owl:Class ;
+    rdfs:subClassOf wf:WaterFlow ;
+    rdfs:label "Blackwater flow" ;
+    rdfs:comment "Flow from toilets and urinals" .
+
+wf:RainwaterFlow a owl:Class ;
+    rdfs:subClassOf wf:WaterFlow ;
+    rdfs:label "Rainwater flow" ;
+    rdfs:comment "Flow from rainwater collection systems" .
+
+wf:PotableWaterFlow a owl:Class ;
+    rdfs:subClassOf wf:WaterFlow ;
+    rdfs:label "Potable water flow" ;
+    rdfs:comment "Flow of drinking-quality water" .
+
+wf:ReclaimedWaterFlow a owl:Class ;
+    rdfs:subClassOf wf:WaterFlow ;
+    rdfs:label "Reclaimed water flow" ;
+    rdfs:comment "Flow of treated water for reuse" .
+
+# Property to classify flow type at ports
+wf:hasFlowType a owl:ObjectProperty ;
+    rdfs:label "has flow type" ;
+    rdfs:comment "Classifies the type of water flowing through a port" ;
+    rdfs:domain wf:Port ;
+    rdfs:range wf:WaterFlow .
+
+# ========== SPECIALIZED FLOW RELATIONSHIPS ==========
+
+# Primary vs backup flow paths
+wf:hasPrimaryFlow a owl:ObjectProperty ;
+    rdfs:label "has primary flow" ;
+    rdfs:comment "Main flow connection (as opposed to backup or overflow)" ;
+    rdfs:domain wf:OutputPort ;
+    rdfs:range wf:InputPort ;
+    rdfs:subPropertyOf wf:flowsTo .
+
+wf:hasBackupFlow a owl:ObjectProperty ;
+    rdfs:label "has backup flow" ;
+    rdfs:comment "Alternative flow path for overflow or emergency" ;
+    rdfs:domain wf:OutputPort ;
+    rdfs:range wf:InputPort ;
+    rdfs:subPropertyOf wf:flowsTo .
+
+wf:hasOverflowFlow a owl:ObjectProperty ;
+    rdfs:label "has overflow flow" ;
+    rdfs:comment "Flow path for excess water beyond capacity" ;
+    rdfs:domain wf:OutputPort ;
+    rdfs:range wf:InputPort ;
+    rdfs:subPropertyOf wf:flowsTo .
+
+# ========== SYSTEM RELATIONSHIPS ==========
+
+# Household containment
+wf:hasUsagePoint a owl:ObjectProperty ;
+    rdfs:label "has usage point" ;
+    rdfs:comment "Water usage points contained within or associated with a household" ;
+    rdfs:domain wf:Household ;
+    rdfs:range wf:WaterUsagePoint .
+
+wf:hasComponent a owl:ObjectProperty ;
+    rdfs:label "has component" ;
+    rdfs:comment "Water system component that is part of the household system" ;
+    rdfs:domain wf:Household ;
+    rdfs:range wf:WaterSystemComponent .
+
+# ========== MODEL INTEGRATION PROPERTIES ==========
+# These support linking ports to computational model inputs/outputs
+
+wf:correspondsToModelInput a owl:ObjectProperty ;
+    rdfs:label "corresponds to model input" ;
+    rdfs:comment "Port corresponds to an input variable in a computational model" ;
+    rdfs:domain wf:InputPort ;
+    rdfs:range owl:Thing .  # Range will be specified in information.ttl module
+
+wf:correspondsToModelOutput a owl:ObjectProperty ;
+    rdfs:label "corresponds to model output" ;
+    rdfs:comment "Port corresponds to an output variable in a computational model" ;
+    rdfs:domain wf:OutputPort ;
+    rdfs:range owl:Thing .  # Range will be specified in information.ttl module

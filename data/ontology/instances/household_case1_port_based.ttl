@@ -1,0 +1,368 @@
+@prefix housecase1: <https://ugentbiomath.github.io/ontology/index.ttl#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# ========================================
+# PORT-BASED HOUSEHOLD WATER SYSTEM MODEL
+# ========================================
+# This file demonstrates the port-based modeling approach following OntoCAPE pattern.
+# Each component has explicit input and output ports that connect to form the network topology.
+
+# ---------- HOUSEHOLD ----------
+housecase1:house a wf:Household ;
+    rdfs:label "Household" ;
+    rdfs:comment "Residential building with decentralized water reuse system" .
+
+# ---------- WATER USAGE POINTS ----------
+
+# Bath and Shower
+housecase1:Bath_and_Shower a wf:BathingFixture ;
+    rdfs:label "Bath and Shower" ;
+    wf:hasInputPort housecase1:Bath_Input ;
+    wf:hasOutputPort housecase1:Bath_Output .
+
+housecase1:Bath_Input a wf:InputPort ;
+    rdfs:label "Bath/Shower Water Inlet" ;
+    wf:hasFlowType wf:ReclaimedWaterFlow .
+
+housecase1:Bath_Output a wf:OutputPort ;
+    rdfs:label "Bath/Shower Greywater Outlet" ;
+    wf:hasFlowType wf:GreywaterFlow .
+
+# Bathroom Sink
+housecase1:Bathroom_sink a wf:CleaningFixture ;
+    rdfs:label "Bathroom Sink" ;
+    wf:hasInputPort housecase1:BathroomSink_Input ;
+    wf:hasOutputPort housecase1:BathroomSink_Output .
+
+housecase1:BathroomSink_Input a wf:InputPort ;
+    rdfs:label "Bathroom Sink Water Inlet" ;
+    wf:hasFlowType wf:ReclaimedWaterFlow .
+
+housecase1:BathroomSink_Output a wf:OutputPort ;
+    rdfs:label "Bathroom Sink Greywater Outlet" ;
+    wf:hasFlowType wf:GreywaterFlow .
+
+# Washing Machine
+housecase1:Washing_machine a wf:Appliance ;
+    rdfs:label "Washing Machine and Handwash" ;
+    wf:hasInputPort housecase1:WashingMachine_Input ;
+    wf:hasOutputPort housecase1:WashingMachine_Output .
+
+housecase1:WashingMachine_Input a wf:InputPort ;
+    rdfs:label "Washing Machine Water Inlet" ;
+    wf:hasFlowType wf:ReclaimedWaterFlow .
+
+housecase1:WashingMachine_Output a wf:OutputPort ;
+    rdfs:label "Washing Machine Greywater Outlet" ;
+    wf:hasFlowType wf:GreywaterFlow .
+
+# Dishwasher
+housecase1:Dishwasher a wf:Appliance ;
+    rdfs:label "Dishwasher" ;
+    wf:hasInputPort housecase1:Dishwasher_Input ;
+    wf:hasOutputPort housecase1:Dishwasher_Output .
+
+housecase1:Dishwasher_Input a wf:InputPort ;
+    rdfs:label "Dishwasher Water Inlet" ;
+    wf:hasFlowType wf:ReclaimedWaterFlow .
+
+housecase1:Dishwasher_Output a wf:OutputPort ;
+    rdfs:label "Dishwasher Greywater Outlet" ;
+    wf:hasFlowType wf:GreywaterFlow .
+
+# Kitchen Sink
+housecase1:Kitchen_sink a wf:CleaningFixture ;
+    rdfs:label "Kitchen Sink" ;
+    wf:hasInputPort housecase1:KitchenSink_Input ;
+    wf:hasOutputPort housecase1:KitchenSink_Output .
+
+housecase1:KitchenSink_Input a wf:InputPort ;
+    rdfs:label "Kitchen Sink Water Inlet" ;
+    wf:hasFlowType wf:PotableWaterFlow .
+
+housecase1:KitchenSink_Output a wf:OutputPort ;
+    rdfs:label "Kitchen Sink Greywater Outlet" ;
+    wf:hasFlowType wf:GreywaterFlow .
+
+# Toilet
+housecase1:Toilet a wf:Toilet ;
+    rdfs:label "Toilet" ;
+    wf:hasInputPort housecase1:Toilet_Input ;
+    wf:hasOutputPort housecase1:Toilet_Output .
+
+housecase1:Toilet_Input a wf:InputPort ;
+    rdfs:label "Toilet Flush Water Inlet" ;
+    wf:hasFlowType wf:ReclaimedWaterFlow .
+
+housecase1:Toilet_Output a wf:OutputPort ;
+    rdfs:label "Toilet Blackwater Outlet" ;
+    wf:hasFlowType wf:BlackwaterFlow .
+
+# Cleaning
+housecase1:Cleaning a wf:CleaningFixture ;
+    rdfs:label "General Cleaning" ;
+    wf:hasInputPort housecase1:Cleaning_Input ;
+    wf:hasOutputPort housecase1:Cleaning_Output .
+
+housecase1:Cleaning_Input a wf:InputPort ;
+    rdfs:label "Cleaning Water Inlet" ;
+    wf:hasFlowType wf:RainwaterFlow .
+
+housecase1:Cleaning_Output a wf:OutputPort ;
+    rdfs:label "Cleaning Greywater Outlet" ;
+    wf:hasFlowType wf:GreywaterFlow .
+
+# Gardening (sink only - no return flow)
+housecase1:Gardening_reuse a wf:WaterUsagePoint ;
+    rdfs:label "Garden Irrigation" ;
+    wf:hasInputPort housecase1:Gardening_Input .
+
+housecase1:Gardening_Input a wf:InputPort ;
+    rdfs:label "Garden Water Inlet" ;
+    wf:hasFlowType wf:RainwaterFlow .
+
+# ---------- WATER SOURCES ----------
+
+# Rainwater Collection
+housecase1:Rainwater a wf:RainwaterCollectionSystem ;
+    rdfs:label "Rainwater Collection System" ;
+    wf:hasOutputPort housecase1:Rainwater_Output .
+
+housecase1:Rainwater_Output a wf:OutputPort ;
+    rdfs:label "Collected Rainwater Outlet" ;
+    wf:hasFlowType wf:RainwaterFlow .
+
+# ---------- STORAGE TANKS ----------
+
+# Rainwater Storage Tank
+housecase1:Rainwater_storage a wf:RainwaterStorageTank ;
+    rdfs:label "Rainwater Storage Tank" ;
+    wf:hasInputPort housecase1:RainwaterTank_Input ;
+    wf:hasOutputPort housecase1:RainwaterTank_Output_RO ;
+    wf:hasOutputPort housecase1:RainwaterTank_Output_Gardening ;
+    wf:hasOutputPort housecase1:RainwaterTank_Output_Cleaning ;
+    wf:hasOutputPort housecase1:RainwaterTank_Output_GreywaterMix .
+
+housecase1:RainwaterTank_Input a wf:InputPort ;
+    rdfs:label "Rainwater Tank Inlet" ;
+    wf:hasFlowType wf:RainwaterFlow .
+
+housecase1:RainwaterTank_Output_RO a wf:OutputPort ;
+    rdfs:label "Rainwater Tank Outlet to RO" ;
+    wf:hasFlowType wf:RainwaterFlow .
+
+housecase1:RainwaterTank_Output_Gardening a wf:OutputPort ;
+    rdfs:label "Rainwater Tank Outlet to Gardening" ;
+    wf:hasFlowType wf:RainwaterFlow .
+
+housecase1:RainwaterTank_Output_Cleaning a wf:OutputPort ;
+    rdfs:label "Rainwater Tank Outlet to Cleaning" ;
+    wf:hasFlowType wf:RainwaterFlow .
+
+housecase1:RainwaterTank_Output_GreywaterMix a wf:OutputPort ;
+    rdfs:label "Rainwater Tank Outlet to Greywater Mix" ;
+    wf:hasFlowType wf:RainwaterFlow .
+
+# Purified Greywater Storage Tank
+housecase1:Purified_greywater_storage a wf:PurifiedGreywaterStorageTank ;
+    rdfs:label "Purified Greywater Storage Tank" ;
+    wf:hasInputPort housecase1:GreywaterTank_Input_MBR ;
+    wf:hasInputPort housecase1:GreywaterTank_Input_RO ;
+    wf:hasInputPort housecase1:GreywaterTank_Input_RainwaterMix ;
+    wf:hasOutputPort housecase1:GreywaterTank_Output_Bath ;
+    wf:hasOutputPort housecase1:GreywaterTank_Output_BathroomSink ;
+    wf:hasOutputPort housecase1:GreywaterTank_Output_WashingMachine ;
+    wf:hasOutputPort housecase1:GreywaterTank_Output_Dishwasher ;
+    wf:hasOutputPort housecase1:GreywaterTank_Output_Toilet ;
+    wf:hasOutputPort housecase1:GreywaterTank_Output_Overflow .
+
+housecase1:GreywaterTank_Input_MBR a wf:InputPort ;
+    rdfs:label "Greywater Tank Inlet from MBR" ;
+    wf:hasFlowType wf:ReclaimedWaterFlow .
+
+housecase1:GreywaterTank_Input_RO a wf:InputPort ;
+    rdfs:label "Greywater Tank Inlet from RO Permeate" ;
+    wf:hasFlowType wf:ReclaimedWaterFlow .
+
+housecase1:GreywaterTank_Input_RainwaterMix a wf:InputPort ;
+    rdfs:label "Greywater Tank Inlet from Rainwater Mix" ;
+    wf:hasFlowType wf:RainwaterFlow .
+
+housecase1:GreywaterTank_Output_Bath a wf:OutputPort ;
+    rdfs:label "Greywater Tank Outlet to Bath/Shower" ;
+    wf:hasFlowType wf:ReclaimedWaterFlow .
+
+housecase1:GreywaterTank_Output_BathroomSink a wf:OutputPort ;
+    rdfs:label "Greywater Tank Outlet to Bathroom Sink" ;
+    wf:hasFlowType wf:ReclaimedWaterFlow .
+
+housecase1:GreywaterTank_Output_WashingMachine a wf:OutputPort ;
+    rdfs:label "Greywater Tank Outlet to Washing Machine" ;
+    wf:hasFlowType wf:ReclaimedWaterFlow .
+
+housecase1:GreywaterTank_Output_Dishwasher a wf:OutputPort ;
+    rdfs:label "Greywater Tank Outlet to Dishwasher" ;
+    wf:hasFlowType wf:ReclaimedWaterFlow .
+
+housecase1:GreywaterTank_Output_Toilet a wf:OutputPort ;
+    rdfs:label "Greywater Tank Outlet to Toilet" ;
+    wf:hasFlowType wf:ReclaimedWaterFlow .
+
+housecase1:GreywaterTank_Output_Overflow a wf:OutputPort ;
+    rdfs:label "Greywater Tank Overflow Outlet" ;
+    wf:hasFlowType wf:ReclaimedWaterFlow .
+
+# Potable Water Storage Tank
+housecase1:Potable_water_storage a wf:PotableWaterStorageTank ;
+    rdfs:label "Potable Water Storage Tank" ;
+    wf:hasInputPort housecase1:PotableTank_Input ;
+    wf:hasOutputPort housecase1:PotableTank_Output .
+
+housecase1:PotableTank_Input a wf:InputPort ;
+    rdfs:label "Potable Water Tank Inlet" ;
+    wf:hasFlowType wf:PotableWaterFlow .
+
+housecase1:PotableTank_Output a wf:OutputPort ;
+    rdfs:label "Potable Water Tank Outlet" ;
+    wf:hasFlowType wf:PotableWaterFlow .
+
+# Blackwater Storage Tank
+housecase1:Blackwater_storage a wf:BlackwaterStorageTank ;
+    rdfs:label "Blackwater Storage Tank" ;
+    wf:hasInputPort housecase1:BlackwaterTank_Input ;
+    wf:hasOutputPort housecase1:BlackwaterTank_Output .
+
+housecase1:BlackwaterTank_Input a wf:InputPort ;
+    rdfs:label "Blackwater Tank Inlet" ;
+    wf:hasFlowType wf:BlackwaterFlow .
+
+housecase1:BlackwaterTank_Output a wf:OutputPort ;
+    rdfs:label "Blackwater Tank Outlet" ;
+    wf:hasFlowType wf:BlackwaterFlow .
+
+# ---------- TREATMENT UNITS ----------
+
+# Membrane Bioreactor (MBR)
+housecase1:Membrane_bioreactor a wf:MembraneBioreactorUnit ;
+    rdfs:label "Membrane Bioreactor" ;
+    rdfs:comment "Biological treatment + membrane filtration for greywater" ;
+    wf:hasInputPort housecase1:MBR_Input_Bath ;
+    wf:hasInputPort housecase1:MBR_Input_BathroomSink ;
+    wf:hasInputPort housecase1:MBR_Input_WashingMachine ;
+    wf:hasInputPort housecase1:MBR_Input_Dishwasher ;
+    wf:hasInputPort housecase1:MBR_Input_KitchenSink ;
+    wf:hasInputPort housecase1:MBR_Input_Cleaning ;
+    wf:hasOutputPort housecase1:MBR_Output_Permeate .
+
+housecase1:MBR_Input_Bath a wf:InputPort ;
+    rdfs:label "MBR Inlet from Bath/Shower" ;
+    wf:hasFlowType wf:GreywaterFlow .
+
+housecase1:MBR_Input_BathroomSink a wf:InputPort ;
+    rdfs:label "MBR Inlet from Bathroom Sink" ;
+    wf:hasFlowType wf:GreywaterFlow .
+
+housecase1:MBR_Input_WashingMachine a wf:InputPort ;
+    rdfs:label "MBR Inlet from Washing Machine" ;
+    wf:hasFlowType wf:GreywaterFlow .
+
+housecase1:MBR_Input_Dishwasher a wf:InputPort ;
+    rdfs:label "MBR Inlet from Dishwasher" ;
+    wf:hasFlowType wf:GreywaterFlow .
+
+housecase1:MBR_Input_KitchenSink a wf:InputPort ;
+    rdfs:label "MBR Inlet from Kitchen Sink" ;
+    wf:hasFlowType wf:GreywaterFlow .
+
+housecase1:MBR_Input_Cleaning a wf:InputPort ;
+    rdfs:label "MBR Inlet from Cleaning" ;
+    wf:hasFlowType wf:GreywaterFlow .
+
+housecase1:MBR_Output_Permeate a wf:OutputPort ;
+    rdfs:label "MBR Permeate Outlet" ;
+    wf:hasFlowType wf:ReclaimedWaterFlow .
+
+# Reverse Osmosis (RO)
+housecase1:Reverse_osmosis a wf:ReverseOsmosisUnit ;
+    rdfs:label "Reverse Osmosis Unit" ;
+    rdfs:comment "Advanced purification for potable water production" ;
+    wf:hasInputPort housecase1:RO_Input ;
+    wf:hasOutputPort housecase1:RO_Output_Permeate_Potable ;
+    wf:hasOutputPort housecase1:RO_Output_Permeate_Greywater .
+
+housecase1:RO_Input a wf:InputPort ;
+    rdfs:label "RO Inlet" ;
+    wf:hasFlowType wf:RainwaterFlow .
+
+housecase1:RO_Output_Permeate_Potable a wf:OutputPort ;
+    rdfs:label "RO Potable Permeate Outlet" ;
+    wf:hasFlowType wf:PotableWaterFlow .
+
+housecase1:RO_Output_Permeate_Greywater a wf:OutputPort ;
+    rdfs:label "RO Greywater-Quality Permeate Outlet" ;
+    wf:hasFlowType wf:ReclaimedWaterFlow .
+
+# Infiltration Unit
+housecase1:Infiltration a wf:InfiltrationUnit ;
+    rdfs:label "Infiltration System" ;
+    rdfs:comment "Subsurface disposal for blackwater and overflow" ;
+    wf:hasInputPort housecase1:Infiltration_Input_Blackwater ;
+    wf:hasInputPort housecase1:Infiltration_Input_Overflow .
+
+housecase1:Infiltration_Input_Blackwater a wf:InputPort ;
+    rdfs:label "Infiltration Inlet from Blackwater" ;
+    wf:hasFlowType wf:BlackwaterFlow .
+
+housecase1:Infiltration_Input_Overflow a wf:InputPort ;
+    rdfs:label "Infiltration Inlet from Overflow" ;
+    wf:hasFlowType wf:ReclaimedWaterFlow .
+
+# ========================================
+# FLOW TOPOLOGY (PORT CONNECTIONS)
+# ========================================
+
+# Rainwater collection to storage
+housecase1:Rainwater_Output wf:flowsTo housecase1:RainwaterTank_Input .
+
+# Rainwater storage distribution
+housecase1:RainwaterTank_Output_RO wf:flowsTo housecase1:RO_Input .
+housecase1:RainwaterTank_Output_Gardening wf:flowsTo housecase1:Gardening_Input .
+housecase1:RainwaterTank_Output_Cleaning wf:flowsTo housecase1:Cleaning_Input .
+housecase1:RainwaterTank_Output_GreywaterMix wf:flowsTo housecase1:GreywaterTank_Input_RainwaterMix .
+
+# Greywater generation (usage points to MBR)
+housecase1:Bath_Output wf:flowsTo housecase1:MBR_Input_Bath .
+housecase1:BathroomSink_Output wf:flowsTo housecase1:MBR_Input_BathroomSink .
+housecase1:WashingMachine_Output wf:flowsTo housecase1:MBR_Input_WashingMachine .
+housecase1:Dishwasher_Output wf:flowsTo housecase1:MBR_Input_Dishwasher .
+housecase1:KitchenSink_Output wf:flowsTo housecase1:MBR_Input_KitchenSink .
+housecase1:Cleaning_Output wf:flowsTo housecase1:MBR_Input_Cleaning .
+
+# Blackwater generation
+housecase1:Toilet_Output wf:flowsTo housecase1:BlackwaterTank_Input .
+
+# MBR treatment
+housecase1:MBR_Output_Permeate wf:flowsTo housecase1:GreywaterTank_Input_MBR .
+
+# RO treatment
+housecase1:RO_Output_Permeate_Potable wf:flowsTo housecase1:PotableTank_Input .
+housecase1:RO_Output_Permeate_Greywater wf:flowsTo housecase1:GreywaterTank_Input_RO .
+
+# Purified greywater distribution (reuse)
+housecase1:GreywaterTank_Output_Bath wf:flowsTo housecase1:Bath_Input .
+housecase1:GreywaterTank_Output_BathroomSink wf:flowsTo housecase1:BathroomSink_Input .
+housecase1:GreywaterTank_Output_WashingMachine wf:flowsTo housecase1:WashingMachine_Input .
+housecase1:GreywaterTank_Output_Dishwasher wf:flowsTo housecase1:Dishwasher_Input .
+housecase1:GreywaterTank_Output_Toilet wf:flowsTo housecase1:Toilet_Input .
+
+# Potable water distribution
+housecase1:PotableTank_Output wf:flowsTo housecase1:KitchenSink_Input .
+
+# Waste disposal
+housecase1:BlackwaterTank_Output wf:flowsTo housecase1:Infiltration_Input_Blackwater .
+housecase1:GreywaterTank_Output_Overflow wf:hasOverflowFlow housecase1:Infiltration_Input_Overflow .

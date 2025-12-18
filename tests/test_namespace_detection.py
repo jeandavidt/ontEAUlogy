@@ -66,8 +66,8 @@ class TestNamespaceDetection:
         generator = OntologyDocGenerator(ontology_path=nonexistent)
 
         # Should have fallback namespace
-        assert generator.ontology_namespace == "http://example.org/onteaulogy#"
-        assert generator.ontology_base == "http://example.org/onteaulogy"
+        assert generator.ontology_namespace == "http://example.org/waterFRAME#"
+        assert generator.ontology_base == "http://example.org/waterFRAME"
 
     def test_namespace_used_for_entity_links(self):
         """Test that detected namespace is used when generating entity links."""
