@@ -15,6 +15,9 @@ wheels/
 # Generated notebook export (will be regenerated during build)
 /docs/notebook/
 
+# Resources for local development and research
+/dev-resources
+
 # ruff cache
 .ruff_cache
 
