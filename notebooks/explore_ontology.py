@@ -12,7 +12,7 @@
 
 import marimo
 
-__generated_with = "0.17.8"
+__generated_with = "0.18.4"
 app = marimo.App(width="medium")
 
 
@@ -30,13 +30,30 @@ def _():
 
 
 @app.cell
-def _(Path, mo):
+def _(mo):
+    import sys
+    import argparse
+
+    # Parse command-line arguments in script mode
+    if mo.app_meta().mode == "script":
+        parser = argparse.ArgumentParser(description="Explore RDF ontology")
+        parser.add_argument(
+            "--ontology",
+            "-o",
+            default="data/ontology/waterframe.ttl",
+            help="Path or URI to the ontology file (default: data/ontology/waterframe.ttl)"
+        )
+        args = parser.parse_args()
+        _initial_value = args.ontology
+    else:
+        _initial_value = "data/ontology/waterframe.ttl"
+
     # Input for ontology file path or URI
     ontology_input = mo.ui.text(
         label="Ontology Path or URI",
         full_width=True,
-        value="https://raw.githubusercontent.com/UGentBiomath/ontology/refs/heads/main/index.ttl",
-        placeholder="Enter file path or URI (e.g., http://example.org/ontology.ttl)"
+        value=_initial_value,
+        placeholder="Enter file path or URI (e.g., data/ontology/waterframe.ttl or http://example.org/ontology.ttl)"
     )
     ontology_input
     return (ontology_input,)
@@ -45,8 +62,27 @@ def _(Path, mo):
 @app.cell
 def _(Path, mo, ontology_input, rdflib):
     import urllib.request
+    import urllib.error
 
     graph = rdflib.Graph()
+
+    def _load_from_uri(_uri):
+        """Helper to load content from URI"""
+        with urllib.request.urlopen(_uri) as response:
+            return response.read().decode('utf-8')
+
+    def _try_load_module_from_uri(_base_uri, _module_path):
+        """Try to construct and load a module URI"""
+        # Remove the filename from base URI to get directory
+        _dir_uri = _base_uri.rsplit('/', 1)[0]
+        # Construct module URI
+        _module_uri = f"{_dir_uri}/{_module_path}"
+        try:
+            _content = _load_from_uri(_module_uri)
+            graph.parse(data=_content, format="turtle")
+            return True, _module_uri
+        except Exception:
+            return False, _module_uri
 
     _input_value = ontology_input.value.strip()
     _out = []
@@ -55,21 +91,97 @@ def _(Path, mo, ontology_input, rdflib):
         if _input_value.startswith(('http://', 'https://')):
             # Load from URI
             try:
-                # Fetch content manually first (WASM-compatible approach)
-                with urllib.request.urlopen(_input_value) as response:
-                    _content = response.read().decode('utf-8')
-
-                # Parse from string instead of URL
+                # Fetch and parse main ontology
+                _content = _load_from_uri(_input_value)
                 graph.parse(data=_content, format="turtle")
-                _out.append(mo.md(f"✓ Loaded ontology from URI: `{_input_value}`"))
+                _out.append(mo.md(f"✓ Loaded main ontology from URI: `{_input_value}`"))
+
+                # Try to load common module paths
+                _module_paths = [
+                    "modules/core/material_entities.ttl",
+                    "modules/core/properties.ttl",
+                    "modules/core/qualities.ttl",
+                    "modules/core/processes.ttl",
+                    "modules/core/roles.ttl",
+                    "modules/core/information.ttl",
+                ]
+
+                _loaded_modules = []
+                _failed_modules = []
+
+                for _module_path in _module_paths:
+                    _success, _module_uri = _try_load_module_from_uri(_input_value, _module_path)
+                    if _success:
+                        _loaded_modules.append(_module_path)
+                    else:
+                        _failed_modules.append(_module_path)
+
+                if _loaded_modules:
+                    _out.append(mo.md(f"✓ Loaded {len(_loaded_modules)} module(s): {', '.join([p.split('/')[-1] for p in _loaded_modules])}"))
+
+                # Try to load bridge modules
+                _bridge_paths = [
+                    "bridges/sosa_alignment.ttl",
+                    "bridges/prov_alignment.ttl",
+                    "bridges/qudt_alignment.ttl",
+                ]
+
+                _loaded_bridges = []
+                for _bridge_path in _bridge_paths:
+                    _success, _bridge_uri = _try_load_module_from_uri(_input_value, _bridge_path)
+                    if _success:
+                        _loaded_bridges.append(_bridge_path)
+
+                if _loaded_bridges:
+                    _out.append(mo.md(f"✓ Loaded {len(_loaded_bridges)} bridge(s): {', '.join([p.split('/')[-1] for p in _loaded_bridges])}"))
+
+                _total_triples = len(graph)
+                _out.append(mo.md(f"**Total triples loaded:** {_total_triples}"))
+
             except Exception as e:
                 _out.append(mo.md(f"❌ Error loading from URI: {e}"))
         else:
             # Load from file path
             _ontology_path = Path(_input_value)
             if _ontology_path.exists():
-                graph.parse(_ontology_path, format="turtle")
-                _out.append(mo.md(f"✓ Loaded ontology from file: `{_ontology_path}`"))
+                try:
+                    # Load main ontology file
+                    graph.parse(_ontology_path, format="turtle")
+                    _out.append(mo.md(f"✓ Loaded main ontology: `{_ontology_path}`"))
+
+                    # Load all module files from modules/ directory
+                    _modules_dir = _ontology_path.parent / "modules"
+                    _module_count = 0
+                    if _modules_dir.exists():
+                        for _module_file in _modules_dir.rglob("*.ttl"):
+                            try:
+                                graph.parse(_module_file, format="turtle")
+                                _module_count += 1
+                            except Exception as e:
+                                _out.append(mo.md(f"⚠ Warning: Could not load module `{_module_file.name}`: {e}"))
+
+                        if _module_count > 0:
+                            _out.append(mo.md(f"✓ Loaded {_module_count} module(s) from `{_modules_dir.relative_to(_ontology_path.parent.parent)}`"))
+
+                    # Load all bridge files from bridges/ directory
+                    _bridges_dir = _ontology_path.parent / "bridges"
+                    _bridge_count = 0
+                    if _bridges_dir.exists():
+                        for _bridge_file in _bridges_dir.rglob("*.ttl"):
+                            try:
+                                graph.parse(_bridge_file, format="turtle")
+                                _bridge_count += 1
+                            except Exception as e:
+                                _out.append(mo.md(f"⚠ Warning: Could not load bridge `{_bridge_file.name}`: {e}"))
+
+                        if _bridge_count > 0:
+                            _out.append(mo.md(f"✓ Loaded {_bridge_count} bridge(s) from `{_bridges_dir.relative_to(_ontology_path.parent.parent)}`"))
+
+                    _total_triples = len(graph)
+                    _out.append(mo.md(f"**Total triples loaded:** {_total_triples}"))
+
+                except Exception as e:
+                    _out.append(mo.md(f"❌ Error loading ontology: {e}"))
             else:
                 _out.append(mo.md(f"❌ File not found: `{_ontology_path}`"))
     else:
@@ -131,6 +243,14 @@ def _(OWL, RDF, RDFS, graph, nx, rdflib):
                 ontology_nodes.add(s_uri)
                 node_types[s_uri] = 'ontology'
 
+            # Check if it's referenced as an import (owl:imports)
+            # This catches external ontologies that aren't loaded but are referenced
+            if p_uri == str(OWL.imports):
+                # The object of owl:imports is an ontology URI
+                if o_uri not in node_types:
+                    node_types[o_uri] = 'ontology'
+                    ontology_nodes.add(o_uri)
+
             # Check if subject or object is a meta-level term
             if s_uri in meta_level_uris:
                 node_types[s_uri] = 'meta'
@@ -180,6 +300,17 @@ def _(OWL, RDF, RDFS, graph, nx, rdflib):
                     node_types[s_uri] = 'datatype_property'
                 elif str(o) == str(OWL.NamedIndividual):
                     node_types[s_uri] = 'individual'
+
+            # Classes can also be defined via rdfs:subClassOf without explicit rdf:type
+            if p_uri == str(RDFS.subClassOf):
+                # Subject of subClassOf is a class
+                if s_uri not in node_types or node_types[s_uri] == 'unknown':
+                    node_types[s_uri] = 'class'
+                # Object of subClassOf is also a class (superclass)
+                if o_uri not in node_types or node_types[o_uri] == 'unknown':
+                    # Don't override if it's already marked as meta or other specific type
+                    if not any(o_uri.startswith(ns) for ns in meta_namespaces):
+                        node_types[o_uri] = 'class'
 
         # Second pass: build graph
         for s, p, o in rdf_graph:
@@ -241,7 +372,119 @@ def _(OWL, RDF, RDFS, graph, nx, rdflib):
 
 
 @app.cell
-def _(mo):
+def _(OWL, graph, mo, nx_graph):
+    # Extract namespaces/modules from the graph
+    def _extract_namespaces(rdf_graph, nx_g):
+        """Extract unique namespaces from the graph with node counts"""
+        namespace_info = {}
+
+        # Get all unique namespaces from nodes
+        for node_uri, node_data in nx_g.nodes(data=True):
+            if node_uri.startswith('http'):
+                # Extract namespace (everything before the last # or /)
+                if '#' in node_uri:
+                    namespace = node_uri.rsplit('#', 1)[0] + '#'
+                elif '/' in node_uri:
+                    # For slash-based URIs, take up to the last segment
+                    parts = node_uri.rsplit('/', 1)
+                    namespace = parts[0] + '/'
+                else:
+                    namespace = node_uri
+
+                node_type = node_data.get('node_type', 'unknown')
+
+                if namespace not in namespace_info:
+                    namespace_info[namespace] = {
+                        'count': 0,
+                        'types': set(),
+                        'label': namespace
+                    }
+
+                namespace_info[namespace]['count'] += 1
+                namespace_info[namespace]['types'].add(node_type)
+
+        # Try to get prettier labels from ontology declarations
+        for ns_uri, ns_data in namespace_info.items():
+            # Check if this namespace has an ontology declaration
+            ontology_uri = ns_uri.rstrip('#/')
+            for ont_uri in rdf_graph.subjects(predicate=None, object=OWL.Ontology):
+                if str(ont_uri).startswith(ontology_uri):
+                    # Try to get a label
+                    for label in rdf_graph.objects(ont_uri, None):
+                        label_str = str(label)
+                        if len(label_str) < 100 and not label_str.startswith('http'):
+                            ns_data['label'] = label_str
+                            break
+
+        # Sort by count (descending)
+        sorted_ns = sorted(namespace_info.items(), key=lambda x: x[1]['count'], reverse=True)
+
+        return sorted_ns
+
+    _namespaces = _extract_namespaces(graph, nx_graph)
+
+    # Format namespace options for dropdown
+    _namespace_options = [("All namespaces", None)]
+
+    for ns_uri, ns_data in _namespaces:
+        # Determine indentation based on nesting
+        _indent = ""
+        _short_name = ns_uri
+
+        # Shorten common long URIs
+        if "www.w3.org" in ns_uri:
+            # Extract the spec name (e.g., "owl", "rdf", "rdfs")
+            if '#' in ns_uri:
+                _short_name = ns_uri.rstrip('#').split('/')[-1]
+            else:
+                _short_name = ns_uri.rstrip('/').split('/')[-1]
+            _indent = "  "  # Indent meta namespaces
+        elif "purl.obolibrary.org" in ns_uri:
+            # Extract ontology name (e.g., "BFO")
+            if '/obo/' in ns_uri:
+                _parts = ns_uri.split('/obo/')
+                if len(_parts) > 1:
+                    _short_name = _parts[1].rstrip('#/').split('/')[0]
+                else:
+                    _short_name = "OBO"
+            else:
+                _short_name = "OBO"
+            _indent = "  "
+        elif "github.com" in ns_uri or "ugentbiomath" in ns_uri or "waterframe" in ns_uri.lower():
+            # Project namespaces - extract meaningful part
+            if '/modules/core/' in ns_uri:
+                # Extract module name
+                _module = ns_uri.split('/modules/core/')[-1].rstrip('#/')
+                _short_name = f"core/{_module}"
+                _indent = "    "  # Double indent for nested modules
+            elif '/modules/' in ns_uri:
+                _module = ns_uri.split('/modules/')[-1].rstrip('#/')
+                _short_name = f"modules/{_module}"
+                _indent = "  "
+            elif 'waterframe#' in ns_uri or ns_uri.endswith('waterframe/'):
+                _short_name = "waterFRAME (main)"
+            else:
+                # Try to get the last meaningful segment
+                _short_name = ns_uri.rstrip('#/').split('/')[-1]
+        else:
+            # For other namespaces, extract the last segment
+            _short_name = ns_uri.rstrip('#/').split('/')[-1]
+            if not _short_name:
+                _short_name = ns_uri.rstrip('#/').split('/')[-2] if len(ns_uri.rstrip('#/').split('/')) > 1 else ns_uri
+
+        _label = f"{_indent}{_short_name} ({ns_data['count']})"
+        _namespace_options.append((_label, ns_uri))
+
+    namespace_filter = mo.ui.dropdown(
+        options=_namespace_options,
+        value=None,
+        label="Filter by Namespace/Module"
+    )
+    return (namespace_filter,)
+
+
+@app.cell
+def _(mo, namespace_filter):
     # Filter controls
     show_blank_nodes = mo.ui.checkbox(label="Show Blank Nodes", value=False)
     show_meta = mo.ui.checkbox(label="Show Meta-level Terms", value=True)
@@ -264,6 +507,7 @@ def _(mo):
 
     mo.vstack([
         mo.md("**Filter Options:**"),
+        namespace_filter,
         mo.hstack([show_blank_nodes, show_meta, show_datatypes, show_literals]),
         layout_options,
         refresh_button
@@ -284,6 +528,7 @@ def _(
     json,
     layout_options,
     mo,
+    namespace_filter,
     nx_graph,
     refresh_button,
     show_blank_nodes,
@@ -309,6 +554,9 @@ def _(
         if not filters['show_literals']:
             skip_types.add('literal')
 
+        # Namespace filter
+        selected_namespace = filters.get('namespace', None)
+
         # Add nodes
         for node_id, node_data in G.nodes(data=True):
             node_type = node_data.get('node_type', 'unknown')
@@ -316,6 +564,11 @@ def _(
             # Skip filtered types
             if node_type in skip_types:
                 continue
+
+            # Skip if namespace filter is active and node doesn't match
+            if selected_namespace is not None:
+                if not node_id.startswith(selected_namespace):
+                    continue
 
             elements.append({
                 'data': {
@@ -345,11 +598,20 @@ def _(
         return elements
 
     # Prepare filters from current UI values
+    # Handle namespace filter value - could be None, a string, or a tuple
+    _ns_value = namespace_filter.value
+    if isinstance(_ns_value, tuple):
+        # If it's a tuple, extract the second element (the actual value)
+        _ns_filter = _ns_value[1] if len(_ns_value) > 1 else None
+    else:
+        _ns_filter = _ns_value
+
     _filters = {
         'show_blank': show_blank_nodes.value,
         'show_meta': show_meta.value,
         'show_datatypes': show_datatypes.value,
         'show_literals': show_literals.value,
+        'namespace': _ns_filter,  # None means "All namespaces", otherwise it's a URI string
     }
 
     # Get elements with current filters
@@ -618,9 +880,28 @@ def _(
     cyto_widget = CytoscapeWidget()
     graph_viz = mo.ui.anywidget(cyto_widget)
 
+    # Create legend
+    _legend_md = """
+    ### Legend
+
+    | Shape | Color | Type |
+    |-------|-------|------|
+    | ⭐ | Purple | Ontology |
+    | ◆ | Dark Gray | Meta (OWL/RDFS/RDF) |
+    | ⬡ | Teal | Datatype (XSD) |
+    | ⚪ | Blue | Class |
+    | ◇ | Green | Object Property |
+    | ▭ | Orange | Datatype Property |
+    | ⬢ | Light Purple | Individual |
+    | ▼ | Light Gray | Literal |
+    | ▲ | Red | Blank Node |
+    | ▽ | Dark Red | Unknown |
+    """
+
     mo.vstack([
         mo.md(f"**Showing {len(_cyto_elements)} elements** (Layout: {_selected_layout})"),
-        graph_viz
+        graph_viz,
+        mo.md(_legend_md)
     ])
     return
 
@@ -647,6 +928,22 @@ def _(mo, nx, nx_graph):
         _stats += f"\n- **{_type}**: {_count}"
 
     mo.md(_stats)
+    return
+
+
+@app.cell
+def _(graph, mo, nx_graph):
+    # Script mode: print summary of loaded ontology
+    if mo.app_meta().mode == "script":
+        print("=" * 60)
+        print("Ontology Explorer - Script Mode Test")
+        print("=" * 60)
+        print(f"\n✓ Ontology loaded successfully")
+        print(f"  - Total RDF triples: {len(graph)}")
+        print(f"  - Graph nodes: {nx_graph.number_of_nodes()}")
+        print(f"  - Graph edges: {nx_graph.number_of_edges()}")
+        print("\n✓ Script mode test completed successfully!")
+        print("=" * 60)
     return
 
 

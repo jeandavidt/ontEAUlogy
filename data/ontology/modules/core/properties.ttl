@@ -7,8 +7,8 @@
 
 <https://ugentbiomath.github.io/waterframe/modules/core/properties>
     a owl:Ontology ;
-    owl:imports <https://ugentbiomath.github.io/ontEAUlogy/modules/core/material_entities> ;
-    dc:title "ontEAUlogy: Properties Module" ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/material_entities> ;
+    dc:title "waterFRAME: Properties Module" ;
     dc:creator "Jean-David Therrien" ;
     rdfs:comment "Properties that connect water system components and their ports. Uses port-based modeling following OntoCAPE pattern." .
 
