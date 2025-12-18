@@ -2,7 +2,7 @@
 from pathlib import Path
 
 
-def get_project_root(current_path: Path, project_name:str = "ontEAUlogy") -> Path:
+def get_project_root(current_path: Path, project_name:str) -> Path:
     """goes up the file system tree until it finds the project name.
     If it is not found, the funciton returns a NameError."""
     current_path.absolute()
@@ -17,7 +17,13 @@ def get_project_root(current_path: Path, project_name:str = "ontEAUlogy") -> Pat
 
 def get_ontology_path() -> Path:
     try:
-        root = get_project_root(Path(__file__))
+        root = get_project_root(Path(__file__), "waterFRAME")
     except NameError:
-        raise NameError("The default project name is different from the actual project name.")
-    return root / "data/ontology/onteaulogy.ttl"
+        # Fallback for when directory hasn't been renamed yet
+        try:
+            root = get_project_root(Path(__file__), "ontEAUlogy")
+        except NameError:
+            raise NameError(
+                "Project directory not found (looking for waterFRAME or ontEAUlogy)."
+            )
+    return root / "data/ontology/waterframe.ttl"

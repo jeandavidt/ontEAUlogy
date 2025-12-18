@@ -1,1 +1,1 @@
-"""Tests for the ontEAUlogy documentation generator."""
+"""Tests for the waterFRAME documentation generator."""

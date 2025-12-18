@@ -1,20 +1,16 @@
-# ontEAUlogy
+# waterFRAME
 
-**Version:** 1.0.0
+**Version:** 0.1.0
 
-A comprehensive ontology for water reuse and management
-
-## Overview
-
-An ontology that provides a structured vocabulary for describing water reuse systems, processes, and related concepts in environmental engineering and water management.
+A modular ontology for water reuse systems with BFO alignment and support for agent-based optimization queries
 
 ## Statistics
 
-- **Classes:** 13
-- **Object Properties:** 4
-- **Datatype Properties:** 3
-- **Named Individuals:** 9
-- **Total Entities:** 29
+- **Classes:** 9
+- **Object Properties:** 15
+- **Datatype Properties:** 0
+- **Named Individuals:** 0
+- **Total Entities:** 24
 
 ## Navigation
 
@@ -22,7 +18,7 @@ An ontology that provides a structured vocabulary for describing water reuse sys
 
 ## Ontology Information
 
-**Ontology URI:** `http://example.org/onteaulogy`
+**Ontology URI:** `https://ugentbiomath.github.io/waterframe`
 
-**Namespace:** `http://example.org/onteaulogy#`
+**Namespace:** `https://ugentbiomath.github.io/waterframe#`
 

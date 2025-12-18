@@ -3,7 +3,7 @@ requires      = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name        = "onteaulogy"
+name        = "waterframe_ontology"
 version     = "0.1.1"
 description = "Add your description here"
 readme      = "README.md"

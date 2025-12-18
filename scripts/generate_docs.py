@@ -2,7 +2,7 @@
 """
 Ontology Documentation Generator
 
-This script parses the ontEAUlogy ontology file and generates
+This script parses the waterFRAME ontology file and generates
 a single markdown documentation file (entities.md) containing
 all entities as sections with internal anchor links.
 """
@@ -15,7 +15,7 @@ from rdflib.namespace import DC, OWL, RDF, RDFS, SKOS
 
 # Add the src directory to the path so we can import our modules
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-from onteaulogy import get_ontology_path
+from helpers import get_ontology_path
 
 
 class OntologyDocGenerator:
@@ -37,21 +37,42 @@ class OntologyDocGenerator:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         # Initialize namespace attributes with defaults
-        self.ontology_base = "http://example.org/onteaulogy"
+        self.ontology_base = "http://example.org/waterFRAME"
         self.ontology_namespace = f"{self.ontology_base}#"
 
         # Load the ontology (may override namespace if found)
         self._load_ontology()
 
     def _load_ontology(self):
-        """Load and parse the ontology file."""
+        """Load and parse the ontology file and all imported modules."""
         if not self.ontology_path.exists():
             print(f"Warning: Ontology file not found at {self.ontology_path}")
             return
 
         try:
+            # Load main ontology
             self.graph.parse(self.ontology_path, format="turtle")
             print(f"Loaded ontology from {self.ontology_path}")
+
+            # Load all module files from the modules directory
+            modules_dir = self.ontology_path.parent / "modules"
+            if modules_dir.exists():
+                for module_file in modules_dir.rglob("*.ttl"):
+                    try:
+                        self.graph.parse(module_file, format="turtle")
+                        print(f"Loaded module from {module_file}")
+                    except Exception as e:
+                        print(f"Warning: Could not load module {module_file}: {e}")
+
+            # Load all bridge files from the bridges directory
+            bridges_dir = self.ontology_path.parent / "bridges"
+            if bridges_dir.exists():
+                for bridge_file in bridges_dir.rglob("*.ttl"):
+                    try:
+                        self.graph.parse(bridge_file, format="turtle")
+                        print(f"Loaded bridge from {bridge_file}")
+                    except Exception as e:
+                        print(f"Warning: Could not load bridge {bridge_file}: {e}")
 
             # Extract the ontology namespace from the graph
             self._extract_ontology_namespace()
@@ -84,7 +105,7 @@ class OntologyDocGenerator:
             return
 
         # Last resort fallback
-        self.ontology_base = "http://example.org/onteaulogy"
+        self.ontology_base = "http://example.org/waterFRAME"
         self.ontology_namespace = f"{self.ontology_base}#"
         print(
             f"Warning: Could not detect ontology namespace, "
@@ -147,6 +168,13 @@ class OntologyDocGenerator:
                 info = self._get_property_info(entity_uri, info, object_property=False)
             elif type_uri == OWL.NamedIndividual:
                 info = self._get_individual_info(entity_uri, info)
+
+        # Implicit class detection: if it has rdfs:subClassOf, it's a class
+        # (even if not explicitly declared with rdf:type owl:Class)
+        if (entity_uri, RDFS.subClassOf, None) in self.graph:
+            if 'Class' not in info['types']:
+                info['types'].append('Class')
+            info = self._get_class_info(entity_uri, info)
 
         return info
 
@@ -579,87 +607,307 @@ class OntologyDocGenerator:
         print(f"Generated index at {index_file}")
         return index_file
 
-    def generate_all_docs(self):
-        """Generate documentation for all entities in a single entities.md file."""
-        if not self.graph:
-            print("No ontology loaded. Cannot generate documentation.")
-            return None
+    def _get_module_info(self, module_path):
+        """Extract metadata from a module file."""
+        module_graph = Graph()
+        try:
+            module_graph.parse(module_path, format="turtle")
 
-        # Find all entities (classes, properties, individuals)
-        entities = set()
+            # Find ontology declaration
+            for ontology_uri in module_graph.subjects(RDF.type, OWL.Ontology):
+                metadata = {
+                    'title': None,
+                    'description': None,
+                    'uri': str(ontology_uri)
+                }
 
-        # Get all classes
-        for class_uri in self.graph.subjects(RDF.type, OWL.Class):
-            entities.add(str(class_uri))
+                for label in module_graph.objects(ontology_uri, DC.title):
+                    metadata['title'] = str(label)
+                    break
 
-        # Get all properties
-        for prop_uri in self.graph.subjects(RDF.type, OWL.ObjectProperty):
-            entities.add(str(prop_uri))
+                for comment in module_graph.objects(ontology_uri, RDFS.comment):
+                    metadata['description'] = str(comment)
+                    break
 
-        for prop_uri in self.graph.subjects(RDF.type, OWL.DatatypeProperty):
-            entities.add(str(prop_uri))
+                return metadata
+        except Exception as e:
+            print(f"Warning: Could not extract metadata from {module_path}: {e}")
 
-        # Get all named individuals
-        for ind_uri in self.graph.subjects(RDF.type, OWL.NamedIndividual):
-            entities.add(str(ind_uri))
+        return {'title': None, 'description': None, 'uri': None}
 
-        # Also get entities that are objects of triples (might catch entities not explicitly typed)
-        for s, p, o in self.graph:
-            if isinstance(o, URIRef) and str(o).startswith(('http://', 'https://')):
-                entities.add(str(o))
-
-        print(f"Found {len(entities)} entities to document")
-
-        # Build the complete document
-        all_content = "# Ontology Entities\n\n"
-        all_content += (
-            "This document contains all entities defined in "
-            "the ontEAUlogy ontology.\n\n"
+    def _is_blank_node(self, entity_uri):
+        """Check if entity is a blank node or RDF/OWL internal construct."""
+        # Blank nodes and internal RDF/OWL/RDFS constructs
+        return (
+            entity_uri.startswith('_:')
+            or entity_uri.startswith('http://www.w3.org/2002/07/owl#')
+            or entity_uri.startswith('http://www.w3.org/1999/02/22-rdf-syntax-ns#')
+            or entity_uri.startswith('http://www.w3.org/2000/01/rdf-schema#')
         )
 
-        # Collect entity information and sort by name for better organization
-        entity_sections = []
-        for entity_uri in entities:
+    def _add_placeholder_content(self, entity_info):
+        """Add placeholder content for entities without labels or descriptions."""
+        if not entity_info['labels']:
+            entity_info['labels'] = ['[Undefined label]']
+
+        if not entity_info['descriptions']:
+            entity_info['descriptions'] = ['Yet to be defined...']
+
+        return entity_info
+
+    def _categorize_entities_by_type(self, entity_uris):
+        """Categorize entities by their OWL type."""
+        categories = {
+            'classes': [],
+            'object_properties': [],
+            'datatype_properties': [],
+            'individuals': [],
+            'other': []
+        }
+
+        for entity_uri in entity_uris:
+            # Skip blank nodes and RDF/OWL internal constructs
+            if self._is_blank_node(entity_uri):
+                continue
+
             try:
                 entity_info = self._get_entity_info(entity_uri)
-                if entity_info and (entity_info['labels'] or entity_info['descriptions']):
-                    section_content = self._generate_entity_section(entity_info)
-                    # Store: (local_name, entity_uri, section_content)
-                    entity_sections.append((
-                        entity_info['local_name'],
-                        entity_uri,
-                        section_content
-                    ))
-                    print(f"Generated section for {entity_info['local_name']}")
+                if not entity_info:
+                    continue
+
+                # Skip if it has no types (likely not a real entity)
+                if not entity_info['types']:
+                    continue
+
+                # Add placeholder content if missing labels/descriptions
+                entity_info = self._add_placeholder_content(entity_info)
+
+                # Categorize based on types
+                if 'Class' in entity_info['types']:
+                    categories['classes'].append(entity_info)
+                elif 'ObjectProperty' in entity_info['types']:
+                    categories['object_properties'].append(entity_info)
+                elif 'DatatypeProperty' in entity_info['types']:
+                    categories['datatype_properties'].append(entity_info)
+                elif 'NamedIndividual' in entity_info['types']:
+                    categories['individuals'].append(entity_info)
+                else:
+                    categories['other'].append(entity_info)
             except Exception as e:
-                print(f"Error generating docs for {entity_uri}: {e}")
+                print(f"Error categorizing {entity_uri}: {e}")
 
-        # Sort sections alphabetically by entity name
-        entity_sections.sort(key=lambda x: x[0].lower())
+        # Sort each category alphabetically
+        for category in categories.values():
+            category.sort(key=lambda x: x['local_name'].lower())
 
-        # Add table of contents
-        if entity_sections:
-            all_content += "## Table of Contents\n\n"
-            for entity_name, entity_uri, _ in entity_sections:
-                anchor = self._get_anchor_id(entity_uri)
-                all_content += f"- [{entity_name}](#{anchor})\n"
-            all_content += "\n---\n\n"
+        return categories
 
-        # Add all entity sections
-        for _, _, section_content in entity_sections:
-            all_content += section_content
-            all_content += "\n---\n\n"
+    def _generate_module_page(self, module_name, module_path, entities_by_type):
+        """Generate a documentation page for a single module."""
+        module_info = self._get_module_info(module_path)
 
-        # Write to single file
-        output_file = self.output_dir.parent / "entities.md"
-        with open(output_file, 'w', encoding='utf-8') as f:
-            f.write(all_content)
+        # Build page content
+        title = module_info['title'] or f"Module: {module_name}"
+        content = f"# {title}\n\n"
 
-        print(
-            f"\nGenerated documentation for {len(entity_sections)} "
-            f"entities in {output_file}"
-        )
-        return output_file
+        if module_info['description']:
+            content += f"{module_info['description']}\n\n"
+
+        content += f"**Module URI:** `{module_info['uri'] or 'N/A'}`\n\n"
+        content += f"**Source:** `{module_path.relative_to(self.ontology_path.parent.parent)}`\n\n"
+
+        # Count entities
+        total = sum(len(entities) for entities in entities_by_type.values())
+        content += f"**Total Entities:** {total}\n\n"
+
+        # Table of contents
+        content += "## Contents\n\n"
+        if entities_by_type['classes']:
+            content += f"- [Classes](#classes) ({len(entities_by_type['classes'])})\n"
+        if entities_by_type['object_properties']:
+            obj_props_count = len(entities_by_type['object_properties'])
+            content += (
+                f"- [Object Properties](#object-properties) ({obj_props_count})\n"
+            )
+        if entities_by_type['datatype_properties']:
+            dt_props_count = len(entities_by_type['datatype_properties'])
+            content += (
+                f"- [Datatype Properties](#datatype-properties) ({dt_props_count})\n"
+            )
+        if entities_by_type['individuals']:
+            ind_count = len(entities_by_type['individuals'])
+            content += f"- [Individuals](#individuals) ({ind_count})\n"
+        content += "\n---\n\n"
+
+        # Generate sections for each type
+        if entities_by_type['classes']:
+            content += "## Classes\n\n"
+            for entity_info in entities_by_type['classes']:
+                content += self._generate_entity_section(entity_info)
+                content += "\n---\n\n"
+
+        if entities_by_type['object_properties']:
+            content += "## Object Properties\n\n"
+            for entity_info in entities_by_type['object_properties']:
+                content += self._generate_entity_section(entity_info)
+                content += "\n---\n\n"
+
+        if entities_by_type['datatype_properties']:
+            content += "## Datatype Properties\n\n"
+            for entity_info in entities_by_type['datatype_properties']:
+                content += self._generate_entity_section(entity_info)
+                content += "\n---\n\n"
+
+        if entities_by_type['individuals']:
+            content += "## Individuals\n\n"
+            for entity_info in entities_by_type['individuals']:
+                content += self._generate_entity_section(entity_info)
+                content += "\n---\n\n"
+
+        return content
+
+    def generate_modular_docs(self):
+        """Generate documentation organized by module structure."""
+        if not self.graph:
+            print("No ontology loaded. Cannot generate documentation.")
+            return []
+
+        # Create modules directory in docs
+        modules_doc_dir = self.output_dir.parent / "modules"
+        modules_doc_dir.mkdir(parents=True, exist_ok=True)
+
+        # Get the ontology directory structure
+        ontology_dir = self.ontology_path.parent
+        modules_dir = ontology_dir / "modules"
+        bridges_dir = ontology_dir / "bridges"
+
+        generated_files = []
+
+        # Process modules directory
+        if modules_dir.exists():
+            for module_file in sorted(modules_dir.rglob("*.ttl")):
+                # Get relative path from modules directory
+                rel_path = module_file.relative_to(modules_dir)
+                module_name = rel_path.stem
+
+                # Parse the module to find its entities
+                module_graph = Graph()
+                try:
+                    module_graph.parse(module_file, format="turtle")
+                except Exception as e:
+                    print(f"Warning: Could not parse {module_file}: {e}")
+                    continue
+
+                # Collect entities from this module
+                # Look for all classes, properties, and individuals defined here
+                entity_uris = set()
+
+                # Get all classes
+                for class_uri in module_graph.subjects(RDF.type, OWL.Class):
+                    if self.ontology_base.lower() in str(class_uri).lower():
+                        entity_uris.add(str(class_uri))
+
+                # Also get classes defined via rdfs:subClassOf
+                for class_uri in module_graph.subjects(RDFS.subClassOf, None):
+                    if self.ontology_base.lower() in str(class_uri).lower():
+                        entity_uris.add(str(class_uri))
+
+                # Get all properties
+                for prop_uri in module_graph.subjects(RDF.type, OWL.ObjectProperty):
+                    if self.ontology_base.lower() in str(prop_uri).lower():
+                        entity_uris.add(str(prop_uri))
+
+                for prop_uri in module_graph.subjects(RDF.type, OWL.DatatypeProperty):
+                    if self.ontology_base.lower() in str(prop_uri).lower():
+                        entity_uris.add(str(prop_uri))
+
+                # Get all individuals
+                for ind_uri in module_graph.subjects(RDF.type, OWL.NamedIndividual):
+                    if self.ontology_base.lower() in str(ind_uri).lower():
+                        entity_uris.add(str(ind_uri))
+
+                # Categorize entities
+                entities_by_type = self._categorize_entities_by_type(entity_uris)
+
+                # Generate page content
+                content = self._generate_module_page(
+                    module_name, module_file, entities_by_type
+                )
+
+                # Create output directory structure
+                output_subdir = modules_doc_dir / rel_path.parent
+                output_subdir.mkdir(parents=True, exist_ok=True)
+
+                # Write file
+                output_file = output_subdir / f"{module_name}.md"
+                with open(output_file, 'w', encoding='utf-8') as f:
+                    f.write(content)
+
+                print(f"Generated module page: {output_file}")
+                generated_files.append(output_file)
+
+        # Process bridges directory
+        if bridges_dir.exists():
+            bridges_doc_dir = self.output_dir.parent / "bridges"
+            bridges_doc_dir.mkdir(parents=True, exist_ok=True)
+
+            for bridge_file in sorted(bridges_dir.rglob("*.ttl")):
+                rel_path = bridge_file.relative_to(bridges_dir)
+                bridge_name = rel_path.stem
+
+                # Parse the bridge file
+                bridge_graph = Graph()
+                try:
+                    bridge_graph.parse(bridge_file, format="turtle")
+                except Exception as e:
+                    print(f"Warning: Could not parse {bridge_file}: {e}")
+                    continue
+
+                # Collect entities from this bridge
+                # Look for all classes, properties, and individuals defined here
+                entity_uris = set()
+
+                # Get all classes
+                for class_uri in bridge_graph.subjects(RDF.type, OWL.Class):
+                    if self.ontology_base.lower() in str(class_uri).lower():
+                        entity_uris.add(str(class_uri))
+
+                # Also get classes defined via rdfs:subClassOf
+                for class_uri in bridge_graph.subjects(RDFS.subClassOf, None):
+                    if self.ontology_base.lower() in str(class_uri).lower():
+                        entity_uris.add(str(class_uri))
+
+                # Get all properties
+                for prop_uri in bridge_graph.subjects(RDF.type, OWL.ObjectProperty):
+                    if self.ontology_base.lower() in str(prop_uri).lower():
+                        entity_uris.add(str(prop_uri))
+
+                for prop_uri in bridge_graph.subjects(RDF.type, OWL.DatatypeProperty):
+                    if self.ontology_base.lower() in str(prop_uri).lower():
+                        entity_uris.add(str(prop_uri))
+
+                # Get all individuals
+                for ind_uri in bridge_graph.subjects(RDF.type, OWL.NamedIndividual):
+                    if self.ontology_base.lower() in str(ind_uri).lower():
+                        entity_uris.add(str(ind_uri))
+
+                # Categorize entities
+                entities_by_type = self._categorize_entities_by_type(entity_uris)
+
+                # Generate page content
+                content = self._generate_module_page(
+                    bridge_name, bridge_file, entities_by_type
+                )
+
+                # Write file
+                output_file = bridges_doc_dir / f"{bridge_name}.md"
+                with open(output_file, 'w', encoding='utf-8') as f:
+                    f.write(content)
+
+                print(f"Generated bridge page: {output_file}")
+                generated_files.append(output_file)
+
+        return generated_files
 
 def main():
     """Main function to run the documentation generator."""
@@ -668,13 +916,15 @@ def main():
     # Generate index page
     index_file = generator.generate_index()
 
-    # Generate entities documentation
-    entities_file = generator.generate_all_docs()
+    # Generate modular documentation
+    module_files = generator.generate_modular_docs()
 
-    if entities_file:
+    if module_files:
         print("\nSuccessfully generated documentation:")
         print(f"  - Index: {index_file}")
-        print(f"  - Entities: {entities_file}")
+        print(f"  - Module pages: {len(module_files)}")
+        for file in module_files:
+            print(f"    - {file}")
 
 if __name__ == "__main__":
     main()

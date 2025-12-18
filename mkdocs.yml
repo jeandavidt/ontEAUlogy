@@ -1,10 +1,10 @@
-site_name: ontEAUlogy Documentation
-site_description: Automated documentation for the ontEAUlogy ontology, providing comprehensive
+site_name: waterFRAME Documentation
+site_description: Automated documentation for the waterFRAME ontology, providing comprehensive
   information about all entities, classes, properties, and relationships.
 site_author: Jean-David Therrien (BioMATH UGent)
-site_url: https://jeandavidt.github.io/ontEAUlogy/
-repo_url: https://github.com/jeandavidt/ontEAUlogy
-repo_name: jeandavidt/ontEAUlogy
+site_url: https://jeandavidt.github.io/waterFRAME/
+repo_url: https://github.com/jeandavidt/waterFRAME
+repo_name: jeandavidt/waterFRAME
 edit_uri: edit/main/docs/
 copyright: Copyright &copy; 2025 Jean-David Therrien
 use_directory_urls: true
@@ -89,12 +89,18 @@ plugins:
     separator: '[\s\u200b\-_,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
 nav:
 - Home: index.md
-- Entities: entities.md
+- Modules:
+  - Core:
+    - Material Entities: modules/core/material_entities.md
+    - Properties: modules/core/properties.md
 - Explore Ontology: notebook/index.html
 watch:
-- data/ontology/
+- data/ontology/modules/
+- data/ontology/bridges/
+- data/ontology/waterframe.ttl
 - scripts/
 - src/
+- notebooks/
 extra_css:
 - stylesheets/extra.css
 extra_javascript:
