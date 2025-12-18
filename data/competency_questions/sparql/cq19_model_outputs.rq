@@ -1,0 +1,56 @@
+# CQ19: What are the output variables for Model M?
+# Port-based approach: Model outputs correspond to component output ports
+# This enables agent-based optimization by identifying where results are retrieved
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX housecase1: <https://ugentbiomath.github.io/ontology/index.ttl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+# Query 1: Find all output ports for a specific component (= model outputs)
+SELECT ?outputPort ?outputPortLabel ?flowType ?downstreamComponent ?downstreamLabel
+WHERE {
+    # Specify the component (treatment unit) of interest
+    BIND(housecase1:Membrane_bioreactor AS ?component)
+
+    # Get all output ports for this component
+    ?component wf:hasOutputPort ?outputPort .
+
+    # Optional: Find where this output port flows to
+    OPTIONAL {
+        ?outputPort wf:flowsTo ?downstreamPort .
+        ?downstreamComponent wf:hasInputPort ?downstreamPort .
+        OPTIONAL { ?downstreamComponent rdfs:label ?downstreamLabel }
+    }
+
+    # Optional: Flow type classification
+    OPTIONAL { ?outputPort wf:hasFlowType ?flowType }
+
+    # Optional: Port label
+    OPTIONAL { ?outputPort rdfs:label ?outputPortLabel }
+}
+ORDER BY ?outputPortLabel
+
+# Query 2: Find output ports that correspond to model output variables
+# (When information.ttl module is implemented)
+# Uncomment when wf:correspondsToModelOutput property is populated:
+# SELECT ?outputPort ?modelVariable ?variableName ?variableType
+# WHERE {
+#     BIND(housecase1:Membrane_bioreactor AS ?component)
+#     ?component wf:hasOutputPort ?outputPort .
+#     ?outputPort wf:correspondsToModelOutput ?modelVariable .
+#     OPTIONAL { ?modelVariable rdfs:label ?variableName }
+#     OPTIONAL { ?modelVariable wf:hasVariableType ?variableType }
+# }
+
+# Query 3: Find components with multiple outputs (splitters)
+# Useful for identifying branching points in the network
+# Uncomment to use:
+# SELECT ?component ?componentLabel (COUNT(?outputPort) AS ?outputCount)
+# WHERE {
+#     ?component wf:hasOutputPort ?outputPort .
+#     OPTIONAL { ?component rdfs:label ?componentLabel }
+# }
+# GROUP BY ?component ?componentLabel
+# HAVING (COUNT(?outputPort) > 1)
+# ORDER BY DESC(?outputCount)

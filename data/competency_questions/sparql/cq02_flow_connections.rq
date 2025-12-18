@@ -1,0 +1,33 @@
+# CQ2: What flows connect Node A to Node B? (directed edges, flow type: water, sludge, chemical)
+# This query finds direct flow connections between two specific nodes
+PREFIX wf: <https://ugentbiomath.github.io/ontEAUlogy#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?flowConnection ?flowType ?flowDirection ?sourceLabel ?targetLabel
+WHERE {
+    # Find direct flow connections between nodes
+    ?flowConnection a wf:WaterSystemComponent .
+    
+    # Direct flow relationship
+    ?flowConnection wf:flowsTo ?targetNode .
+    
+    # Filter for specific nodes (replace with actual nodes in practice)
+    FILTER(?flowConnection = wf:Membrane_bioreactor && ?targetNode = wf:Purified_greywater_storage)
+    
+    # Optional flow characteristics
+    OPTIONAL { ?flowConnection wf:hasFlowType ?flowType }
+    OPTIONAL { ?flowConnection wf:hasFlowDirection ?flowDirection }
+    
+    # Optional labels for readability
+    OPTIONAL { ?flowConnection rdfs:label ?sourceLabel }
+    OPTIONAL { ?targetNode rdfs:label ?targetLabel }
+}
+
+# To find ALL flow connections in the system:
+# SELECT ?source ?target ?sourceLabel ?targetLabel
+# WHERE {
+#     ?source wf:flowsTo ?target .
+#     OPTIONAL { ?source rdfs:label ?sourceLabel }
+#     OPTIONAL { ?target rdfs:label ?targetLabel }
+# }

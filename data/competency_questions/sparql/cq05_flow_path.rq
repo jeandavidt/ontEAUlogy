@@ -1,0 +1,36 @@
+# CQ5: What is the complete flow path from Source S to Sink K? (may require transitive reasoning)
+# This query finds all possible paths from source to sink using property chains
+PREFIX wf: <https://ugentbiomath.github.io/ontEAUlogy#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?path ?node ?nodeLabel ?nodeType ?step
+WHERE {
+    # Define source and sink (replace with actual nodes)
+    VALUES ?sourceS { wf:Rainwater_storage }
+    VALUES ?sinkK { wf:Infiltration }
+    
+    # Recursive path finding using property paths
+    # This finds all paths of any length from source to sink
+    ?sourceS wf:flowsTo+ ?intermediateNode .
+    
+    # Check if this intermediate node reaches the sink
+    ?intermediateNode wf:flowsTo* ?sinkK .
+    
+    # Get the complete path from source to this intermediate node
+    ?sourceS wf:flowsTo+ ?node .
+    
+    # Get node information
+    ?node rdf:type ?nodeType .
+    FILTER(?nodeType != wf:WaterSystemComponent)
+    
+    OPTIONAL { ?node rdfs:label ?nodeLabel }
+    
+    # For path numbering (simple approach)
+    BIND (
+        IF(?node = ?sourceS, 0,
+           IF(?node = ?sinkK, 999, 1)
+        ) AS ?step
+    )
+}
+ORDER BY ?step

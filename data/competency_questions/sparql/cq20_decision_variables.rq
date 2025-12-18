@@ -1,0 +1,60 @@
+# CQ20: Which parameters of Model M are fixed vs. manipulable (decision variables)?
+#
+# IMPORTANT DESIGN QUESTIONS (see docs/design_decisions.md):
+# 1. Are decision variables always located at ports? Or can they be:
+#    - Internal component parameters (e.g., reactor volume, membrane area)?
+#    - Process parameters (e.g., aeration rate, recycle ratio)?
+#    - Control setpoints (e.g., DO controller target)?
+# 2. The mapping between physical system and mathematical model is NOT one-to-one:
+#    - One physical component may have multiple models (steady-state, dynamic, etc.)
+#    - One model may represent multiple physical components (e.g., treatment train)
+#    - Need to consult OntoCAPE for system-model mapping patterns
+# 3. Three-layer distinction needed:
+#    - Mathematical model (equations, variables, parameters)
+#    - Software implementation (code, algorithms)
+#    - API/invocation protocol (endpoints, function signatures, agent references)
+#
+# This query is a PLACEHOLDER until information.ttl and roles.ttl modules are designed
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX housecase1: <https://ugentbiomath.github.io/ontology/index.ttl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+# PLACEHOLDER Query: Identify ports (which MAY correspond to some decision variables)
+# This is incomplete - decision variables can be internal parameters not at ports
+SELECT ?component ?componentLabel ?port ?portLabel ?portType
+WHERE {
+    # Specify the component of interest
+    BIND(housecase1:Reverse_osmosis AS ?component)
+
+    # Get all ports
+    ?component wf:hasPort ?port .
+    ?port rdf:type ?portType .
+    FILTER(?portType IN (wf:InputPort, wf:OutputPort))
+
+    # Labels
+    OPTIONAL { ?component rdfs:label ?componentLabel }
+    OPTIONAL { ?port rdfs:label ?portLabel }
+}
+ORDER BY ?portType ?portLabel
+
+# TODO: Complete implementation requires:
+# 1. Define Model class in information.ttl (following OntoCAPE)
+# 2. Define ModelVariable class with subclasses:
+#    - InputVariable (may correspond to port or internal parameter)
+#    - OutputVariable (may correspond to port or computed quantity)
+#    - InternalParameter (not directly observable at ports)
+# 3. Define Role class in roles.ttl with instances:
+#    - DecisionVariable (manipulable in optimization)
+#    - FixedParameter (user-specified, not optimized)
+#    - StateVariable (computed by model)
+# 4. Define relationships:
+#    - wf:hasModel (Component -> Model)
+#    - wf:hasVariable (Model -> ModelVariable)
+#    - wf:correspondsToPort (ModelVariable -> Port) [when applicable]
+#    - wf:hasRole (ModelVariable -> Role) [context-dependent]
+# 5. Three-layer model representation:
+#    - MathematicalModel (abstract equations)
+#    - SoftwareImplementation (executable code)
+#    - InvocationProtocol (how to call it: API, CLI, agent)

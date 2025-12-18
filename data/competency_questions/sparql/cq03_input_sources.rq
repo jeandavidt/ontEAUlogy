@@ -1,0 +1,36 @@
+# CQ3: What are the possible input sources for Plant X?
+# This query finds all upstream sources that can flow to a given treatment plant/unit
+PREFIX wf: <https://ugentbiomath.github.io/ontEAUlogy#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?inputSource ?sourceType ?sourceLabel ?flowType ?isDirect
+WHERE {
+    # Target treatment plant/unit (replace with actual node)
+    VALUES ?plantX { <https://ugentbiomath.github.io/ontology/index.ttl#Membrane_bioreactor> }
+    
+    # Find upstream sources (both direct and indirect)
+    {
+        # Direct input sources
+        ?inputSource wf:flowsTo ?plantX .
+        BIND(true AS ?isDirect)
+    }
+    UNION
+    {
+        # Indirect sources (upstream of direct sources)
+        ?inputSource wf:flowsTo+ ?midNode .
+        ?midNode wf:flowsTo+ ?plantX .
+        FILTER(?inputSource != ?midNode && ?midNode != ?plantX)
+        BIND(false AS ?isDirect)
+    }
+    
+    # Get source type information
+    ?inputSource rdf:type ?sourceType .
+    FILTER(?sourceType != wf:WaterSystemComponent)
+    
+    # Optional flow characteristics and labels
+    OPTIONAL { ?inputSource wf:hasFlowType ?flowType }
+    OPTIONAL { ?inputSource rdfs:label ?sourceLabel }
+}
+GROUP BY ?inputSource ?sourceType ?sourceLabel ?flowType ?isDirect
+ORDER BY ?isDirect ?sourceType ?sourceLabel

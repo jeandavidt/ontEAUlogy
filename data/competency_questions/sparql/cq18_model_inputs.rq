@@ -1,0 +1,57 @@
+# CQ18: What are the input variables for Model M?
+# Port-based approach: Model inputs correspond to component input ports
+# This enables agent-based optimization by identifying where boundary conditions/inputs are set
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX housecase1: <https://ugentbiomath.github.io/ontology/index.ttl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+# Query 1: Find all input ports for a specific component (= model inputs)
+SELECT ?inputPort ?inputPortLabel ?flowType ?upstreamComponent ?upstreamLabel
+WHERE {
+    # Specify the component (treatment unit) of interest
+    BIND(housecase1:Membrane_bioreactor AS ?component)
+
+    # Get all input ports for this component
+    ?component wf:hasInputPort ?inputPort .
+
+    # Optional: Find what connects to this input port
+    OPTIONAL {
+        ?upstreamPort wf:flowsTo ?inputPort .
+        ?upstreamComponent wf:hasOutputPort ?upstreamPort .
+        OPTIONAL { ?upstreamComponent rdfs:label ?upstreamLabel }
+    }
+
+    # Optional: Flow type classification
+    OPTIONAL { ?inputPort wf:hasFlowType ?flowType }
+
+    # Optional: Port label
+    OPTIONAL { ?inputPort rdfs:label ?inputPortLabel }
+}
+ORDER BY ?inputPortLabel
+
+# Query 2: Find input ports that correspond to model input variables
+# (When information.ttl module is implemented)
+# Uncomment when wf:correspondsToModelInput property is populated:
+# SELECT ?inputPort ?modelVariable ?variableName ?variableType
+# WHERE {
+#     BIND(housecase1:Membrane_bioreactor AS ?component)
+#     ?component wf:hasInputPort ?inputPort .
+#     ?inputPort wf:correspondsToModelInput ?modelVariable .
+#     OPTIONAL { ?modelVariable rdfs:label ?variableName }
+#     OPTIONAL { ?modelVariable wf:hasVariableType ?variableType }
+# }
+
+# Query 3: Count input ports by component type
+# Useful for understanding model complexity
+# Uncomment to use:
+# SELECT ?componentType ?componentTypeLabel (COUNT(?inputPort) AS ?inputCount)
+# WHERE {
+#     ?component rdf:type ?componentType .
+#     ?componentType rdfs:subClassOf* wf:WaterSystemComponent .
+#     ?component wf:hasInputPort ?inputPort .
+#     OPTIONAL { ?componentType rdfs:label ?componentTypeLabel }
+# }
+# GROUP BY ?componentType ?componentTypeLabel
+# ORDER BY DESC(?inputCount)

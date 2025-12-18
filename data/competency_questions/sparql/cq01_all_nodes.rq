@@ -1,0 +1,20 @@
+# CQ1: What are all the nodes (plants, sources, junctions, sinks) in a given catchment?
+# This query retrieves all water system components, which are the physical nodes in the system
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?node ?nodeType ?nodeLabel ?comment
+WHERE {
+    # Find all instances of WaterSystemComponent or its subclasses
+    ?node rdf:type/rdfs:subClassOf* wf:WaterSystemComponent .
+    
+    # Get the most specific type
+    ?node rdf:type ?nodeType .
+    FILTER(?nodeType != wf:WaterSystemComponent)
+    
+    # Optional label and comment for better readability
+    OPTIONAL { ?node rdfs:label ?nodeLabel }
+    OPTIONAL { ?node rdfs:comment ?comment }
+}
+ORDER BY ?nodeType ?nodeLabel
