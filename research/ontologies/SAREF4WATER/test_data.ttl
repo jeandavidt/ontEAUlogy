@@ -1,0 +1,345 @@
+@prefix : <http://example.org/test/> .
+@prefix s4watr: <https://w3id.org/def/S4WATR#> .
+@prefix saref: <https://w3id.org/saref#> .
+@prefix saref4city: <https://w3id.org/def/saref4city#> .
+@prefix geo: <http://www.opengis.net/ont/geosparql#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Test data for SAREF4WATER ontology evaluation
+# Based on competency questions for water treatment plant representation
+
+# ============================================================================
+# WATER ASSETS (Treatment Plants, Wells, Dams, Reservoirs)
+# ============================================================================
+
+# Wastewater Treatment Plant - testing CQ1, CQ6, CQ17
+:PlantA a s4watr:WaterAsset ;
+    rdfs:label "Wastewater Treatment Plant A" ;
+    rdfs:comment "Primary treatment plant for urban wastewater" .
+
+# Catchment Well - testing CQ1, CQ3
+:WellB a s4watr:CatchmentWell ;
+    rdfs:label "Catchment Well B" ;
+    rdfs:comment "Groundwater extraction point" .
+
+# Reservoir - testing CQ1, CQ4
+:ReservoirC a s4watr:Reservoir ;
+    rdfs:label "Reservoir C" ;
+    rdfs:comment "Water storage facility" .
+
+# Dam - testing CQ1
+:DamD a s4watr:Dam ;
+    rdfs:label "Dam D" ;
+    rdfs:comment "Water control structure" .
+
+# Groundwater Well
+:GroundwaterWellE a s4watr:GroundWaterWell ;
+    rdfs:label "Groundwater Well E" .
+
+# ============================================================================
+# WATER INFRASTRUCTURE (Pipes, Tanks, Aqueducts)
+# ============================================================================
+
+# Storage Tank - testing CQ9
+:StorageTankF a s4watr:StorageTank ;
+    rdfs:label "Storage Tank F" ;
+    rdfs:comment "Water storage tank with 100,000L capacity" .
+
+# Pipe connecting Plant A to Reservoir C - testing CQ2, CQ4
+:PipeAtoC a s4watr:Pipe ;
+    rdfs:label "Pipe from Plant A to Reservoir C" ;
+    rdfs:comment "Effluent discharge pipe" .
+
+# Pipe connecting Well B to Plant A - testing CQ3
+:PipeBtoA a s4watr:Pipe ;
+    rdfs:label "Pipe from Well B to Plant A" ;
+    rdfs:comment "Raw water supply pipe" .
+
+# Aqueduct
+:AqueductG a s4watr:Aquedunct ;
+    rdfs:label "Aqueduct G" .
+
+# ============================================================================
+# DEVICES (Sensors, Actuators, Meters)
+# ============================================================================
+
+# Water Quality Sensor - testing CQ10, CQ13
+:WaterQualitySensor1 a s4watr:WaterQualitySensor ;
+    rdfs:label "Water Quality Sensor at Plant A Effluent" ;
+    s4watr:usedIn :PlantA ;
+    s4watr:hasFabricationNo "WQS-2024-001" ;
+    s4watr:hasFirmwareVersion "v2.3.1" ;
+    s4watr:hasHardwareVersion "HW-rev3" ;
+    saref:hasManufacture "AquaTech Inc." ;
+    saref:hasModel "MultiParam-500" ;
+    s4watr:hasVersion :Version_WQS1 .
+
+# Tank Level Sensor - testing CQ9
+:TankLevelSensor1 a s4watr:TankLevelSensor ;
+    rdfs:label "Tank Level Sensor for Storage Tank F" ;
+    s4watr:usedIn :StorageTankF ;
+    s4watr:hasFabricationNo "TLS-2024-005" ;
+    s4watr:hasFirmwareVersion "v1.5.0" ;
+    s4watr:hasHardwareVersion "HW-rev2" ;
+    saref:hasManufacture "SensorCorp" ;
+    saref:hasModel "UltraLevel-200" ;
+    s4watr:hasVersion :Version_TLS1 .
+
+# Capacity Sensor
+:CapacitySensor1 a s4watr:CapacitySensor ;
+    rdfs:label "Capacity Sensor for Reservoir C" ;
+    s4watr:usedIn :ReservoirC ;
+    s4watr:hasFabricationNo "CS-2024-010" ;
+    s4watr:hasFirmwareVersion "v1.2.3" ;
+    s4watr:hasHardwareVersion "HW-rev1" ;
+    saref:hasManufacture "FlowMetrics Ltd." ;
+    saref:hasModel "CapSense-1000" ;
+    s4watr:hasVersion :Version_CS1 .
+
+# Water Meter
+:WaterMeter1 a s4watr:ColdWaterMeter ;
+    rdfs:label "Cold Water Meter at Well B" ;
+    s4watr:usedIn :WellB ;
+    s4watr:hasFabricationNo "CWM-2024-020" ;
+    s4watr:hasFirmwareVersion "v3.1.0" ;
+    s4watr:hasVersion :Version_WM1 ;
+    s4watr:hasTarrif :TarrifResidential .
+
+# Pump - testing actuator capabilities
+:Pump1 a s4watr:Pump ;
+    rdfs:label "Transfer Pump 1" ;
+    s4watr:usedIn :WellB ;
+    s4watr:hasFabricationNo "PMP-2024-015" ;
+    s4watr:hasFirmwareVersion "v2.0.1" ;
+    s4watr:hasHardwareVersion "HW-rev4" ;
+    saref:hasManufacture "PumpTech" ;
+    saref:hasModel "HighFlow-750" ;
+    s4watr:hasVersion :Version_Pump1 .
+
+# Valve
+:Valve1 a s4watr:Valve ;
+    rdfs:label "Control Valve 1" ;
+    s4watr:usedIn :PipeBtoA ;
+    s4watr:hasFabricationNo "VLV-2024-008" ;
+    s4watr:hasFirmwareVersion "v1.8.2" ;
+    s4watr:hasHardwareVersion "HW-rev3" ;
+    saref:hasManufacture "ValveControl Inc." ;
+    saref:hasModel "SmartValve-300" ;
+    s4watr:hasVersion :Version_Valve1 .
+
+# Pressure Regulator
+:PressureReg1 a s4watr:PressureRegulator ;
+    rdfs:label "Pressure Regulator 1" ;
+    s4watr:usedIn :PipeAtoC ;
+    s4watr:hasFabricationNo "PR-2024-012" ;
+    s4watr:hasFirmwareVersion "v1.4.5" ;
+    s4watr:hasHardwareVersion "HW-rev2" ;
+    saref:hasManufacture "PressureControl LLC" ;
+    saref:hasModel "AutoPress-150" ;
+    s4watr:hasVersion :Version_PR1 .
+
+# ============================================================================
+# VERSIONS (for devices)
+# ============================================================================
+
+:Version_WQS1 a s4watr:Version ;
+    rdfs:label "Version 2.3.1" .
+
+:Version_TLS1 a s4watr:Version ;
+    rdfs:label "Version 1.5.0" .
+
+:Version_CS1 a s4watr:Version ;
+    rdfs:label "Version 1.2.3" .
+
+:Version_WM1 a s4watr:Version ;
+    rdfs:label "Version 3.1.0" .
+
+:Version_Pump1 a s4watr:Version ;
+    rdfs:label "Version 2.0.1" .
+
+:Version_Valve1 a s4watr:Version ;
+    rdfs:label "Version 1.8.2" .
+
+:Version_PR1 a s4watr:Version ;
+    rdfs:label "Version 1.4.5" .
+
+# ============================================================================
+# TARRIFS
+# ============================================================================
+
+:TarrifResidential a s4watr:Tarrif ;
+    rdfs:label "Residential Water Tarrif" .
+
+:TarrifIndustrial a s4watr:Tarrif ;
+    rdfs:label "Industrial Water Tarrif" .
+
+# ============================================================================
+# WATER PROPERTIES - testing CQ10, CQ11, CQ13
+# ============================================================================
+
+# Physical properties
+:TurbidityProperty a s4watr:Physical ;
+    rdfs:label "Turbidity" ;
+    rdfs:comment "Measure of water clarity" .
+
+:ConductanceProperty a s4watr:Physical ;
+    rdfs:label "Electrical Conductance" ;
+    rdfs:comment "Measure of water's ability to conduct electricity" .
+
+# Chemical properties
+:pHProperty a s4watr:Chemical ;
+    rdfs:label "pH" ;
+    rdfs:comment "Measure of acidity or alkalinity" .
+
+:HardnessProperty a s4watr:Chemical ;
+    rdfs:label "Water Hardness" ;
+    rdfs:comment "Measure of calcium and magnesium concentration" .
+
+# Generic water properties
+:TemperatureProperty a s4watr:WaterProperty ;
+    rdfs:label "Water Temperature" .
+
+:FlowRateProperty a s4watr:WaterProperty ;
+    rdfs:label "Flow Rate" .
+
+:VolumeProperty a s4watr:WaterProperty ;
+    rdfs:label "Volume" .
+
+# ============================================================================
+# MEASUREMENTS - testing CQ10, CQ12
+# ============================================================================
+
+# Turbidity measurement at Plant A effluent
+:TurbidityMeasurement1 a saref:Measurement ;
+    rdfs:label "Turbidity measurement at 2024-01-15 10:30" ;
+    saref:hasValue "2.5"^^xsd:float ;
+    saref:isMeasuredIn :NTU_Unit ;
+    saref:relatesToProperty s4watr:Turbidity ;
+    saref:hasTimeStamp "2024-01-15T10:30:00"^^xsd:dateTime ;
+    saref:measurementMadeBy :WaterQualitySensor1 .
+
+# pH measurement at Plant A effluent
+:pHMeasurement1 a saref:Measurement ;
+    rdfs:label "pH measurement at 2024-01-15 10:30" ;
+    saref:hasValue "7.2"^^xsd:float ;
+    saref:isMeasuredIn :pH_Unit ;
+    saref:relatesToProperty s4watr:pH ;
+    saref:hasTimeStamp "2024-01-15T10:30:00"^^xsd:dateTime ;
+    saref:measurementMadeBy :WaterQualitySensor1 .
+
+# Temperature measurement
+:TempMeasurement1 a saref:Measurement ;
+    rdfs:label "Temperature measurement at 2024-01-15 10:30" ;
+    saref:hasValue "18.5"^^xsd:float ;
+    saref:isMeasuredIn :Celsius_Unit ;
+    saref:relatesToProperty s4watr:Temperature ;
+    saref:hasTimeStamp "2024-01-15T10:30:00"^^xsd:dateTime ;
+    saref:measurementMadeBy :WaterQualitySensor1 .
+
+# Flow rate measurement
+:FlowMeasurement1 a saref:Measurement ;
+    rdfs:label "Flow rate measurement at 2024-01-15 10:30" ;
+    saref:hasValue "450.0"^^xsd:float ;
+    saref:isMeasuredIn :LitersPerSecond_Unit ;
+    saref:relatesToProperty s4watr:FlowOfWater ;
+    saref:hasTimeStamp "2024-01-15T10:30:00"^^xsd:dateTime ;
+    saref:measurementMadeBy :WaterMeter1 .
+
+# Tank level measurement
+:LevelMeasurement1 a saref:Measurement ;
+    rdfs:label "Tank level measurement at 2024-01-15 10:30" ;
+    saref:hasValue "75000.0"^^xsd:float ;
+    saref:isMeasuredIn :Liters_Unit ;
+    saref:relatesToProperty s4watr:CurrentLevel ;
+    saref:hasTimeStamp "2024-01-15T10:30:00"^^xsd:dateTime ;
+    saref:measurementMadeBy :TankLevelSensor1 .
+
+# ============================================================================
+# UNITS OF MEASURE
+# ============================================================================
+
+:NTU_Unit a saref:UnitOfMeasure ;
+    rdfs:label "NTU" ;
+    rdfs:comment "Nephelometric Turbidity Unit" .
+
+:pH_Unit a saref:UnitOfMeasure ;
+    rdfs:label "pH" ;
+    rdfs:comment "pH unit (dimensionless)" .
+
+:Celsius_Unit a saref:UnitOfMeasure ;
+    rdfs:label "°C" ;
+    rdfs:comment "Degrees Celsius" .
+
+:LitersPerSecond_Unit a saref:UnitOfMeasure ;
+    rdfs:label "L/s" ;
+    rdfs:comment "Liters per second" .
+
+:Liters_Unit a saref:UnitOfMeasure ;
+    rdfs:label "L" ;
+    rdfs:comment "Liters" .
+
+:mgPerL_Unit a saref:UnitOfMeasure ;
+    rdfs:label "mg/L" ;
+    rdfs:comment "Milligrams per liter" .
+
+# ============================================================================
+# INDICATORS - testing city-level metrics
+# ============================================================================
+
+:WaterEfficiencyIndicator a s4watr:Indicator ;
+    rdfs:label "Water Efficiency Indicator" ;
+    s4watr:assignedTo :TestCity .
+
+:WaterQualityIndicator a s4watr:Indicator ;
+    rdfs:label "Water Quality Compliance Indicator" ;
+    s4watr:assignedTo :TestCity .
+
+# ============================================================================
+# CITY
+# ============================================================================
+
+:TestCity a saref4city:City ;
+    rdfs:label "Test City" ;
+    rdfs:comment "Municipal area for testing" .
+
+# ============================================================================
+# RELATIONSHIPS
+# ============================================================================
+
+# Water assets have indicators
+:PlantA s4watr:hasIndicator :WaterQualityIndicator .
+:ReservoirC s4watr:hasIndicator :WaterEfficiencyIndicator .
+
+# Water assets are managed by devices
+:PlantA s4watr:isManagedBy :WaterQualitySensor1 .
+:StorageTankF s4watr:isManagedBy :TankLevelSensor1 .
+:ReservoirC s4watr:isManagedBy :CapacitySensor1 .
+:WellB s4watr:isManagedBy :WaterMeter1 .
+
+# Devices manage water assets (inverse)
+:WaterQualitySensor1 s4watr:manageWaterAsset :PlantA .
+:TankLevelSensor1 s4watr:manageWaterAsset :StorageTankF .
+
+# Infrastructure is composed of assets
+:MainWaterNetwork a s4watr:WaterInfrastructure ;
+    rdfs:label "Main Water Distribution Network" ;
+    s4watr:isComposedBy :PlantA, :WellB, :ReservoirC, :DamD, :StorageTankF .
+
+# Devices measure properties
+:WaterQualitySensor1 saref:measuresProperty s4watr:Turbidity, s4watr:pH, s4watr:Temperature .
+:TankLevelSensor1 saref:measuresProperty s4watr:CurrentLevel .
+:WaterMeter1 saref:measuresProperty s4watr:FlowOfWater .
+
+# Properties are measured by devices (inverse)
+s4watr:Turbidity saref:isMeasuredByDevice :WaterQualitySensor1 .
+s4watr:pH saref:isMeasuredByDevice :WaterQualitySensor1 .
+s4watr:Temperature saref:isMeasuredByDevice :WaterQualitySensor1 .
+
+# Properties relate to measurements
+s4watr:Turbidity saref:relatesToMeasurements :TurbidityMeasurement1 .
+s4watr:pH saref:relatesToMeasurements :pHMeasurement1 .
+s4watr:Temperature saref:relatesToMeasurements :TempMeasurement1 .
+s4watr:FlowOfWater saref:relatesToMeasurements :FlowMeasurement1 .
+s4watr:CurrentLevel saref:relatesToMeasurements :LevelMeasurement1 .
