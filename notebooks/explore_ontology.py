@@ -880,28 +880,11 @@ def _(
     cyto_widget = CytoscapeWidget()
     graph_viz = mo.ui.anywidget(cyto_widget)
 
-    # Create legend
-    _legend_md = """
-    ### Legend
 
-    | Shape | Color | Type |
-    |-------|-------|------|
-    | ⭐ | Purple | Ontology |
-    | ◆ | Dark Gray | Meta (OWL/RDFS/RDF) |
-    | ⬡ | Teal | Datatype (XSD) |
-    | ⚪ | Blue | Class |
-    | ◇ | Green | Object Property |
-    | ▭ | Orange | Datatype Property |
-    | ⬢ | Light Purple | Individual |
-    | ▼ | Light Gray | Literal |
-    | ▲ | Red | Blank Node |
-    | ▽ | Dark Red | Unknown |
-    """
 
     mo.vstack([
         mo.md(f"**Showing {len(_cyto_elements)} elements** (Layout: {_selected_layout})"),
-        graph_viz,
-        mo.md(_legend_md)
+        graph_viz
     ])
     return
 
