@@ -1,0 +1,357 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://ugentbiomath.github.io/waterframe/modules/qualities>
+    a owl:Ontology ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/material_entities> ;
+    dc:title "waterFRAME: Water Quality Parameters Module" ;
+    dc:creator "Jean-David Therrien" ;
+    rdfs:comment "Water quality parameters and requirements for modeling and regulation. Uses Entity_Feature_Value pattern from Manchester ODPs." .
+
+# ========== WATER QUALITY PARAMETER BASE CLASS ==========
+# A water quality parameter is a measurable quality of water
+
+wf:WaterQualityParameter a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000019 ;  # Quality
+    rdfs:label "Water quality parameter" ;
+    rdfs:comment "A measurable quality or characteristic of water." .
+
+# ========== SPECIFIC WATER QUALITY PARAMETERS ==========
+
+# Biochemical Oxygen Demand
+wf:BOD a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityParameter ;
+    rdfs:label "Biochemical Oxygen Demand" ;
+    rdfs:comment "The amount of dissolved oxygen needed by aerobic biological organisms to break down organic matter. Measured in mg/L." ;
+    wf:hasUnit qudt:milligramPerLiter .
+
+# Chemical Oxygen Demand
+wf:COD a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityParameter ;
+    rdfs:label "Chemical Oxygen Demand" ;
+    rdfs:comment "The oxygen equivalent of the organic matter content. Measured in mg/L." ;
+    wf:hasUnit qudt:milligramPerLiter .
+
+# Total Suspended Solids
+wf:TSS a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityParameter ;
+    rdfs:label "Total Suspended Solids" ;
+    rdfs:comment "The total amount of solid material suspended in water. Measured in mg/L." ;
+    wf:hasUnit qudt:milligramPerLiter .
+
+# Total Dissolved Solids
+wf:TDS a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityParameter ;
+    rdfs:label "Total Dissolved Solids" ;
+    rdfs:comment "The total amount of dissolved solids in water. Measured in mg/L." ;
+    wf:hasUnit qudt:milligramPerLiter .
+
+# pH
+wf:pH a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityParameter ;
+    rdfs:label "pH" ;
+    rdfs:comment "A measure of the acidity or basicity of water. Dimensionless scale 0-14." .
+
+# Temperature
+wf:Temperature a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityParameter ;
+    rdfs:label "Temperature" ;
+    rdfs:comment "Water temperature. Measured in degrees Celsius." ;
+    wf:hasUnit qudt:degreeCelsius .
+
+# Turbidity
+wf:Turbidity a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityParameter ;
+    rdfs:label "Turbidity" ;
+    rdfs:comment "The cloudiness or haziness of water caused by suspended particles. Measured in NTU." ;
+    wf:hasUnit <http://qudt.org/vocab/unit/NTU> .
+
+# Conductivity
+wf:Conductivity a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityParameter ;
+    rdfs:label "Conductivity" ;
+    rdfs:comment "The ability of water to conduct electricity, indicating ion concentration. Measured in μS/cm." ;
+    wf:hasUnit <http://qudt.org/vocab/unit/MicroSIEMENPerCentimeter> .
+
+# Dissolved Oxygen
+wf:DissolvedOxygen a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityParameter ;
+    rdfs:label "Dissolved Oxygen" ;
+    rdfs:comment "The amount of oxygen dissolved in water. Measured in mg/L." ;
+    wf:hasUnit qudt:milligramPerLiter .
+
+# Total Nitrogen
+wf:TotalNitrogen a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityParameter ;
+    rdfs:label "Total Nitrogen" ;
+    rdfs:comment "The total amount of nitrogen in water (organic + inorganic). Measured in mg/L." ;
+    wf:hasUnit qudt:milligramPerLiter .
+
+# Total Phosphorus
+wf:TotalPhosphorus a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityParameter ;
+    rdfs:label "Total Phosphorus" ;
+    rdfs:comment "The total amount of phosphorus in water. Measured in mg/L." ;
+    wf:hasUnit qudt:milligramPerLiter .
+
+# Ammonia
+wf:Ammonia a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityParameter ;
+    rdfs:label "Ammonia" ;
+    rdfs:comment "Concentration of ammonia (NH3-N). Measured in mg/L." ;
+    wf:hasUnit qudt:milligramPerLiter .
+
+# Nitrate
+wf:Nitrate a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityParameter ;
+    rdfs:label "Nitrate" ;
+    rdfs:comment "Concentration of nitrate (NO3-N). Measured in mg/L." ;
+    wf:hasUnit qudt:milligramPerLiter .
+
+# Nitrite
+wf:Nitrite a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityParameter ;
+    rdfs:label "Nitrite" ;
+    rdfs:comment "Concentration of nitrite (NO2-N). Measured in mg/L." ;
+    wf:hasUnit qudt:milligramPerLiter .
+
+# Orthophosphate
+wf:Orthophosphate a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityParameter ;
+    rdfs:label "Orthophosphate" ;
+    rdfs:comment "Concentration of orthophosphate (PO4-P). Measured in mg/L." ;
+    wf:hasUnit qudt:milligramPerLiter .
+
+# Alkalinity
+wf:Alkalinity a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityParameter ;
+    rdfs:label "Alkalinity" ;
+    rdfs:comment "The capacity of water to neutralize acids. Measured as mg/L CaCO3." ;
+    wf:hasUnit <http://qudt.org/vocab/unit/MilligramPerLiter> .
+
+# Chlorine
+wf:Chlorine a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityParameter ;
+    rdfs:label "Chlorine" ;
+    rdfs:comment "Residual chlorine concentration. Measured in mg/L." ;
+    wf:hasUnit qudt:milligramPerLiter .
+
+# Coliform
+wf:Coliform a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityParameter ;
+    rdfs:label "Coliform" ;
+    rdfs:comment "Concentration of coliform bacteria. Measured as MPN/100mL or CFU/100mL." .
+
+# EscherichiaColi a owl:Class ;
+#     rdfs:subClassOf wf:Coliform ;
+#     rdfs:label "Escherichia coli" ;
+#     rdfs:comment "E. coli concentration as indicator of fecal contamination." .
+
+# ========== WATER QUALITY REQUIREMENTS ==========
+# Represents regulatory or operational limits for water quality
+
+wf:WaterQualityRequirement a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000023 ;  # Specifically dependent continuant
+    rdfs:label "Water quality requirement" ;
+    rdfs:comment "A requirement or limit for a water quality parameter (regulatory or operational)." .
+
+wf:hasWaterQualityParameter a owl:ObjectProperty ;
+    rdfs:label "has water quality parameter" ;
+    rdfs:comment "Links a requirement to the parameter it governs" ;
+    rdfs:domain wf:WaterQualityRequirement ;
+    rdfs:range wf:WaterQualityParameter .
+
+wf:hasLimitValue a owl:DatatypeProperty ;
+    rdfs:label "has limit value" ;
+    rdfs:comment "The numeric limit value for the requirement" ;
+    rdfs:domain wf:WaterQualityRequirement ;
+    rdfs:range xsd:double .
+
+wf:hasLimitType a owl:ObjectProperty ;
+    rdfs:label "has limit type" ;
+    rdfs:comment "The type of limit (maximum, minimum, range, etc.)" ;
+    rdfs:domain wf:WaterQualityRequirement ;
+    rdfs:range wf:LimitType .
+
+# Limit types (value partition pattern)
+wf:LimitType a owl:Class ;
+    rdfs:label "Limit type" ;
+    rdfs:comment "Classification of water quality limit types." .
+
+wf:MaximumLimit a owl:Class ;
+    rdfs:subClassOf wf:LimitType ;
+    rdfs:label "Maximum limit" ;
+    rdfs:comment "The maximum allowed value for a parameter." .
+
+wf:MinimumLimit a owl:Class ;
+    rdfs:subClassOf wf:LimitType ;
+    rdfs:label "Minimum limit" ;
+    rdfs:comment "The minimum allowed value for a parameter." .
+
+wf:RangeLimit a owl:Class ;
+    rdfs:subClassOf wf:LimitType ;
+    rdfs:label "Range limit" ;
+    rdfs:comment "A range of allowed values for a parameter." .
+
+wf:AverageLimit a owl:Class ;
+    rdfs:subClassOf wf:LimitType ;
+    rdfs:label "Average limit" ;
+    rdfs:comment "The average or mean value limit." .
+
+# ========== WATER QUALITY CLASSIFICATIONS ==========
+# Value partition pattern for water quality classes
+
+wf:WaterQualityClass a owl:Class ;
+    rdfs:label "Water quality class" ;
+    rdfs:comment "A classification of water quality levels." .
+
+wf:ExcellentQuality a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityClass ;
+    rdfs:label "Excellent quality" ;
+    rdfs:comment "Water of excellent quality, suitable for all uses." .
+
+wf:GoodQuality a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityClass ;
+    rdfs:label "Good quality" ;
+    rdfs:comment "Water of good quality, suitable for most uses." .
+
+wf:FairQuality a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityClass ;
+    rdfs:label "Fair quality" ;
+    rdfs:comment "Water of fair quality, treatment may be required for some uses." .
+
+wf:PoorQuality a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityClass ;
+    rdfs:label "Poor quality" ;
+    rdfs:comment "Water of poor quality, treatment required for most uses." .
+
+wf:VeryPoorQuality a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityClass ;
+    rdfs:label "Very poor quality" ;
+    rdfs:comment "Water of very poor quality, limited uses." .
+
+# Make quality classes mutually exclusive
+wf:ExcellentQuality owl:disjointWith wf:GoodQuality, wf:FairQuality, wf:PoorQuality, wf:VeryPoorQuality .
+wf:GoodQuality owl:disjointWith wf:FairQuality, wf:PoorQuality, wf:VeryPoorQuality .
+wf:FairQuality owl:disjointWith wf:PoorQuality, wf:VeryPoorQuality .
+wf:PoorQuality owl:disjointWith wf:VeryPoorQuality .
+
+# ========== REGULATORY STANDARDS ==========
+
+wf:RegulatoryStandard a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000027 ;  # Rule
+    rdfs:label "Regulatory standard" ;
+    rdfs:comment "A regulatory standard for water quality." .
+
+wf:hasRegulatoryStandard a owl:ObjectProperty ;
+    rdfs:label "has regulatory standard" ;
+    rdfs:comment "Links a requirement to its regulatory standard" ;
+    rdfs:domain wf:WaterQualityRequirement ;
+    rdfs:range wf:RegulatoryStandard .
+
+wf:EUWaterFrameworkDirective a owl:Class ;
+    rdfs:subClassOf wf:RegulatoryStandard ;
+    rdfs:label "EU Water Framework Directive" ;
+    rdfs:comment "European Union Water Framework Directive standards." .
+
+wf:USEPAStandard a owl:Class ;
+    rdfs:subClassOf wf:RegulatoryStandard ;
+    rdfs:label "US EPA Standard" ;
+    rdfs:comment "United States Environmental Protection Agency standards." .
+
+wf:WHOGuideline a owl:Class ;
+    rdfs:subClassOf wf:RegulatoryStandard ;
+    rdfs:label "WHO Guideline" ;
+    rdfs:comment "World Health Organization drinking water guidelines." .
+
+# ========== WATER REUSE CLASSIFICATIONS ==========
+# Fit-for-purpose water quality classifications
+
+wf:FitForPurpose a owl:Class ;
+    rdfs:label "Fit-for-purpose classification" ;
+    rdfs:comment "Classification of water by its intended use." .
+
+wf:PotableWater a owl:Class ;
+    rdfs:subClassOf wf:FitForPurpose ;
+    rdfs:label "Potable water" ;
+    rdfs:comment "Water suitable for drinking." .
+
+wf:IrrigationWater a owl:Class ;
+    rdfs:subClassOf wf:FitForPurpose ;
+    rdfs:label "Irrigation water" ;
+    rdfs:comment "Water suitable for crop irrigation." .
+
+wf:IndustrialProcessWater a owl:Class ;
+    rdfs:subClassOf wf:FitForPurpose ;
+    rdfs:label "Industrial process water" ;
+    rdfs:comment "Water suitable for industrial processes." .
+
+wf:ToiletFlushingWater a owl:Class ;
+    rdfs:subClassOf wf:FitForPurpose ;
+    rdfs:label "Toilet flushing water" ;
+    rdfs:comment "Water suitable for toilet flushing." .
+
+wf:LandscapeIrrigationWater a owl:Class ;
+    rdfs:subClassOf wf:FitForPurpose ;
+    rdfs:label "Landscape irrigation water" ;
+    rdfs:comment "Water suitable for landscape irrigation." .
+
+wf:GroundwaterRechargeWater a owl:Class ;
+    rdfs:subClassOf wf:FitForPurpose ;
+    rdfs:label "Groundwater recharge water" ;
+    rdfs:comment "Water suitable for groundwater recharge." .
+
+# ========== OBSERVED VALUE ==========
+# Following Entity_Feature_Value pattern: observation -> parameter -> value
+
+wf:WaterQualityObservation a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000052 ;  # Processual entity (observation event)
+    rdfs:label "Water quality observation" ;
+    rdfs:comment "An observation event where water quality is measured." .
+
+wf:observedParameter a owl:ObjectProperty ;
+    rdfs:label "observed parameter" ;
+    rdfs:comment "Links an observation to the parameter being measured" ;
+    rdfs:domain wf:WaterQualityObservation ;
+    rdfs:range wf:WaterQualityParameter .
+
+wf:observedValue a owl:DatatypeProperty ;
+    rdfs:label "observed value" ;
+    rdfs:comment "The numeric value observed" ;
+    rdfs:domain wf:WaterQualityObservation ;
+    rdfs:range xsd:double .
+
+wf:observedAt a owl:DatatypeProperty ;
+    rdfs:label "observed at" ;
+    rdfs:comment "The location where the observation was made" ;
+    rdfs:domain wf:WaterQualityObservation ;
+    rdfs:range xsd:string .
+
+wf:observedOn a owl:DatatypeProperty ;
+    rdfs:label "observed on" ;
+    rdfs:comment "The date/time of the observation" ;
+    rdfs:domain wf:WaterQualityObservation ;
+    rdfs:range xsd:dateTime .
+
+# ========== EXAMPLE INSTANCES ==========
+# Example: EU discharge standard for BOD
+# wf:BOD_DischargeLimit_EU a wf:WaterQualityRequirement ;
+#     rdfs:label "EU BOD Discharge Limit" ;
+#     wf:hasWaterQualityParameter wf:BOD ;
+#     wf:hasLimitValue "25.0"^^xsd:double ;
+#     wf:hasLimitType wf:MaximumLimit ;
+#     wf:hasRegulatoryStandard wf:EUWaterFrameworkDirective .
+
+# Example: Observation
+# wf:Sample_2024_01_15 a wf:WaterQualityObservation ;
+#     rdfs:label "Sample collected 2024-01-15" ;
+#     wf:observedParameter wf:BOD ;
+#     wf:observedValue "12.5"^^xsd:double ;
+#     wf:observedAt "Outfall_Monitoring_Point_A" ;
+#     wf:observedOn "2024-01-15T10:30:00"^^xsd:dateTime .
