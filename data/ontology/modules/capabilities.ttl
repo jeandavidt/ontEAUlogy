@@ -1,0 +1,196 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix cap: <https://ugentbiomath.github.io/waterframe/capability#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://ugentbiomath.github.io/waterframe/modules/capabilities>
+    a owl:Ontology ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/material_entities> ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/information> ;
+    dc:title "waterFRAME: Model Capabilities Module" ;
+    dc:creator "Jean-David Therrien" ;
+    rdfs:comment "Capability taxonomy for computational models. Defines what models can do (simulation types, analysis types, etc.)." .
+
+# ========== CAPABILITY BASE CLASS ==========
+# A capability represents what a model or system can do
+
+wf:ModelCapability a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000016 ;  # Realizable entity
+    rdfs:label "Model capability" ;
+    rdfs:comment "A capability that a model or software system can perform." .
+
+# Capabilities namespace for specific capability types
+cap:ModelCapability a owl:Class ;
+    rdfs:subClassOf wf:ModelCapability ;
+    rdfs:label "Model capability (capability namespace)" ;
+    rdfs:comment "Base class for specific capability types." .
+
+# ========== SIMULATION CAPABILITIES ==========
+
+# Steady-state simulation
+cap:SteadyStateSimulation a owl:Class ;
+    rdfs:subClassOf wf:ModelCapability ;
+    rdfs:label "Steady-state simulation" ;
+    rdfs:comment "The ability to simulate a system under steady-state conditions (no change over time)." .
+
+# Dynamic simulation
+cap:DynamicSimulation a owl:Class ;
+    rdfs:subClassOf wf:ModelCapability ;
+    rdfs:label "Dynamic simulation" ;
+    rdfs:comment "The ability to simulate a system with time-varying behavior." .
+
+# ========== ANALYSIS CAPABILITIES ==========
+
+# Sensitivity analysis
+cap:SensitivityAnalysis a owl:Class ;
+    rdfs:subClassOf wf:ModelCapability ;
+    rdfs:label "Sensitivity analysis" ;
+    rdfs:comment "The ability to analyze how changes in inputs affect outputs." .
+
+# Uncertainty quantification
+cap:UncertaintyQuantification a owl:Class ;
+    rdfs:subClassOf wf:ModelCapability ;
+    rdfs:label "Uncertainty quantification" ;
+    rdfs:comment "The ability to quantify uncertainty in model predictions." .
+
+# Optimization
+cap:Optimization a owl:Class ;
+    rdfs:subClassOf wf:ModelCapability ;
+    rdfs:label "Optimization" ;
+    rdfs:comment "The ability to find optimal parameter values or operating conditions." .
+
+# ========== BALANCE CAPABILITIES ==========
+
+# Mass balance
+cap:MassBalance a owl:Class ;
+    rdfs:subClassOf wf:ModelCapability ;
+    rdfs:label "Mass balance" ;
+    rdfs:comment "The ability to perform mass balance calculations." .
+
+# Energy balance
+cap:EnergyBalance a owl:Class ;
+    rdfs:subClassOf wf:ModelCapability ;
+    rdfs:label "Energy balance" ;
+    rdfs:comment "The ability to perform energy balance calculations." .
+
+# ========== PREDICTION CAPABILITIES ==========
+
+# Water quality prediction
+cap:WaterQualityPrediction a owl:Class ;
+    rdfs:subClassOf wf:ModelCapability ;
+    rdfs:label "Water quality prediction" ;
+    rdfs:comment "The ability to predict water quality parameters." .
+
+# Cost estimation
+cap:CostEstimation a owl:Class ;
+    rdfs:subClassOf wf:ModelCapability ;
+    rdfs:label "Cost estimation" ;
+    rdfs:comment "The ability to estimate costs (capital, operational)." .
+
+# ========== ADDITIONAL CAPABILITIES ==========
+
+# Hydraulic modeling
+cap:HydraulicModeling a owl:Class ;
+    rdfs:subClassOf wf:ModelCapability ;
+    rdfs:label "Hydraulic modeling" ;
+    rdfs:comment "The ability to model hydraulic behavior (flow rates, pressures)." .
+
+# Biokinetic modeling
+cap:BiokineticModeling a owl:Class ;
+    rdfs:subClassOf wf:ModelCapability ;
+    rdfs:label "Biokinetic modeling" ;
+    rdfs:comment "The ability to model biological kinetic processes." .
+
+# Sludge production modeling
+cap:SludgeProduction a owl:Class ;
+    rdfs:subClassOf wf:ModelCapability ;
+    rdfs:label "Sludge production modeling" ;
+    rdfs:comment "The ability to predict sludge production rates." .
+
+# Nutrient removal modeling
+cap:NutrientRemoval a owl:Class ;
+    rdfs:subClassOf wf:ModelCapability ;
+    rdfs:label "Nutrient removal modeling" ;
+    rdfs:comment "The ability to model nitrogen and phosphorus removal." .
+
+# ========== CAPABILITY PROPERTIES ==========
+
+# Description of the capability
+cap:description a owl:DatatypeProperty ;
+    rdfs:label "description" ;
+    rdfs:comment "A textual description of the capability" ;
+    rdfs:domain wf:ModelCapability ;
+    rdfs:range xsd:string .
+
+# Required inputs for the capability
+cap:requiredInputs a owl:ObjectProperty ;
+    rdfs:label "required inputs" ;
+    rdfs:comment "The input variables required to perform this capability" ;
+    rdfs:domain wf:ModelCapability ;
+    rdfs:range wf:ModelInput .
+
+# Outputs produced by the capability
+cap:producesOutputs a owl:ObjectProperty ;
+    rdfs:label "produces outputs" ;
+    rdfs:comment "The output variables produced by this capability" ;
+    rdfs:domain wf:ModelCapability ;
+    rdfs:range wf:ModelOutput .
+
+# Link capability to implementing model
+cap:implementedByModel a owl:ObjectProperty ;
+    rdfs:label "implemented by model" ;
+    rdfs:comment "Links a capability to the model that implements it" ;
+    rdfs:domain wf:ModelCapability ;
+    rdfs:range wf:ProcessModel .
+
+# Link model to its capabilities
+wf:hasCapability a owl:ObjectProperty ;
+    rdfs:label "has capability" ;
+    rdfs:comment "Links a model or software system to its capabilities" ;
+    rdfs:domain [ owl:unionOf (wf:ProcessModel wf:SoftwareSystem) ] ;
+    rdfs:range wf:ModelCapability .
+
+# ========== CAPABILITY TAXONOMY ==========
+
+# Simulation capabilities are mutually exclusive types
+cap:SteadyStateSimulation owl:disjointWith cap:DynamicSimulation .
+cap:DynamicSimulation owl:disjointWith cap:SteadyStateSimulation .
+
+# Analysis capabilities
+cap:SensitivityAnalysis owl:disjointWith cap:UncertaintyQuantification .
+cap:SensitivityAnalysis owl:disjointWith cap:Optimization .
+cap:UncertaintyQuantification owl:disjointWith cap:Optimization .
+
+# ========== EXAMPLE INSTANCES ==========
+# Example: BioWin simulator capabilities
+# wf:BioWin_Simulator a wf:SoftwareSystem ;
+#     rdfs:label "BioWin Simulator" ;
+#     wf:hasCapability cap:DynamicSimulation ;
+#     wf:hasCapability cap:MassBalance ;
+#     wf:hasCapability cap:WaterQualityPrediction ;
+#     wf:hasCapability cap:Optimization ;
+#     wf:hasCapability cap:BiokineticModeling ;
+#     wf:hasCapability cap:NutrientRemoval ;
+#     wf:apiEndpoint "https://api.biwin.example.com/v1" ;
+#     wf:apiVersion "6.1" .
+
+# Example: ASM1 model capabilities
+# wf:ASM1_Model a wf:SimulationModel ;
+#     rdfs:label "Activated Sludge Model No. 1" ;
+#     wf:hasCapability cap:DynamicSimulation ;
+#     wf:hasCapability cap:MassBalance ;
+#     wf:hasCapability cap:WaterQualityPrediction ;
+#     cap:description "Mathematical model for activated sludge processes simulating carbon and nitrogen removal." ;
+#     cap:requiredInputs wf:InflowRate_Input, wf:InflowCOD_Input, wf:InflowTKN_Input ;
+#     cap:producesOutputs wf:EffluentCOD_Output, wf:EffluentTN_Output, wf:SludgeProduction_Output .
+
+# Example: Simple steady-state model
+# wf:SimpleMassBalanceModel a wf:SimulationModel ;
+#     rdfs:label "Simple Mass Balance Model" ;
+#     wf:hasCapability cap:SteadyStateSimulation ;
+#     wf:hasCapability cap:MassBalance ;
+#     cap:description "Simple steady-state mass balance calculator." .
