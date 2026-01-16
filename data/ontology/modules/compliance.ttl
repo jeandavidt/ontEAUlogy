@@ -1,0 +1,350 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://ugentbiomath.github.io/waterframe/modules/compliance>
+    a owl:Ontology ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/qualities> ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/sampling> ;
+    dc:title "waterFRAME: Compliance Checking Module" ;
+    dc:creator "Jean-David Therrien" ;
+    rdfs:comment "Classes and properties for regulatory compliance checking, violation tracking, and compliance status management. Supports multi-jurisdiction regulatory compliance verification." .
+
+# ========== COMPLIANCE STATUS ==========
+# Explicit representation of compliance state
+
+wf:ComplianceStatus a owl:Class ;
+    rdfs:label "Compliance status" ;
+    rdfs:comment "The compliance status of an observation or measurement with respect to regulatory requirements." .
+
+wf:Compliant a owl:Class ;
+    rdfs:subClassOf wf:ComplianceStatus ;
+    rdfs:label "Compliant" ;
+    rdfs:comment "Observation meets all applicable regulatory requirements." .
+
+wf:NonCompliant a owl:Class ;
+    rdfs:subClassOf wf:ComplianceStatus ;
+    rdfs:label "Non-compliant" ;
+    rdfs:comment "Observation exceeds one or more regulatory limits." .
+
+wf:PendingReview a owl:Class ;
+    rdfs:subClassOf wf:ComplianceStatus ;
+    rdfs:label "Pending review" ;
+    rdfs:comment "Compliance status not yet determined or under review." .
+
+wf:NotApplicable a owl:Class ;
+    rdfs:subClassOf wf:ComplianceStatus ;
+    rdfs:label "Not applicable" ;
+    rdfs:comment "No applicable regulatory requirement exists for this observation." .
+
+# Make compliance statuses mutually exclusive
+wf:Compliant owl:disjointWith wf:NonCompliant, wf:PendingReview, wf:NotApplicable .
+wf:NonCompliant owl:disjointWith wf:PendingReview, wf:NotApplicable .
+wf:PendingReview owl:disjointWith wf:NotApplicable .
+
+# ========== COMPLIANCE CHECK ==========
+# A verification event comparing observation to requirement
+
+wf:ComplianceCheck a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000015 ;  # Process
+    rdfs:label "Compliance check" ;
+    rdfs:comment "An event where an observation is verified against a regulatory requirement." .
+
+# ========== VIOLATION RECORD ==========
+# Record of a regulatory violation
+
+wf:ViolationRecord a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000031 ;  # Information content entity
+    rdfs:label "Violation record" ;
+    rdfs:comment "A record documenting a regulatory violation." .
+
+wf:ExceedanceViolation a owl:Class ;
+    rdfs:subClassOf wf:ViolationRecord ;
+    rdfs:label "Exceedance violation" ;
+    rdfs:comment "Violation where measured value exceeds maximum limit." .
+
+wf:DeficiencyViolation a owl:Class ;
+    rdfs:subClassOf wf:ViolationRecord ;
+    rdfs:label "Deficiency violation" ;
+    rdfs:comment "Violation where measured value falls below minimum limit." .
+
+wf:RangeViolation a owl:Class ;
+    rdfs:subClassOf wf:ViolationRecord ;
+    rdfs:label "Range violation" ;
+    rdfs:comment "Violation where measured value falls outside allowed range." .
+
+wf:SamplingViolation a owl:Class ;
+    rdfs:subClassOf wf:ViolationRecord ;
+    rdfs:label "Sampling violation" ;
+    rdfs:comment "Violation of sampling requirements (frequency, method, etc.)." .
+
+wf:ReportingViolation a owl:Class ;
+    rdfs:subClassOf wf:ViolationRecord ;
+    rdfs:label "Reporting violation" ;
+    rdfs:comment "Violation of reporting requirements (deadline, format, etc.)." .
+
+# ========== VIOLATION SEVERITY ==========
+
+wf:ViolationSeverity a owl:Class ;
+    rdfs:label "Violation severity" ;
+    rdfs:comment "Classification of violation severity for prioritization and response." .
+
+wf:MinorViolation a owl:Class ;
+    rdfs:subClassOf wf:ViolationSeverity ;
+    rdfs:label "Minor violation" ;
+    rdfs:comment "Minor technical violation, typically addressed through notification." .
+
+wf:ModerateViolation a owl:Class ;
+    rdfs:subClassOf wf:ViolationSeverity ;
+    rdfs:label "Moderate violation" ;
+    rdfs:comment "Significant violation requiring corrective action." .
+
+wf:SeriousViolation a owl:Class ;
+    rdfs:subClassOf wf:ViolationSeverity ;
+    rdfs:label "Serious violation" ;
+    rdfs:comment "Serious violation with potential environmental or health impact." .
+
+wf:CriticalViolation a owl:Class ;
+    rdfs:subClassOf wf:ViolationSeverity ;
+    rdfs:label "Critical violation" ;
+    rdfs:comment "Critical violation requiring immediate response." .
+
+# ========== EXTENDED LIMIT TYPES ==========
+# Generalized limit types for multi-jurisdiction support
+
+wf:TechnologyBasedLimit a owl:Class ;
+    rdfs:subClassOf wf:LimitType ;
+    rdfs:label "Technology-based effluent limit (TBEL)" ;
+    rdfs:comment "Minimum level of effluent quality attainable by available technology. Common in USEPA permits." .
+
+wf:WaterQualityBasedLimit a owl:Class ;
+    rdfs:subClassOf wf:LimitType ;
+    rdfs:label "Water quality-based effluent limit (WQBEL)" ;
+    rdfs:comment "Limit required to protect receiving water quality standards. More stringent than technology-based." .
+
+wf:ConcentrationLimit a owl:Class ;
+    rdfs:subClassOf wf:LimitType ;
+    rdfs:label "Concentration limit" ;
+    rdfs:comment "Limit expressed as concentration (e.g., mg/L, ug/L)." .
+
+wf:LoadLimit a owl:Class ;
+    rdfs:subClassOf wf:LimitType ;
+    rdfs:label "Load limit" ;
+    rdfs:comment "Limit expressed as mass per unit time (e.g., kg/day, lbs/day). Calculated as concentration x flow." .
+
+wf:PercentRemovalLimit a owl:Class ;
+    rdfs:subClassOf wf:LimitType ;
+    rdfs:label "Percent removal limit" ;
+    rdfs:comment "Limit expressed as minimum removal efficiency (e.g., 85% BOD removal)." .
+
+wf:DailyMaximumLimit a owl:Class ;
+    rdfs:subClassOf wf:LimitType ;
+    rdfs:label "Daily maximum limit" ;
+    rdfs:comment "Maximum value allowed in any single day." .
+
+wf:WeeklyAverageLimit a owl:Class ;
+    rdfs:subClassOf wf:LimitType ;
+    rdfs:label "Weekly average limit" ;
+    rdfs:comment "Average limit over a 7-day period." .
+
+wf:MonthlyAverageLimit a owl:Class ;
+    rdfs:subClassOf wf:LimitType ;
+    rdfs:label "Monthly average limit" ;
+    rdfs:comment "Average limit over a calendar month." .
+
+wf:AnnualAverageLimit a owl:Class ;
+    rdfs:subClassOf wf:LimitType ;
+    rdfs:label "Annual average limit" ;
+    rdfs:comment "Average limit over a calendar year." .
+
+# ========== LOAD CALCULATION ==========
+# For calculating mass loading from concentration and flow
+
+wf:LoadCalculation a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000015 ;  # Process
+    rdfs:label "Load calculation" ;
+    rdfs:comment "Derivation of pollutant load from concentration observation and flow measurement. Load = Concentration x Flow x conversion factor." .
+
+# ========== COMPLIANCE CHECK PROPERTIES ==========
+
+# Link observation to compliance status
+wf:hasComplianceStatus a owl:ObjectProperty ;
+    rdfs:label "has compliance status" ;
+    rdfs:comment "Links an observation to its compliance status" ;
+    rdfs:domain wf:WaterQualityObservation ;
+    rdfs:range wf:ComplianceStatus .
+
+# Compliance check relationships
+wf:checksObservation a owl:ObjectProperty ;
+    rdfs:label "checks observation" ;
+    rdfs:comment "Links a compliance check to the observation being verified" ;
+    rdfs:domain wf:ComplianceCheck ;
+    rdfs:range wf:WaterQualityObservation .
+
+wf:againstRequirement a owl:ObjectProperty ;
+    rdfs:label "against requirement" ;
+    rdfs:comment "Links a compliance check to the requirement being checked against" ;
+    rdfs:domain wf:ComplianceCheck ;
+    rdfs:range wf:WaterQualityRequirement .
+
+wf:resultsIn a owl:ObjectProperty ;
+    rdfs:label "results in" ;
+    rdfs:comment "Links a compliance check to its resulting status" ;
+    rdfs:domain wf:ComplianceCheck ;
+    rdfs:range wf:ComplianceStatus .
+
+wf:generatesViolation a owl:ObjectProperty ;
+    rdfs:label "generates violation" ;
+    rdfs:comment "Links a compliance check to a violation record if non-compliant" ;
+    rdfs:domain wf:ComplianceCheck ;
+    rdfs:range wf:ViolationRecord .
+
+# ========== VIOLATION RECORD PROPERTIES ==========
+
+# Violation to observation
+wf:violatingObservation a owl:ObjectProperty ;
+    rdfs:label "violating observation" ;
+    rdfs:comment "Links a violation to the observation that caused it" ;
+    rdfs:domain wf:ViolationRecord ;
+    rdfs:range wf:WaterQualityObservation .
+
+# Violation to requirement
+wf:violatedRequirement a owl:ObjectProperty ;
+    rdfs:label "violated requirement" ;
+    rdfs:comment "Links a violation to the requirement that was violated" ;
+    rdfs:domain wf:ViolationRecord ;
+    rdfs:range wf:WaterQualityRequirement .
+
+# Violation severity
+wf:hasSeverity a owl:ObjectProperty ;
+    rdfs:label "has severity" ;
+    rdfs:comment "Links a violation to its severity classification" ;
+    rdfs:domain wf:ViolationRecord ;
+    rdfs:range wf:ViolationSeverity .
+
+# ========== LOAD CALCULATION PROPERTIES ==========
+
+# Load from concentration observation
+wf:fromConcentration a owl:ObjectProperty ;
+    rdfs:label "from concentration" ;
+    rdfs:comment "Links a load calculation to its source concentration observation" ;
+    rdfs:domain wf:LoadCalculation ;
+    rdfs:range wf:WaterQualityObservation .
+
+# Load from flow measurement
+wf:fromFlowMeasurement a owl:ObjectProperty ;
+    rdfs:label "from flow measurement" ;
+    rdfs:comment "Links a load calculation to its source flow measurement" ;
+    rdfs:domain wf:LoadCalculation ;
+    rdfs:range wf:DischargeMeasurement .
+
+# ========== DATA PROPERTIES ==========
+
+# Compliance check timestamp
+wf:checkedOn a owl:DatatypeProperty ;
+    rdfs:label "checked on" ;
+    rdfs:comment "Date and time when compliance was verified" ;
+    rdfs:domain wf:ComplianceCheck ;
+    rdfs:range xsd:dateTime .
+
+# Last compliance check for observation
+wf:lastCheckedOn a owl:DatatypeProperty ;
+    rdfs:label "last checked on" ;
+    rdfs:comment "Date and time of most recent compliance check" ;
+    rdfs:domain wf:WaterQualityObservation ;
+    rdfs:range xsd:dateTime .
+
+# Violation amount (how much limit was exceeded/deficient)
+wf:violationAmount a owl:DatatypeProperty ;
+    rdfs:label "violation amount" ;
+    rdfs:comment "The amount by which the limit was exceeded (positive) or deficient (negative)" ;
+    rdfs:domain wf:ViolationRecord ;
+    rdfs:range xsd:double .
+
+# Violation percentage (relative exceedance)
+wf:violationPercentage a owl:DatatypeProperty ;
+    rdfs:label "violation percentage" ;
+    rdfs:comment "Percentage by which the limit was exceeded ((observed - limit) / limit * 100)" ;
+    rdfs:domain wf:ViolationRecord ;
+    rdfs:range xsd:double .
+
+# Violation date
+wf:violationDate a owl:DatatypeProperty ;
+    rdfs:label "violation date" ;
+    rdfs:comment "Date when the violation occurred" ;
+    rdfs:domain wf:ViolationRecord ;
+    rdfs:range xsd:date .
+
+# Violation ID (regulatory tracking)
+wf:violationId a owl:DatatypeProperty ;
+    rdfs:label "violation ID" ;
+    rdfs:comment "Unique identifier for regulatory tracking of the violation" ;
+    rdfs:domain wf:ViolationRecord ;
+    rdfs:range xsd:string .
+
+# Load calculation result
+wf:calculatedLoad a owl:DatatypeProperty ;
+    rdfs:label "calculated load" ;
+    rdfs:comment "The calculated pollutant load value" ;
+    rdfs:domain wf:LoadCalculation ;
+    rdfs:range xsd:double .
+
+wf:loadUnit a owl:ObjectProperty ;
+    rdfs:label "load unit" ;
+    rdfs:comment "Unit of the calculated load (e.g., kg/day)" ;
+    rdfs:domain wf:LoadCalculation ;
+    rdfs:range <http://qudt.org/schema/qudt/Unit> .
+
+wf:calculatedOn a owl:DatatypeProperty ;
+    rdfs:label "calculated on" ;
+    rdfs:comment "Date and time when load was calculated" ;
+    rdfs:domain wf:LoadCalculation ;
+    rdfs:range xsd:dateTime .
+
+# ========== REQUIREMENT EXTENSIONS ==========
+# Additional properties for water quality requirements
+
+# Upper limit value (for range limits)
+wf:hasUpperLimitValue a owl:DatatypeProperty ;
+    rdfs:label "has upper limit value" ;
+    rdfs:comment "The upper bound of a range limit" ;
+    rdfs:domain wf:WaterQualityRequirement ;
+    rdfs:range xsd:double .
+
+# Lower limit value (for range limits)
+wf:hasLowerLimitValue a owl:DatatypeProperty ;
+    rdfs:label "has lower limit value" ;
+    rdfs:comment "The lower bound of a range limit" ;
+    rdfs:domain wf:WaterQualityRequirement ;
+    rdfs:range xsd:double .
+
+# Percent removal requirement
+wf:hasMinRemovalPercent a owl:DatatypeProperty ;
+    rdfs:label "has minimum removal percent" ;
+    rdfs:comment "Minimum percent removal required" ;
+    rdfs:domain wf:WaterQualityRequirement ;
+    rdfs:range xsd:double .
+
+# Averaging period (for average-based limits)
+wf:hasAveragingPeriod a owl:DatatypeProperty ;
+    rdfs:label "has averaging period" ;
+    rdfs:comment "Averaging period for the limit (e.g., 30 days, 7 days)" ;
+    rdfs:domain wf:WaterQualityRequirement ;
+    rdfs:range xsd:string .
+
+# Effective date range
+wf:effectiveFrom a owl:DatatypeProperty ;
+    rdfs:label "effective from" ;
+    rdfs:comment "Date from which the requirement is effective" ;
+    rdfs:domain wf:WaterQualityRequirement ;
+    rdfs:range xsd:date .
+
+wf:effectiveUntil a owl:DatatypeProperty ;
+    rdfs:label "effective until" ;
+    rdfs:comment "Date until which the requirement is effective" ;
+    rdfs:domain wf:WaterQualityRequirement ;
+    rdfs:range xsd:date .
