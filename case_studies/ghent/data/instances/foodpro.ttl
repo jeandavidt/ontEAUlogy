@@ -1,0 +1,122 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+
+# ==============================================================================
+# FoodPro - Food Processing Industry
+# ==============================================================================
+# Location: Upstream zone
+# Water Demand: 800 m3/day
+# Water Source: DWP-1
+# Wastewater Destination: WWTP-1
+# Characteristics: High BOD output, organic load from food processing
+
+ghent:FoodPro a wf:FoodProcessingIndustry ;
+    rdfs:label "FoodPro Food Processing Company"@en ;
+    rdfs:comment "Food processing facility in the upstream zone. Produces prepared foods with significant organic (BOD) load in wastewater."@en ;
+    geo:lat "51.0590"^^xsd:double ;
+    geo:long "3.6880"^^xsd:double ;
+    wf:hasInputPort ghent:FoodPro_PotableWater_In ;
+    wf:hasOutputPort ghent:FoodPro_ProcessWater_Out ;
+    wf:hasOutputPort ghent:FoodPro_Wastewater_Out ;
+    wf:hasComponent ghent:FoodPro_Processing ;
+    wf:hasComponent ghent:FoodPro_Cleaning ;
+    wf:hasComponent ghent:FoodPro_Cooking .
+
+# Ports
+ghent:FoodPro_PotableWater_In a wf:InputPort ;
+    rdfs:label "FoodPro Potable Water Inlet"@en ;
+    rdfs:comment "Potable water connection from DWP-1"@en ;
+    wf:hasFlowType wf:PotableWaterFlow ;
+    wf:hasSource ghent:DWP1_PotableWater_Out .
+
+ghent:FoodPro_ProcessWater_Out a wf:OutputPort ;
+    rdfs:label "FoodPro Process Water Outlet"@en ;
+    rdfs:comment "Process water for food processing"@en ;
+    wf:hasFlowType wf:ProcessWaterFlow .
+
+ghent:FoodPro_Wastewater_Out a wf:OutputPort ;
+    rdfs:label "FoodPro Wastewater Outlet"@en ;
+    rdfs:comment "High-BOD food processing wastewater to WWTP-1"@en ;
+    wf:hasFlowType wf:IndustrialWastewaterFlow ;
+    wf:flowsTo ghent:WWTP1_Influent_In .
+
+# Treatment components
+ghent:FoodPro_Processing a wf:ProcessUnit ;
+    rdfs:label "FoodPro Processing Line"@en ;
+    rdfs:comment "Raw food material processing and preparation"@en .
+
+ghent:FoodPro_Cleaning a wf:ProcessUnit ;
+    rdfs:label "FoodPro CIP Systems"@en ;
+    rdfs:comment "Clean-in-place systems for equipment sanitation"@en .
+
+ghent:FoodPro_Cooking a wf:ProcessUnit ;
+    rdfs:label "FoodPro Cooking Operations"@en ;
+    rdfs:comment "Cooking and thermal processing operations"@en .
+
+# Water demand
+ghent:FoodPro_WaterDemand a qudt:QuantityValue ;
+    rdfs:label "FoodPro Daily Water Demand"@en ;
+    qudt:numericValue "800"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+# Input water quality requirements (potable quality for food)
+ghent:FoodPro_Water_pH a wf:WaterQualityRequirement ;
+    rdfs:label "FoodPro Input Water pH Range"@en ;
+    wf:hasWaterQualityParameter wf:pH ;
+    wf:hasLimitValue "7.0"^^xsd:double ;
+    wf:hasLimitType wf:OptimumLimit .
+
+ghent:FoodPro_Water_TSS a wf:WaterQualityRequirement ;
+    rdfs:label "FoodPro Input Water TSS Limit"@en ;
+    wf:hasWaterQualityParameter wf:TSS ;
+    wf:hasLimitValue "1.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    qudt:unit unit:MilligramPerLiter .
+
+# Wastewater characteristics (high BOD - food processing)
+ghent:FoodPro_Wastewater_BOD a wf:WaterQualityObservation ;
+    rdfs:label "FoodPro Wastewater BOD"@en ;
+    wf:observedParameter wf:BOD ;
+    wf:observedValue "2000.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Very high BOD from organic food waste and cleaning"@en ;
+    wf:observedAt "ghent:FoodPro_Wastewater_Out" .
+
+ghent:FoodPro_Wastewater_COD a wf:WaterQualityObservation ;
+    rdfs:label "FoodPro Wastewater COD"@en ;
+    wf:observedParameter wf:COD ;
+    wf:observedValue "3500.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "High COD from organic matter"@en ;
+    wf:observedAt "ghent:FoodPro_Wastewater_Out" .
+
+ghent:FoodPro_Wastewater_TSS a wf:WaterQualityObservation ;
+    rdfs:label "FoodPro Wastewater TSS"@en ;
+    wf:observedParameter wf:TSS ;
+    wf:observedValue "800.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "High TSS from food particles"@en ;
+    wf:observedAt "ghent:FoodPro_Wastewater_Out" .
+
+ghent:FoodPro_Wastewater_TP a wf:WaterQualityObservation ;
+    rdfs:label "FoodPro Wastewater Total Phosphorus"@en ;
+    wf:observedParameter wf:TotalPhosphorus ;
+    wf:observedValue "25.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Elevated phosphorus from food ingredients"@en ;
+    wf:observedAt "ghent:FoodPro_Wastewater_Out" .
+
+# Discharge limits (VLAREM II for industrial discharge to sewer)
+ghent:FoodPro_VLAREM_BOD a wf:WaterQualityRequirement ;
+    rdfs:label "VLAREM II BOD Discharge Limit (to sewer)"@en ;
+    wf:hasWaterQualityParameter wf:BOD ;
+    wf:hasLimitValue "2500.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:hasRegulatoryStandard wf:VLAREM_II .
