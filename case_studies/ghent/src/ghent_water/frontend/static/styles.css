@@ -1,0 +1,114 @@
+/* Custom Streamlit styles for the ontEAUlogy frontend */
+
+/* Main layout adjustments */
+.main .block-container {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    max-width: 100%;
+}
+
+/* Header styling */
+h1, h2, h3 {
+    color: #1a5f7a;
+}
+
+/* Map container */
+.stFolium {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Card-like containers for panels */
+div[data-testid="stExpander"] {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+/* Button styling */
+div.stButton > button {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+/* Metric styling */
+div[data-testid="stMetricValue"] {
+    font-size: 1.5rem;
+    color: #1a5f7a;
+}
+
+/* Tab styling */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+}
+
+.stTabs [data-baseweb="tab"] {
+    height: 50px;
+    padding: 0 24px;
+    border-radius: 8px 8px 0 0;
+}
+
+/* Status colors */
+.status-idle {
+    color: #28a745;
+}
+
+.status-running {
+    color: #ffc107;
+}
+
+.status-error {
+    color: #dc3545;
+}
+
+/* Results section */
+.results-section {
+    background-color: #f8f9fa;
+    padding: 16px;
+    border-radius: 8px;
+    margin-top: 16px;
+}
+
+/* Entity marker tooltip */
+.leaflet-tooltip {
+    font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .main .block-container {
+        padding: 0.5rem;
+    }
+    
+    .stColumns {
+        gap: 0.5rem;
+    }
+}
+
+/* Hide Streamlit branding */
+#MainMenu {
+    visibility: hidden;
+}
+
+footer {
+    visibility: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
