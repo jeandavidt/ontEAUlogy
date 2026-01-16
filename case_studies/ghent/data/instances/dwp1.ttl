@@ -1,0 +1,115 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+
+# ==============================================================================
+# DWP-1 - Drinking Water Plant (Upstream Zone)
+# ==============================================================================
+# Capacity: 2,000 m3/day
+# Location: Upstream zone, draws from Lieve River Segment 1
+# Serves: Dampoort residential district, Texfin, FoodPro
+
+ghent:DWP1 a wf:DrinkingWaterPlant ;
+    rdfs:label "DWP-1 Drinking Water Plant"@en ;
+    rdfs:comment "Upstream drinking water treatment plant serving the Dampoort area and upstream industrial facilities. Draws relatively clean source water from Lieve River Segment 1."@en ;
+    geo:lat "51.0640"^^xsd:double ;
+    geo:long "3.6950"^^xsd:double ;
+    wf:hasInputPort ghent:DWP1_RawWater_In ;
+    wf:hasOutputPort ghent:DWP1_PotableWater_Out ;
+    wf:hasOutputPort ghent:DWP1_Sludge_Out ;
+    wf:hasComponent ghent:DWP1_Coagulation ;
+    wf:hasComponent ghent:DWP1_Sedimentation ;
+    wf:hasComponent ghent:DWP1_Filtration ;
+    wf:hasComponent ghent:DWP1_Disinfection .
+
+# Ports
+ghent:DWP1_RawWater_In a wf:InputPort ;
+    rdfs:label "DWP-1 Raw Water Inlet"@en ;
+    rdfs:comment "Raw water intake from Lieve River Segment 1"@en ;
+    wf:hasFlowType wf:RawWaterFlow .
+
+ghent:DWP1_PotableWater_Out a wf:OutputPort ;
+    rdfs:label "DWP-1 Potable Water Outlet"@en ;
+    rdfs:comment "Treated drinking water distribution to consumers"@en ;
+    wf:hasFlowType wf:PotableWaterFlow .
+
+ghent:DWP1_Sludge_Out a wf:OutputPort ;
+    rdfs:label "DWP-1 Treatment Sludge Outlet"@en ;
+    rdfs:comment "Treatment sludge for disposal"@en .
+
+# Treatment components
+ghent:DWP1_Coagulation a wf:TreatmentUnit ;
+    rdfs:label "DWP-1 Coagulation/Flocculation"@en ;
+    rdfs:comment "Chemical coagulation and flocculation for particle removal"@en .
+
+ghent:DWP1_Sedimentation a wf:TreatmentUnit ;
+    rdfs:label "DWP-1 Sedimentation Basin"@en ;
+    rdfs:comment "Gravity settling of flocculated particles"@en .
+
+ghent:DWP1_Filtration a wf:TreatmentUnit ;
+    rdfs:label "DWP-1 Rapid Sand Filtration"@en ;
+    rdfs:comment "Rapid sand filtration for residual particle removal"@en .
+
+ghent:DWP1_Disinfection a wf:DisinfectionUnit ;
+    rdfs:label "DWP-1 Chlorine Disinfection"@en ;
+    rdfs:comment "Chlorination for pathogen inactivation"@en .
+
+# Operational parameters
+ghent:DWP1_Capacity a qudt:QuantityValue ;
+    rdfs:label "DWP-1 Treatment Capacity"@en ;
+    qudt:numericValue "2000"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+ghent:DWP1_DailyProduction a qudt:QuantityValue ;
+    rdfs:label "DWP-1 Daily Production"@en ;
+    rdfs:comment "Average daily production: 2000 m3/day"@en ;
+    qudt:numericValue "2000"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+# Input water quality requirements (raw water)
+ghent:DWP1_RawWater_BOD_Max a wf:WaterQualityRequirement ;
+    rdfs:label "DWP-1 Raw Water BOD Limit"@en ;
+    wf:hasWaterQualityParameter wf:BOD ;
+    wf:hasLimitValue "10.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    rdfs:comment "Maximum acceptable BOD in source water"@en .
+
+ghent:DWP1_RawWater_Turbidity_Max a wf:WaterQualityRequirement ;
+    rdfs:label "DWP-1 Raw Water Turbidity Limit"@en ;
+    wf:hasWaterQualityParameter wf:Turbidity ;
+    wf:hasLimitValue "50.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    rdfs:comment "Maximum acceptable turbidity in source water (NTU)"@en .
+
+# Output water quality (potable water - meets WHO/EU drinking water standards)
+ghent:DWP1_Potable_Turbidity a wf:WaterQualityObservation ;
+    rdfs:label "DWP-1 Potable Water Turbidity"@en ;
+    wf:observedParameter wf:Turbidity ;
+    wf:observedValue "0.3"^^xsd:double ;
+    rdfs:comment "Typical effluent turbidity (NTU)"@en ;
+    wf:observedAt "ghent:DWP1_PotableWater_Out" .
+
+ghent:DWP1_Potable_Chlorine a wf:WaterQualityObservation ;
+    rdfs:label "DWP-1 Potable Water Residual Chlorine"@en ;
+    wf:observedParameter wf:Chlorine ;
+    wf:observedValue "0.5"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Residual chlorine for distribution system protection"@en ;
+    wf:observedAt "ghent:DWP1_PotableWater_Out" .
+
+ghent:DWP1_Potable_pH a wf:WaterQualityObservation ;
+    rdfs:label "DWP-1 Potable Water pH"@en ;
+    wf:observedParameter wf:pH ;
+    wf:observedValue "7.2"^^xsd:double ;
+    rdfs:comment "pH adjusted for corrosion control"@en ;
+    wf:observedAt "ghent:DWP1_PotableWater_Out" .
+
+# Flow connections to consumers
+ghent:DWP1_PotableWater_Out wf:flowsTo ghent:Dampoort_PotableWater_In .
+ghent:DWP1_PotableWater_Out wf:flowsTo ghent:Texfin_PotableWater_In .
+ghent:DWP1_PotableWater_Out wf:flowsTo ghent:FoodPro_PotableWater_In .
