@@ -1,0 +1,50 @@
+# CQ10: What quality parameters characterize the water at Node N?
+# Using qualities.ttl module with WaterQualityObservation
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# Query 1: Find all water quality observations at a location
+SELECT ?observation ?obsLabel ?parameter ?paramLabel ?value ?unit ?obsTime ?obsLocation
+WHERE {
+    # Specify the observation location
+    BIND("GhentWWTP_Outfall" AS ?location)
+    
+    ?observation a wf:WaterQualityObservation ;
+        wf:observedAt ?obsLocation ;
+        wf:observedParameter ?parameter ;
+        wf:observedValue ?value .
+    
+    FILTER(?obsLocation = ?location)
+    
+    OPTIONAL { ?observation rdfs:label ?obsLabel }
+    OPTIONAL { ?parameter rdfs:label ?paramLabel }
+    OPTIONAL { ?parameter wf:hasUnit ?unit }
+    OPTIONAL { ?observation wf:observedOn ?obsTime }
+}
+ORDER BY ?paramLabel
+
+# Query 2: Get all water quality parameters defined in the ontology
+SELECT ?parameter ?paramLabel ?unit
+WHERE {
+    ?parameter a wf:WaterQualityParameter .
+    OPTIONAL { ?parameter rdfs:label ?paramLabel }
+    OPTIONAL { ?parameter wf:hasUnit ?unit }
+}
+ORDER BY ?paramLabel
+
+# Query 3: Find observations for a specific parameter
+SELECT ?observation ?obsLabel ?value ?obsTime ?obsLocation
+WHERE {
+    BIND(wf:BOD AS ?parameter)
+    
+    ?observation wf:observedParameter ?parameter ;
+        wf:observedValue ?value .
+    
+    OPTIONAL { ?observation rdfs:label ?obsLabel }
+    OPTIONAL { ?observation wf:observedOn ?obsTime }
+    OPTIONAL { ?observation wf:observedAt ?obsLocation }
+}
+ORDER BY DESC(?obsTime)

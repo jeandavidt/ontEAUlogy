@@ -1,0 +1,67 @@
+# CQ11: What are the regulatory limits for Parameter P for Reuse Category R?
+# Using qualities.ttl module with WaterQualityRequirement and RegulatoryStandard
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# Query 1: Find all regulatory limits for a parameter
+SELECT ?requirement ?reqLabel ?parameter ?paramLabel ?limitValue ?limitType ?standard ?stdLabel
+WHERE {
+    BIND(wf:BOD AS ?parameter)
+    
+    ?requirement wf:hasWaterQualityParameter ?parameter ;
+        wf:hasLimitValue ?limitValue ;
+        wf:hasLimitType ?limitType ;
+        wf:hasRegulatoryStandard ?standard .
+    
+    OPTIONAL { ?requirement rdfs:label ?reqLabel }
+    OPTIONAL { ?parameter rdfs:label ?paramLabel }
+    OPTIONAL { ?limitType rdfs:label ?limitTypeLabel }
+    OPTIONAL { ?standard rdfs:label ?stdLabel }
+}
+ORDER BY ?standard
+
+# Query 2: Find all requirements from a specific regulatory standard
+SELECT ?requirement ?reqLabel ?parameter ?paramLabel ?limitValue ?limitType
+WHERE {
+    BIND(wf:EU_Water_Framework_Directive AS ?standard)
+    
+    ?requirement wf:hasRegulatoryStandard ?standard ;
+        wf:hasLimitValue ?limitValue ;
+        wf:hasLimitType ?limitType .
+    
+    OPTIONAL {
+        ?requirement wf:hasWaterQualityParameter ?parameter .
+        OPTIONAL { ?parameter rdfs:label ?paramLabel }
+    }
+    OPTIONAL { ?requirement rdfs:label ?reqLabel }
+    OPTIONAL { ?limitType rdfs:label ?limitTypeLabel }
+}
+ORDER BY ?paramLabel
+
+# Query 3: Check if an observation meets regulatory requirements
+# Note: SPARQL comparison must be done in FILTER, not BIND expression
+SELECT ?observation ?param ?paramLabel ?observedValue ?requirement ?limitValue
+WHERE {
+    # Get observations
+    ?observation wf:observedParameter wf:BOD ;
+        wf:observedValue ?observedValue .
+    
+    # Get requirements for BOD
+    ?requirement wf:hasWaterQualityParameter wf:BOD ;
+        wf:hasLimitValue ?limitValue ;
+        wf:hasLimitType wf:MaximumLimit .
+    
+    # Get parameter label
+    OPTIONAL {
+        ?requirement wf:hasWaterQualityParameter ?param .
+        OPTIONAL { ?param rdfs:label ?paramLabel }
+    }
+    OPTIONAL { ?observation rdfs:label ?obsLabel }
+    
+    # Filter: only show observations that meet the limit
+    FILTER(?observedValue <= ?limitValue)
+}
+ORDER BY ?observation

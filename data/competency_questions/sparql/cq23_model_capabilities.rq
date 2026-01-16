@@ -1,0 +1,66 @@
+# CQ23: What mass/quality balances does Model M compute?
+# Using capabilities.ttl module with ModelCapability taxonomy
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX cap: <https://ugentbiomath.github.io/waterframe/capability#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+# Query 1: Find all capabilities of a model
+SELECT ?model ?modelLabel ?capability ?capLabel ?description
+WHERE {
+    BIND(wf:ASM1_Model AS ?model)
+    
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+    
+    ?model wf:hasCapability ?capability .
+    
+    OPTIONAL { ?capability rdfs:label ?capLabel }
+    OPTIONAL { ?capability cap:description ?description }
+}
+ORDER BY ?capLabel
+
+# Query 2: Find models that support mass balance calculations
+SELECT ?model ?modelLabel ?entity ?entityLabel ?capLabel
+WHERE {
+    ?model wf:hasCapability cap:MassBalance ;
+        wf:representsEntity ?entity .
+    
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+    OPTIONAL { ?entity rdfs:label ?entityLabel }
+    OPTIONAL { cap:MassBalance rdfs:label ?capLabel }
+}
+ORDER BY ?modelLabel
+
+# Query 3: Find models that support dynamic simulation
+SELECT ?model ?modelLabel ?entity ?entityLabel
+WHERE {
+    ?model wf:hasCapability cap:DynamicSimulation ;
+        wf:representsEntity ?entity .
+    
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+    OPTIONAL { ?entity rdfs:label ?entityLabel }
+}
+ORDER BY ?modelLabel
+
+# Query 4: Find software systems with water quality prediction capability
+SELECT ?software ?softwareLabel ?version ?apiEndpoint
+WHERE {
+    ?software wf:hasCapability cap:WaterQualityPrediction ;
+        a wf:SoftwareSystem .
+    
+    OPTIONAL { ?software rdfs:label ?softwareLabel }
+    OPTIONAL { ?software wf:apiVersion ?version }
+    OPTIONAL { ?software wf:apiEndpoint ?apiEndpoint }
+}
+ORDER BY ?softwareLabel
+
+# Query 5: Find all balance-related capabilities
+SELECT ?capability ?capLabel ?description
+WHERE {
+    ?capability wf:hasCapability ?balCapability .
+    FILTER(?balCapability IN (cap:MassBalance, cap:EnergyBalance))
+    
+    OPTIONAL { ?capability rdfs:label ?capLabel }
+    OPTIONAL { ?capability cap:description ?description }
+}
