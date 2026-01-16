@@ -1,0 +1,38 @@
+# CQ40: What sampling points exist in the system and what are their types?
+# Lists all sampling points with their type, location, and associated facility
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?samplingPoint ?pointName ?pointType ?facility ?facilityLabel ?latitude ?longitude
+WHERE {
+    # Get sampling point
+    ?samplingPoint a ?pointTypeClass .
+    ?pointTypeClass rdfs:subClassOf* wf:SamplingPoint .
+    FILTER(?pointTypeClass != owl:NamedIndividual)
+
+    # Point type label
+    ?pointTypeClass rdfs:label ?pointType .
+
+    # Point name
+    OPTIONAL { ?samplingPoint wf:pointName ?pointName . }
+    OPTIONAL { ?samplingPoint rdfs:label ?pointName . }
+
+    # Location coordinates
+    OPTIONAL { ?samplingPoint wf:latitude ?latitude . }
+    OPTIONAL { ?samplingPoint wf:longitude ?longitude . }
+
+    # Associated facility
+    OPTIONAL {
+        ?samplingPoint wf:locatedAt ?facility .
+        ?facility rdfs:label ?facilityLabel .
+    }
+
+    # Or facility has this discharge point
+    OPTIONAL {
+        ?facility wf:hasDischargePoint ?samplingPoint .
+        ?facility rdfs:label ?facilityLabel .
+    }
+}
+ORDER BY ?pointType ?pointName

@@ -1,0 +1,40 @@
+# CQ37: What are all the regulatory violations recorded in the system?
+# Returns violations with observed value, limit, exceedance amount, and severity
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?violation ?parameter ?observedValue ?limitValue ?violationAmount ?violationPercent ?severity ?violationDate ?standard
+WHERE {
+    # Get violation record
+    ?violation a wf:ViolationRecord .
+
+    # Get the violating observation
+    ?violation wf:violatingObservation ?observation .
+    ?observation wf:observedParameter ?paramClass .
+    ?observation wf:observedValue ?observedValue .
+    ?paramClass rdfs:label ?parameter .
+
+    # Get the violated requirement
+    ?violation wf:violatedRequirement ?requirement .
+    ?requirement wf:hasLimitValue ?limitValue .
+
+    # Violation details
+    OPTIONAL { ?violation wf:violationAmount ?violationAmount . }
+    OPTIONAL { ?violation wf:violationPercentage ?violationPercent . }
+    OPTIONAL { ?violation wf:violationDate ?violationDate . }
+
+    # Severity
+    OPTIONAL {
+        ?violation wf:hasSeverity ?severityClass .
+        ?severityClass rdfs:label ?severity .
+    }
+
+    # Regulatory standard
+    OPTIONAL {
+        ?requirement wf:hasRegulatoryStandard ?standardClass .
+        ?standardClass rdfs:label ?standard .
+    }
+}
+ORDER BY DESC(?violationAmount)
