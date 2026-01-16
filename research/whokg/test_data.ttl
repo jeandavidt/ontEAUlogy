@@ -1,0 +1,84 @@
+@prefix : <https://w3id.org/whow/onto/hydrography/> .
+@prefix wmon: <https://w3id.org/whow/onto/water-monitoring#> .
+@prefix hm: <https://w3id.org/whow/onto/health-monitoring#> .
+@prefix top: <https://w3id.org/italia/env/onto/top/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+
+# Hydrography Test Data
+:PoRiver a :RiverWaterBody ;
+    rdfs:label "Po River"@en ;
+    rdfs:comment "Main river in Northern Italy"@en .
+
+:PoBasin a :WaterBasin ;
+    rdfs:label "Po Basin"@en ;
+    rdfs:comment "Hydrographic basin of the Po River"@en .
+
+:PoRiver :belongsToWaterBasin :PoBasin .
+
+:GardaLake a :LakeWaterBody ;
+    rdfs:label "Lake Garda"@en ;
+    rdfs:comment "Largest lake in Italy"@en .
+
+:GardaBasin a :WaterBasin ;
+    rdfs:label "Garda Basin"@en .
+
+:GardaLake :belongsToWaterBasin :GardaBasin .
+
+# Water Monitoring Test Data
+wmon:SamplingPoint_Milan1 a wmon:SamplingPoint ;
+    rdfs:label "Sampling Point - Milan Station 1"@en ;
+    top:hasDirectLocation "45.4642, 9.1900"^^xsd:string .
+
+wmon:WaterSample_PO001 a wmon:WaterSample ;
+    rdfs:label "Water Sample PO-001"@en ;
+    wmon:isSampleOf :PoRiver ;
+    wmon:isTakenAt wmon:SamplingPoint_Milan1 ;
+    wmon:isObtainedBy wmon:WaterSampler_ARS1 .
+
+wmon:WaterSampler_ARS1 a wmon:WaterSampler ;
+    rdfs:label "ARS Lombardy Sampler 1"@en ;
+    rdfs:comment "Automatic water sampler device"@en .
+
+wmon:WaterObs_PO001 a wmon:WaterChemicalParameterObservation ;
+    rdfs:label "Water Observation - Chemical Analysis PO-001"@en ;
+    wmon:hasObservationSample wmon:WaterSample_PO001 ;
+    wmon:hasWaterFeature :PoRiver ;
+    wmon:hasChemicalSubstance :Nitrate ;
+    wmon:hasResult wmon:ObservationValue_PO001_Nitrate ;
+    dc:date "2024-03-15"^^xsd:date .
+
+:Nitrate a wmon:ChemicalSubstance ;
+    rdfs:label "Nitrate (NO3-)"@en ;
+    rdfs:comment "Common chemical pollutant in agricultural runoff"@en .
+
+wmon:ObservationValue_PO001_Nitrate a wmon:ObservationValue ;
+    rdfs:label "Nitrate Concentration Value"@en ;
+    top:value "15.5"^^xsd:decimal ;
+    top:hasUnitOfMeasure "mg/L"^^xsd:string .
+
+wmon:WaterObs_PO002 a wmon:WaterMicrobiologicalParameterObservation ;
+    rdfs:label "Water Observation - Microbiological Analysis PO-002"@en ;
+    wmon:hasObservationSample wmon:WaterSample_PO001 ;
+    wmon:hasWaterFeature :PoRiver ;
+    wmon:hasBiologicalAgent :EscherichiaColi ;
+    wmon:hasResult wmon:ObservationValue_PO002_EColi ;
+    dc:date "2024-03-15"^^xsd:date .
+
+:EscherichiaColi a wmon:BiologicalAgent ;
+    rdfs:label "Escherichia coli (E. coli)"@en ;
+    rdfs:comment "Indicator bacteria for fecal contamination"@en .
+
+wmon:ObservationValue_PO002_EColi a wmon:ObservationValue ;
+    rdfs:label "E. coli Concentration Value"@en ;
+    top:hasMeasurement wmon:Range_PO002_EColi ;
+    dc:date "2024-03-15"^^xsd:date .
+
+wmon:Range_PO002_EColi a wmon:Range ;
+    rdfs:label "E. coli Range < 10"@en ;
+    wmon:lowerBound "0"^^xsd:decimal ;
+    wmon:upperBound "10"^^xsd:decimal ;
+    wmon:upperBoundIncluded true^^xsd:boolean ;
+    wmon:lowerBoundIncluded true^^xsd:boolean .
