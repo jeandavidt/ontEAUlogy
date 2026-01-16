@@ -18,11 +18,24 @@
     owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/material_entities> ;
     owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/properties> ;
     
+    # Information module - Model metadata (CQ18-20)
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/information> ;
+    
+    # Capabilities module - Simulation capabilities
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/capabilities> ;
+    
+    # Qualities module - Water quality parameters (CQ15-17)
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/qualities> ;
+
+    # Sampling module - Sample metadata for regulatory compliance
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/sampling> ;
+
+    # Compliance module - Compliance checking and violation tracking
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/compliance> ;
+
     # Future module imports (placeholder for when modules are created)
-    # owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/qualities> ;
     # owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/processes> ;
     # owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/roles> ;
-    # owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/information> ;
     
     # Bridge module imports (placeholder)
     # owl:imports <https://ugentbiomath.github.io/waterframe/bridges/sosa_alignment> ;
@@ -31,9 +44,13 @@
     
     # Module organization annotations
     rdfs:comment "Core modules available: material_entities, properties" ;
-    rdfs:comment "Planned modules: qualities, processes, roles, information" ;
+    rdfs:comment "Information modules: information, capabilities, qualities" ;
+    rdfs:comment "Regulatory modules: sampling, compliance" ;
     rdfs:comment "Bridge modules: SOSA (observations), PROV-O (provenance), QUDT (units)" ;
-    
+
     # Competency question scope
-    rdfs:comment "Currently answers CQ1 (system topology), CQ2-5 (flow connections)" ;
+    rdfs:comment "Currently answers CQ1-5 (system topology, flow connections)" ;
+    rdfs:comment "Answers CQ10-11 (water quality parameters, regulatory limits)" ;
+    rdfs:comment "Answers CQ15-20 (water quality, model metadata, decision variables)" ;
+    rdfs:comment "New: Supports regulatory compliance checking across any jurisdiction (EU, USEPA, WHO, etc.)" ;
     rdfs:comment "Target: Answer all 36 competency questions across system topology, treatment, water quality, model metadata, and optimization domains" .
