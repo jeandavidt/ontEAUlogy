@@ -1,0 +1,193 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+
+# ==============================================================================
+# LIEVE RIVER - Natural Water Body
+# ==============================================================================
+# The Lieve is a historic canal/river in the Ghent area, connecting Ghent to
+# the coastal region. For this case study, we model three segments representing
+# upstream, mid-stream, and downstream sections.
+
+ghent:LieveRiver a wf:River ;
+    rdfs:label "Lieve River"@en ;
+    rdfs:comment "A historic canal/river in the Ghent metropolitan area, used as the primary water source and receiving body for the synthetic case study."@en ;
+    wf:hasComponent ghent:LieveSegment1 ;
+    wf:hasComponent ghent:LieveSegment2 ;
+    wf:hasComponent ghent:LieveSegment3 .
+
+# ==============================================================================
+# RIVER SEGMENT 1 - Upstream (Source area)
+# ==============================================================================
+
+ghent:LieveSegment1 a wf:RiverSegment ;
+    rdfs:label "Lieve River - Upstream Segment"@en ;
+    rdfs:comment "Upstream segment of the Lieve River, source water intake area for DWP-1."@en ;
+    geo:lat "51.0650"^^xsd:double ;
+    geo:long "3.6900"^^xsd:double ;
+    wf:hasInputPort ghent:LieveSegment1_In ;
+    wf:hasOutputPort ghent:LieveSegment1_Out ;
+    wf:hasOutputPort ghent:LieveSegment1_Intake .
+
+ghent:LieveSegment1_In a wf:InputPort ;
+    rdfs:label "Lieve Segment 1 - Upstream Inlet"@en ;
+    rdfs:comment "Inlet from upper catchment"@en .
+
+ghent:LieveSegment1_Out a wf:OutputPort ;
+    rdfs:label "Lieve Segment 1 - Downstream Outlet"@en ;
+    rdfs:comment "Flow continuing to segment 2"@en ;
+    wf:flowsTo ghent:LieveSegment2_In .
+
+ghent:LieveSegment1_Intake a wf:OutputPort ;
+    rdfs:label "Lieve Segment 1 - DWP-1 Intake Point"@en ;
+    rdfs:comment "Water extraction point for DWP-1"@en ;
+    wf:flowsTo ghent:DWP1_RawWater_In .
+
+# Ambient water quality - Upstream (relatively clean)
+ghent:LieveSegment1_BOD a wf:WaterQualityObservation ;
+    rdfs:label "Lieve Segment 1 - Ambient BOD"@en ;
+    wf:observedParameter wf:BOD ;
+    wf:observedValue "3.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:LieveSegment1" .
+
+ghent:LieveSegment1_COD a wf:WaterQualityObservation ;
+    rdfs:label "Lieve Segment 1 - Ambient COD"@en ;
+    wf:observedParameter wf:COD ;
+    wf:observedValue "15.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:LieveSegment1" .
+
+ghent:LieveSegment1_TN a wf:WaterQualityObservation ;
+    rdfs:label "Lieve Segment 1 - Ambient Total Nitrogen"@en ;
+    wf:observedParameter wf:TotalNitrogen ;
+    wf:observedValue "2.5"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:LieveSegment1" .
+
+ghent:LieveSegment1_TP a wf:WaterQualityObservation ;
+    rdfs:label "Lieve Segment 1 - Ambient Total Phosphorus"@en ;
+    wf:observedParameter wf:TotalPhosphorus ;
+    wf:observedValue "0.3"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:LieveSegment1" .
+
+# ==============================================================================
+# RIVER SEGMENT 2 - Mid-stream (Receives WWTP-1 discharge)
+# ==============================================================================
+
+ghent:LieveSegment2 a wf:RiverSegment ;
+    rdfs:label "Lieve River - Mid-stream Segment"@en ;
+    rdfs:comment "Mid-stream segment receiving WWTP-1 discharge and providing intake water for DWP-2."@en ;
+    geo:lat "51.0580"^^xsd:double ;
+    geo:long "3.7100"^^xsd:double ;
+    wf:hasInputPort ghent:LieveSegment2_In ;
+    wf:hasInputPort ghent:LieveSegment2_WWTP1Discharge ;
+    wf:hasOutputPort ghent:LieveSegment2_Out ;
+    wf:hasOutputPort ghent:LieveSegment2_Intake .
+
+ghent:LieveSegment2_In a wf:InputPort ;
+    rdfs:label "Lieve Segment 2 - Upstream Inlet"@en ;
+    rdfs:comment "Receives flow from Segment 1"@en .
+
+ghent:LieveSegment2_WWTP1Discharge a wf:InputPort ;
+    rdfs:label "Lieve Segment 2 - WWTP-1 Discharge Point"@en ;
+    rdfs:comment "Receives treated effluent from WWTP-1"@en .
+
+ghent:LieveSegment2_Out a wf:OutputPort ;
+    rdfs:label "Lieve Segment 2 - Downstream Outlet"@en ;
+    rdfs:comment "Flow continuing to segment 3"@en ;
+    wf:flowsTo ghent:LieveSegment3_In .
+
+ghent:LieveSegment2_Intake a wf:OutputPort ;
+    rdfs:label "Lieve Segment 2 - DWP-2 Intake Point"@en ;
+    rdfs:comment "Water extraction point for DWP-2 (impacted by upstream WWTP-1)"@en ;
+    wf:flowsTo ghent:DWP2_RawWater_In .
+
+# Ambient water quality - Mid-stream (impacted by WWTP-1)
+ghent:LieveSegment2_BOD a wf:WaterQualityObservation ;
+    rdfs:label "Lieve Segment 2 - Ambient BOD"@en ;
+    wf:observedParameter wf:BOD ;
+    wf:observedValue "8.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:LieveSegment2" .
+
+ghent:LieveSegment2_COD a wf:WaterQualityObservation ;
+    rdfs:label "Lieve Segment 2 - Ambient COD"@en ;
+    wf:observedParameter wf:COD ;
+    wf:observedValue "35.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:LieveSegment2" .
+
+ghent:LieveSegment2_TN a wf:WaterQualityObservation ;
+    rdfs:label "Lieve Segment 2 - Ambient Total Nitrogen"@en ;
+    wf:observedParameter wf:TotalNitrogen ;
+    wf:observedValue "6.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:LieveSegment2" .
+
+ghent:LieveSegment2_TP a wf:WaterQualityObservation ;
+    rdfs:label "Lieve Segment 2 - Ambient Total Phosphorus"@en ;
+    wf:observedParameter wf:TotalPhosphorus ;
+    wf:observedValue "0.8"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:LieveSegment2" .
+
+# ==============================================================================
+# RIVER SEGMENT 3 - Downstream (Receives WWTP-2 discharge)
+# ==============================================================================
+
+ghent:LieveSegment3 a wf:RiverSegment ;
+    rdfs:label "Lieve River - Downstream Segment"@en ;
+    rdfs:comment "Downstream segment receiving WWTP-2 discharge before continuing to the coastal area."@en ;
+    geo:lat "51.0510"^^xsd:double ;
+    geo:long "3.7300"^^xsd:double ;
+    wf:hasInputPort ghent:LieveSegment3_In ;
+    wf:hasInputPort ghent:LieveSegment3_WWTP2Discharge ;
+    wf:hasOutputPort ghent:LieveSegment3_Out .
+
+ghent:LieveSegment3_In a wf:InputPort ;
+    rdfs:label "Lieve Segment 3 - Upstream Inlet"@en ;
+    rdfs:comment "Receives flow from Segment 2"@en .
+
+ghent:LieveSegment3_WWTP2Discharge a wf:InputPort ;
+    rdfs:label "Lieve Segment 3 - WWTP-2 Discharge Point"@en ;
+    rdfs:comment "Receives treated effluent from WWTP-2"@en .
+
+ghent:LieveSegment3_Out a wf:OutputPort ;
+    rdfs:label "Lieve Segment 3 - Downstream Outlet"@en ;
+    rdfs:comment "Flow continuing to coastal estuary"@en .
+
+# Ambient water quality - Downstream (impacted by both WWTPs)
+ghent:LieveSegment3_BOD a wf:WaterQualityObservation ;
+    rdfs:label "Lieve Segment 3 - Ambient BOD"@en ;
+    wf:observedParameter wf:BOD ;
+    wf:observedValue "12.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:LieveSegment3" .
+
+ghent:LieveSegment3_COD a wf:WaterQualityObservation ;
+    rdfs:label "Lieve Segment 3 - Ambient COD"@en ;
+    wf:observedParameter wf:COD ;
+    wf:observedValue "50.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:LieveSegment3" .
+
+ghent:LieveSegment3_TN a wf:WaterQualityObservation ;
+    rdfs:label "Lieve Segment 3 - Ambient Total Nitrogen"@en ;
+    wf:observedParameter wf:TotalNitrogen ;
+    wf:observedValue "9.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:LieveSegment3" .
+
+ghent:LieveSegment3_TP a wf:WaterQualityObservation ;
+    rdfs:label "Lieve Segment 3 - Ambient Total Phosphorus"@en ;
+    wf:observedParameter wf:TotalPhosphorus ;
+    wf:observedValue "1.2"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:LieveSegment3" .

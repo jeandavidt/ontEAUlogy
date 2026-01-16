@@ -1,0 +1,209 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+
+# ==============================================================================
+# WWTP-2 - Wastewater Treatment Plant (Downstream Zone)
+# ==============================================================================
+# Capacity: 2,500 m3/day
+# Location: Downstream zone
+# Receives: Wastewater from Muide residential, ChipTech, PharmaGen, BrewCo
+# Discharges: To Lieve River Segment 3
+
+ghent:WWTP2 a wf:WastewaterTreatmentPlant ;
+    rdfs:label "WWTP-2 Wastewater Treatment Plant"@en ;
+    rdfs:comment "Downstream wastewater treatment plant receiving domestic and industrial wastewater from the Muide area. Includes advanced treatment for pharmaceutical micropollutants."@en ;
+    geo:lat "51.0490"^^xsd:double ;
+    geo:long "3.7250"^^xsd:double ;
+    wf:hasInputPort ghent:WWTP2_Influent_In ;
+    wf:hasOutputPort ghent:WWTP2_Effluent_Out ;
+    wf:hasOutputPort ghent:WWTP2_Sludge_Out ;
+    wf:hasComponent ghent:WWTP2_Screening ;
+    wf:hasComponent ghent:WWTP2_GritRemoval ;
+    wf:hasComponent ghent:WWTP2_PrimarySettler ;
+    wf:hasComponent ghent:WWTP2_MBR ;
+    wf:hasComponent ghent:WWTP2_NutrientRemoval ;
+    wf:hasComponent ghent:WWTP2_GAC ;
+    wf:hasComponent ghent:WWTP2_Disinfection .
+
+# Ports
+ghent:WWTP2_Influent_In a wf:InputPort ;
+    rdfs:label "WWTP-2 Influent Inlet"@en ;
+    rdfs:comment "Combined wastewater inlet from Muide, ChipTech, PharmaGen, and BrewCo"@en ;
+    wf:hasFlowType wf:BlackwaterFlow .
+
+ghent:WWTP2_Effluent_Out a wf:OutputPort ;
+    rdfs:label "WWTP-2 Treated Effluent Outlet"@en ;
+    rdfs:comment "Treated effluent discharge to Lieve River Segment 3"@en ;
+    wf:flowsTo ghent:LieveSegment3_WWTP2Discharge .
+
+ghent:WWTP2_Sludge_Out a wf:OutputPort ;
+    rdfs:label "WWTP-2 Sludge Outlet"@en ;
+    rdfs:comment "Waste sludge for further treatment/disposal"@en .
+
+# Treatment components (enhanced with MBR and GAC for pharmaceutical removal)
+ghent:WWTP2_Screening a wf:Screening ;
+    rdfs:label "WWTP-2 Fine Screens"@en ;
+    rdfs:comment "Fine screening for MBR protection"@en .
+
+ghent:WWTP2_GritRemoval a wf:GritRemoval ;
+    rdfs:label "WWTP-2 Grit Chamber"@en ;
+    rdfs:comment "Vortex grit chamber"@en .
+
+ghent:WWTP2_PrimarySettler a wf:PrimarySettler ;
+    rdfs:label "WWTP-2 Primary Clarifier"@en ;
+    rdfs:comment "Primary settling"@en .
+
+ghent:WWTP2_MBR a wf:MembraneBioreactor ;
+    rdfs:label "WWTP-2 Membrane Bioreactor"@en ;
+    rdfs:comment "MBR for combined biological treatment and ultrafiltration - provides high quality effluent"@en .
+
+ghent:WWTP2_NutrientRemoval a wf:TertiaryTreatment ;
+    rdfs:label "WWTP-2 Nutrient Removal"@en ;
+    rdfs:comment "Integrated BNR in MBR configuration"@en .
+
+ghent:WWTP2_GAC a wf:TreatmentUnit ;
+    rdfs:label "WWTP-2 Granular Activated Carbon"@en ;
+    rdfs:comment "GAC adsorption for pharmaceutical and micropollutant removal"@en .
+
+ghent:WWTP2_Disinfection a wf:DisinfectionUnit ;
+    rdfs:label "WWTP-2 UV Disinfection"@en ;
+    rdfs:comment "UV disinfection (MBR already removes most pathogens)"@en .
+
+# Operational parameters
+ghent:WWTP2_Capacity a qudt:QuantityValue ;
+    rdfs:label "WWTP-2 Treatment Capacity"@en ;
+    qudt:numericValue "2500"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+ghent:WWTP2_DailyInfluent a qudt:QuantityValue ;
+    rdfs:label "WWTP-2 Average Daily Influent"@en ;
+    rdfs:comment "Average influent flow: 1950 m3/day (Muide 750 + ChipTech 200 + PharmaGen 400 + BrewCo 600)"@en ;
+    qudt:numericValue "1950"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+# Influent characteristics (mixed domestic + industrial with pharmaceutical residues)
+ghent:WWTP2_Influent_BOD a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-2 Influent BOD"@en ;
+    wf:observedParameter wf:BOD ;
+    wf:observedValue "400.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "High BOD due to BrewCo contribution"@en ;
+    wf:observedAt "ghent:WWTP2_Influent_In" .
+
+ghent:WWTP2_Influent_COD a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-2 Influent COD"@en ;
+    wf:observedParameter wf:COD ;
+    wf:observedValue "650.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:WWTP2_Influent_In" .
+
+ghent:WWTP2_Influent_TSS a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-2 Influent TSS"@en ;
+    wf:observedParameter wf:TSS ;
+    wf:observedValue "320.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:WWTP2_Influent_In" .
+
+ghent:WWTP2_Influent_TN a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-2 Influent Total Nitrogen"@en ;
+    wf:observedParameter wf:TotalNitrogen ;
+    wf:observedValue "55.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:WWTP2_Influent_In" .
+
+ghent:WWTP2_Influent_TP a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-2 Influent Total Phosphorus"@en ;
+    wf:observedParameter wf:TotalPhosphorus ;
+    wf:observedValue "9.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:WWTP2_Influent_In" .
+
+# Effluent quality (meets VLAREM II - enhanced due to MBR)
+ghent:WWTP2_Effluent_BOD a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-2 Effluent BOD"@en ;
+    wf:observedParameter wf:BOD ;
+    wf:observedValue "5.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Well below VLAREM II limit - MBR advantage"@en ;
+    wf:observedAt "ghent:WWTP2_Effluent_Out" .
+
+ghent:WWTP2_Effluent_COD a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-2 Effluent COD"@en ;
+    wf:observedParameter wf:COD ;
+    wf:observedValue "30.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Well below VLAREM II limit - MBR + GAC"@en ;
+    wf:observedAt "ghent:WWTP2_Effluent_Out" .
+
+ghent:WWTP2_Effluent_TSS a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-2 Effluent TSS"@en ;
+    wf:observedParameter wf:TSS ;
+    wf:observedValue "2.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Very low TSS - MBR provides excellent solids removal"@en ;
+    wf:observedAt "ghent:WWTP2_Effluent_Out" .
+
+ghent:WWTP2_Effluent_TN a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-2 Effluent Total Nitrogen"@en ;
+    wf:observedParameter wf:TotalNitrogen ;
+    wf:observedValue "8.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Below VLAREM II limit"@en ;
+    wf:observedAt "ghent:WWTP2_Effluent_Out" .
+
+ghent:WWTP2_Effluent_TP a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-2 Effluent Total Phosphorus"@en ;
+    wf:observedParameter wf:TotalPhosphorus ;
+    wf:observedValue "0.8"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Below VLAREM II limit"@en ;
+    wf:observedAt "ghent:WWTP2_Effluent_Out" .
+
+ghent:WWTP2_Effluent_Turbidity a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-2 Effluent Turbidity"@en ;
+    wf:observedParameter wf:Turbidity ;
+    wf:observedValue "0.5"^^xsd:double ;
+    rdfs:comment "Very low turbidity due to MBR"@en ;
+    wf:observedAt "ghent:WWTP2_Effluent_Out" .
+
+# VLAREM II Discharge Requirements (same as WWTP-1)
+ghent:WWTP2_VLAREM_BOD a wf:WaterQualityRequirement ;
+    rdfs:label "VLAREM II BOD Discharge Limit"@en ;
+    wf:hasWaterQualityParameter wf:BOD ;
+    wf:hasLimitValue "25.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasRegulatoryStandard wf:VLAREM_II .
+
+ghent:WWTP2_VLAREM_COD a wf:WaterQualityRequirement ;
+    rdfs:label "VLAREM II COD Discharge Limit"@en ;
+    wf:hasWaterQualityParameter wf:COD ;
+    wf:hasLimitValue "125.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasRegulatoryStandard wf:VLAREM_II .
+
+ghent:WWTP2_VLAREM_TSS a wf:WaterQualityRequirement ;
+    rdfs:label "VLAREM II TSS Discharge Limit"@en ;
+    wf:hasWaterQualityParameter wf:TSS ;
+    wf:hasLimitValue "35.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasRegulatoryStandard wf:VLAREM_II .
+
+ghent:WWTP2_VLAREM_TN a wf:WaterQualityRequirement ;
+    rdfs:label "VLAREM II Total Nitrogen Discharge Limit"@en ;
+    wf:hasWaterQualityParameter wf:TotalNitrogen ;
+    wf:hasLimitValue "15.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasRegulatoryStandard wf:VLAREM_II .
+
+ghent:WWTP2_VLAREM_TP a wf:WaterQualityRequirement ;
+    rdfs:label "VLAREM II Total Phosphorus Discharge Limit"@en ;
+    wf:hasWaterQualityParameter wf:TotalPhosphorus ;
+    wf:hasLimitValue "2.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasRegulatoryStandard wf:VLAREM_II .

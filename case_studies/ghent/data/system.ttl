@@ -1,0 +1,166 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# ==============================================================================
+# Ghent Synthetic Water System - Master Configuration File
+# ==============================================================================
+# 
+# This file serves as the entry point for loading the complete Ghent case study
+# data. It provides system-level documentation and defines the complete water
+# system structure.
+#
+# To load the complete system, import all files from case_studies/ghent/data/instances/
+#
+# Files to import:
+#   - lieve_river.ttl
+#   - dwp1.ttl
+#   - dwp2.ttl
+#   - wwtp1.ttl
+#   - wwtp2.ttl
+#   - dampoort_residential.ttl
+#   - muide_residential.ttl
+#   - texfin.ttl
+#   - foodpro.ttl
+#   - chiptech.ttl
+#   - pharmagen.ttl
+#   - brewco.ttl
+#
+# ==============================================================================
+
+# ==============================================================================
+# System-Level Documentation
+# ==============================================================================
+
+ghent:GhentWaterSystem a wf:WaterSystem ;
+    rdfs:label "Ghent Synthetic Water System"@en ;
+    rdfs:comment "A synthetic urban water system case study based on the Ghent, Belgium metropolitan area. This system demonstrates the waterFRAME ontology's capability to model complex water infrastructure networks including natural water bodies, treatment plants, residential districts, and industrial facilities with diverse water requirements."@en ;
+    wf:hasZone ghent:UpstreamZone ;
+    wf:hasZone ghent:DownstreamZone ;
+    wf:hasComponent ghent:LieveRiver ;
+    wf:hasComponent ghent:DWP1 ;
+    wf:hasComponent ghent:DWP2 ;
+    wf:hasComponent ghent:WWTP1 ;
+    wf:hasComponent ghent:WWTP2 ;
+    wf:hasComponent ghent:Dampoort ;
+    wf:hasComponent ghent:Muide ;
+    wf:hasComponent ghent:Texfin ;
+    wf:hasComponent ghent:FoodPro ;
+    wf:hasComponent ghent:ChipTech ;
+    wf:hasComponent ghent:PharmaGen ;
+    wf:hasComponent ghent:BrewCo .
+
+# ==============================================================================
+# Zone Definitions
+# ==============================================================================
+
+ghent:UpstreamZone a wf:WaterZone ;
+    rdfs:label "Upstream Zone"@en ;
+    rdfs:comment "The upstream zone of the Ghent water system, characterized by relatively cleaner source water and industrial activities including textile and food processing."@en ;
+    wf:hasComponent ghent:LieveSegment1 ;
+    wf:hasComponent ghent:DWP1 ;
+    wf:hasComponent ghent:WWTP1 ;
+    wf:hasComponent ghent:Dampoort ;
+    wf:hasComponent ghent:Texfin ;
+    wf:hasComponent ghent:FoodPro ;
+    geo:lat "51.0640"^^xsd:double ;
+    geo:long "3.6950"^^xsd:double .
+
+ghent:DownstreamZone a wf:WaterZone ;
+    rdfs:label "Downstream Zone"@en ;
+    rdfs:comment "The downstream zone of the Ghent water system, receiving water after WWTP-1 discharge and hosting electronics, pharmaceutical, and beverage industries."@en ;
+    wf:hasComponent ghent:LieveSegment2 ;
+    wf:hasComponent ghent:LieveSegment3 ;
+    wf:hasComponent ghent:DWP2 ;
+    wf:hasComponent ghent:WWTP2 ;
+    wf:hasComponent ghent:Muide ;
+    wf:hasComponent ghent:ChipTech ;
+    wf:hasComponent ghent:PharmaGen ;
+    wf:hasComponent ghent:BrewCo ;
+    geo:lat "51.0490"^^xsd:double ;
+    geo:long "3.7250"^^xsd:double .
+
+# ==============================================================================
+# System Summary Statistics
+# ==============================================================================
+
+# Total water demand
+ghent:TotalWaterDemand a qudt:QuantityValue ;
+    rdfs:label "Total System Water Demand"@en ;
+    qudt:numericValue "7500"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay ;
+    rdfs:comment "Total daily water demand across all consumers: 7500 m3/day (Dampoort 450 + Texfin 500 + FoodPro 800 + Muide 750 + ChipTech 200 + PharmaGen 400 + BrewCo 600 + DWP1 capacity 2000 + DWP2 capacity 2500)"@en .
+
+# Total treatment capacity
+ghent:TotalDWP_Capacity a qudt:QuantityValue ;
+    rdfs:label "Total Drinking Water Treatment Capacity"@en ;
+    qudt:numericValue "4500"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay ;
+    rdfs:comment "Combined capacity of DWP-1 (2000) and DWP-2 (2500) = 4500 m3/day"@en .
+
+ghent:TotalWWTP_Capacity a qudt:QuantityValue ;
+    rdfs:label "Total Wastewater Treatment Capacity"@en ;
+    qudt:numericValue "4500"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay ;
+    rdfs:comment "Combined capacity of WWTP-1 (2000) and WWTP-2 (2500) = 4500 m3/day"@en .
+
+# Total population served
+ghent:TotalPopulation a qudt:QuantityValue ;
+    rdfs:label "Total Population Served"@en ;
+    qudt:numericValue "8000"^^xsd:integer ;
+    qudt:unit unit:Person ;
+    rdfs:comment "Total population served by the water system: 8000 inhabitants (Dampoort 3000 + Muide 5000)"@en .
+
+# ==============================================================================
+# Flow Topology Summary
+# ==============================================================================
+#
+# The system follows this flow topology:
+#
+#   Source Water → DWP-1 → Dampoort, Texfin, FoodPro
+#                                      ↓
+#                                    WWTP-1
+#                                      ↓
+#                                    River
+#                                      ↓
+#   Source Water → DWP-2 → Muide, BrewCo, ChipTech, PharmaGen
+#                                      ↓
+#                                    WWTP-2
+#                                      ↓
+#                                    River
+#
+# Key flow characteristics:
+# - River segments provide source water and receive treated effluent
+# - DWP-1 draws from relatively clean upstream river segment
+# - DWP-2 draws from river segment impacted by WWTP-1 discharge
+# - Industrial facilities have specific water quality requirements
+# - WWTP-1 handles upstream industrial and residential wastewater
+# - WWTP-2 handles downstream industrial and residential wastewater
+#
+# ==============================================================================
+
+# ==============================================================================
+# Regulatory Framework Reference
+# ==============================================================================
+
+ghent:VLAREM_II_Framework a wf:RegulatoryFramework ;
+    rdfs:label "VLAREM II Compliance Framework"@en ;
+    rdfs:comment "The Flemish Regulations on Environmental Permits (VLAREM II) establishes discharge limits for wastewater treatment plants and industrial facilities in the Ghent case study."@en ;
+    wf:hasStandard wf:VLAREM_II ;
+    wf:appliesTo ghent:WWTP1 ;
+    wf:appliesTo ghent:WWTP2 ;
+    wf:appliesTo ghent:Texfin ;
+    wf:appliesTo ghent:FoodPro ;
+    wf:appliesTo ghent:ChipTech ;
+    wf:appliesTo ghent:PharmaGen ;
+    wf:appliesTo ghent:BrewCo .
+
+# ==============================================================================
+# End of System Configuration
+# ==============================================================================
