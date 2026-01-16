@@ -112,3 +112,130 @@ wf:OutputPort a owl:Class ;
     rdfs:subClassOf wf:Port ;
     rdfs:label "Output port" ;
     rdfs:comment "Port through which material exits a component" .
+
+# ========== WATER TREATMENT FACILITIES ==========
+# Section 4.3: Extensions for process models and facilities
+
+wf:DrinkingWaterPlant rdfs:subClassOf bfo:BFO_0000040 ;
+    rdfs:label "Drinking water plant" ;
+    rdfs:comment "A facility that treats source water to produce potable water." .
+
+wf:WastewaterTreatmentPlant rdfs:subClassOf bfo:BFO_0000040 ;
+    rdfs:label "Wastewater treatment plant" ;
+    rdfs:comment "A facility that treats wastewater to produce effluent meeting discharge standards." .
+
+# WWTP process units (adapted from OntoCAPE process_units/)
+wf:WWTPTreatmentProcess rdfs:subClassOf wf:WaterSystemComponent ;
+    rdfs:label "WWTP treatment process" ;
+    rdfs:comment "A treatment process within a wastewater treatment plant." .
+
+wf:PrimaryTreatment rdfs:subClassOf wf:WWTPTreatmentProcess ;
+    rdfs:label "Primary treatment" ;
+    rdfs:comment "Physical treatment process for removing settleable solids." .
+
+wf:SecondaryTreatment rdfs:subClassOf wf:WWTPTreatmentProcess ;
+    rdfs:label "Secondary treatment" ;
+    rdfs:comment "Biological treatment process for removing organic matter." .
+
+wf:TertiaryTreatment rdfs:subClassOf wf:WWTPTreatmentProcess ;
+    rdfs:label "Tertiary treatment" ;
+    rdfs:comment "Advanced treatment process for nutrient removal and polishing." .
+
+wf:Screening rdfs:subClassOf wf:PrimaryTreatment ;
+    rdfs:label "Screening" ;
+    rdfs:comment "Removal of large solids through screens." .
+
+wf:GritRemoval rdfs:subClassOf wf:PrimaryTreatment ;
+    rdfs:label "Grit removal" ;
+    rdfs:comment "Removal of heavy inorganic solids." .
+
+wf:PrimarySettler rdfs:subClassOf wf:PrimaryTreatment ;
+    rdfs:label "Primary settler" ;
+    rdfs:comment "Settling tank for primary sludge removal." .
+
+wf:AerationTank rdfs:subClassOf wf:SecondaryTreatment ;
+    rdfs:label "Aeration tank" ;
+    rdfs:comment "Tank where biological oxidation of organic matter occurs." .
+
+wf:SecondarySettler rdfs:subClassOf wf:SecondaryTreatment ;
+    rdfs:label "Secondary settler" ;
+    rdfs:comment "Settling tank for biological sludge separation." .
+
+wf:MembraneBioreactor rdfs:subClassOf wf:SecondaryTreatment ;
+    rdfs:label "Membrane bioreactor" ;
+    rdfs:comment "Combined biological treatment and membrane filtration." .
+
+wf:NitrificationTank rdfs:subClassOf wf:TertiaryTreatment ;
+    rdfs:label "Nitrification tank" ;
+    rdfs:comment "Tank for biological ammonia oxidation." .
+
+wf:DenitrificationTank rdfs:subClassOf wf:TertiaryTreatment ;
+    rdfs:label "Denitrification tank" ;
+    rdfs:comment "Tank for biological nitrate reduction." .
+
+wf:PhosphorusRemovalTank rdfs:subClassOf wf:TertiaryTreatment ;
+    rdfs:label "Phosphorus removal tank" ;
+    rdfs:comment "Tank for biological or chemical phosphorus removal." .
+
+wf:DisinfectionUnit rdfs:subClassOf wf:TertiaryTreatment ;
+    rdfs:label "Disinfection unit" ;
+    rdfs:comment "Unit for pathogen inactivation (UV, chlorination, etc.)." .
+
+# ========== INDUSTRIAL FACILITIES ==========
+# Section 4.3: Industrial facility types
+
+wf:IndustrialFacility rdfs:subClassOf bfo:BFO_0000040 ;
+    rdfs:label "Industrial facility" ;
+    rdfs:comment "An industrial facility that may be a water source or consumer." .
+
+wf:TextileIndustry rdfs:subClassOf wf:IndustrialFacility ;
+    rdfs:label "Textile industry" ;
+    rdfs:comment "Textile manufacturing facility with specific wastewater characteristics." .
+
+wf:FoodProcessingIndustry rdfs:subClassOf wf:IndustrialFacility ;
+    rdfs:label "Food processing industry" ;
+    rdfs:comment "Food and beverage processing facility." .
+
+wf:ElectronicsManufacturing rdfs:subClassOf wf:IndustrialFacility ;
+    rdfs:label "Electronics manufacturing" ;
+    rdfs:comment "Electronics manufacturing facility with high-purity water needs." .
+
+wf:PharmaceuticalIndustry rdfs:subClassOf wf:IndustrialFacility ;
+    rdfs:label "Pharmaceutical industry" ;
+    rdfs:comment "Pharmaceutical manufacturing facility." .
+
+wf:Brewery rdfs:subClassOf wf:IndustrialFacility ;
+    rdfs:label "Brewery" ;
+    rdfs:comment "Beer brewing facility." .
+
+# ========== RESIDENTIAL AND URBAN ==========
+
+wf:ResidentialDistrict rdfs:subClassOf bfo:BFO_0000040 ;
+    rdfs:label "Residential district" ;
+    rdfs:comment "A residential area or district with water demands." .
+
+wf:Household rdfs:subClassOf bfo:BFO_0000040 ;
+    rdfs:label "Household" ;
+    rdfs:comment "A dwelling or building containing water system components." .
+
+# ========== NATURAL WATER BODIES ==========
+
+wf:River rdfs:subClassOf bfo:BFO_0000040 ;
+    rdfs:label "River" ;
+    rdfs:comment "A natural flowing watercourse." .
+
+wf:RiverSegment rdfs:subClassOf bfo:BFO_0000040 ;
+    rdfs:label "River segment" ;
+    rdfs:comment "A defined segment of a river for modeling purposes." .
+
+wf:Lake rdfs:subClassOf bfo:BFO_0000040 ;
+    rdfs:label "Lake" ;
+    rdfs:comment "A natural body of water contained within a basin." .
+
+wf:Groundwater rdfs:subClassOf bfo:BFO_0000040 ;
+    rdfs:label "Groundwater" ;
+    rdfs:comment "Water located beneath the ground surface." .
+
+wf:Catchment rdfs:subClassOf bfo:BFO_0000040 ;
+    rdfs:label "Catchment" ;
+    rdfs:comment "The area from which precipitation collects to a common outlet." .
