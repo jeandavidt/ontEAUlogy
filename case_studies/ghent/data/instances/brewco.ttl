@@ -1,0 +1,143 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+
+# ==============================================================================
+# BrewCo - Brewery
+# ==============================================================================
+# Location: Downstream zone
+# Water Demand: 600 m3/day
+# Water Source: DWP-2 (potable water)
+# Wastewater Destination: WWTP-2
+# Characteristics: High BOD output, organic load from brewing process
+
+ghent:BrewCo a wf:Brewery ;
+    rdfs:label "BrewCo Brewing Company"@en ;
+    rdfs:comment "Craft beer brewing facility in the downstream zone. Produces beer with significant organic (BOD) load in wastewater from mashing and cleaning."@en ;
+    geo:lat "51.0460"^^xsd:double ;
+    geo:long "3.7180"^^xsd:double ;
+    wf:hasInputPort ghent:BrewCo_PotableWater_In ;
+    wf:hasOutputPort ghent:BrewCo_ProcessWater_Out ;
+    wf:hasOutputPort ghent:BrewCo_Wastewater_Out ;
+    wf:hasComponent ghent:BrewCo_Brewing ;
+    wf:hasComponent ghent:BrewCo_Fermentation ;
+    wf:hasComponent ghent:BrewCo_Bottling ;
+    wf:hasComponent ghent:BrewCo_CIP .
+
+# Ports
+ghent:BrewCo_PotableWater_In a wf:InputPort ;
+    rdfs:label "BrewCo Potable Water Inlet"@en ;
+    rdfs:comment "Potable water connection from DWP-2"@en ;
+    wf:hasFlowType wf:PotableWaterFlow ;
+    wf:hasSource ghent:DWP2_PotableWater_Out .
+
+ghent:BrewCo_ProcessWater_Out a wf:OutputPort ;
+    rdfs:label "BrewCo Process Water Outlet"@en ;
+    rdfs:comment "Process water for brewing"@en ;
+    wf:hasFlowType wf:ProcessWaterFlow .
+
+ghent:BrewCo_Wastewater_Out a wf:OutputPort ;
+    rdfs:label "BrewCo Wastewater Outlet"@en ;
+    rdfs:comment "High-BOD brewery wastewater to WWTP-2"@en ;
+    wf:hasFlowType wf:IndustrialWastewaterFlow ;
+    wf:flowsTo ghent:WWTP2_Influent_In .
+
+# Treatment components
+ghent:BrewCo_Brewing a wf:ProcessUnit ;
+    rdfs:label "BrewCo Brewing System"@en ;
+    rdfs:comment "Mashing and lautering operations"@en .
+
+ghent:BrewCo_Fermentation a wf:ProcessUnit ;
+    rdfs:label "BrewCo Fermentation Tanks"@en ;
+    rdfs:comment "Beer fermentation and conditioning"@en .
+
+ghent:BrewCo_Bottling a wf:ProcessUnit ;
+    rdfs:label "BrewCo Bottling Line"@en ;
+    rdfs:comment "Packaging operations"@en .
+
+ghent:BrewCo_CIP a wf:ProcessUnit ;
+    rdfs:label "BrewCo CIP Systems"@en ;
+    rdfs:comment "Clean-in-place for tanks and lines"@en .
+
+# Water demand
+ghent:BrewCo_WaterDemand a qudt:QuantityValue ;
+    rdfs:label "BrewCo Daily Water Demand"@en ;
+    qudt:numericValue "600"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+# Input water quality requirements (potable + brewing quality)
+ghent:BrewCo_Water_pH a wf:WaterQualityRequirement ;
+    rdfs:label "BrewCo Input Water pH Range"@en ;
+    wf:hasWaterQualityParameter wf:pH ;
+    wf:hasLimitValue "7.0"^^xsd:double ;
+    wf:hasLimitType wf:OptimumLimit ;
+    rdfs:comment "pH affects brewing chemistry and yeast performance"@en .
+
+ghent:BrewCo_Water_Mineral a wf:WaterQualityRequirement ;
+    rdfs:label "BrewCo Water Mineral Profile"@en ;
+    wf:hasWaterQualityParameter wf:Hardness ;
+    wf:hasLimitValue "100.0"^^xsd:double ;
+    wf:hasLimitType wf:OptimumLimit ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Moderate hardness for proper brewing"@en .
+
+# Wastewater characteristics (high BOD - brewery)
+ghent:BrewCo_Wastewater_BOD a wf:WaterQualityObservation ;
+    rdfs:label "BrewCo Wastewater BOD"@en ;
+    wf:observedParameter wf:BOD ;
+    wf:observedValue "2500.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Very high BOD from spent grain, yeast, and CIP solutions"@en ;
+    wf:observedAt "ghent:BrewCo_Wastewater_Out" .
+
+ghent:BrewCo_Wastewater_COD a wf:WaterQualityObservation ;
+    rdfs:label "BrewCo Wastewater COD"@en ;
+    wf:observedParameter wf:COD ;
+    wf:observedValue "4500.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "High COD from organic matter"@en ;
+    wf:observedAt "ghent:BrewCo_Wastewater_Out" .
+
+ghent:BrewCo_Wastewater_TSS a wf:WaterQualityObservation ;
+    rdfs:label "BrewCo Wastewater TSS"@en ;
+    wf:observedParameter wf:TSS ;
+    wf:observedValue "1200.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "High TSS from spent grain and yeast"@en ;
+    wf:observedAt "ghent:BrewCo_Wastewater_Out" .
+
+ghent:BrewCo_Wastewater_pH a wf:WaterQualityObservation ;
+    rdfs:label "BrewCo Wastewater pH"@en ;
+    wf:observedParameter wf:pH ;
+    wf:observedValue "5.5"^^xsd:double ;
+    rdfs:comment "Acidic pH from fermentation residues"@en ;
+    wf:observedAt "ghent:BrewCo_Wastewater_Out" .
+
+# Wastewater flow (brewery wastewater is concentrated)
+ghent:BrewCo_Wastewater_Flow a qudt:QuantityValue ;
+    rdfs:label "BrewCo Wastewater Flow"@en ;
+    rdfs:comment "Approximately 80% of water intake becomes wastewater"@en ;
+    qudt:numericValue "480"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+# Discharge limits (VLAREM II for industrial discharge)
+ghent:BrewCo_VLAREM_BOD a wf:WaterQualityRequirement ;
+    rdfs:label "VLAREM II BOD Discharge Limit (to sewer)"@en ;
+    wf:hasWaterQualityParameter wf:BOD ;
+    wf:hasLimitValue "3000.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:hasRegulatoryStandard wf:VLAREM_II .
+
+ghent:BrewCo_VLAREM_pH a wf:WaterQualityRequirement ;
+    rdfs:label "VLAREM II pH Discharge Range"@en ;
+    wf:hasWaterQualityParameter wf:pH ;
+    wf:hasLimitValue "6.5"^^xsd:double ;
+    wf:hasLimitType wf:OptimumLimit ;
+    rdfs:comment "pH should be neutralized before discharge"@en ;
+    wf:hasRegulatoryStandard wf:VLAREM_II .

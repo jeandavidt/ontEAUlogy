@@ -1,0 +1,90 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+
+# ==============================================================================
+# Muide Residential District
+# ==============================================================================
+# Location: Downstream zone
+# Population: 5,000 inhabitants
+# Water Demand: 750 m3/day
+# Water Source: DWP-2
+# Wastewater Destination: WWTP-2
+
+ghent:Muide a wf:ResidentialDistrict ;
+    rdfs:label "Muide Residential District"@en ;
+    rdfs:comment "Residential area in the downstream zone of Ghent. Serves approximately 5,000 inhabitants with water supplied by DWP-2."@en ;
+    geo:lat "51.0530"^^xsd:double ;
+    geo:long "3.7200"^^xsd:double ;
+    wf:hasInputPort ghent:Muide_PotableWater_In ;
+    wf:hasOutputPort ghent:Muide_Wastewater_Out .
+
+# Ports
+ghent:Muide_PotableWater_In a wf:InputPort ;
+    rdfs:label "Muide Potable Water Inlet"@en ;
+    rdfs:comment "Potable water connection from DWP-2"@en ;
+    wf:hasFlowType wf:PotableWaterFlow ;
+    wf:hasSource ghent:DWP2_PotableWater_Out .
+
+ghent:Muide_Wastewater_Out a wf:OutputPort ;
+    rdfs:label "Muide Wastewater Outlet"@en ;
+    rdfs:comment "Domestic wastewater collection to WWTP-2"@en ;
+    wf:hasFlowType wf:BlackwaterFlow ;
+    wf:flowsTo ghent:WWTP2_Influent_In .
+
+# Population and demand
+ghent:Muide_Population a qudt:QuantityValue ;
+    rdfs:label "Muide Population"@en ;
+    qudt:numericValue "5000"^^xsd:integer ;
+    qudt:unit unit:Person .
+
+ghent:Muide_WaterDemand a qudt:QuantityValue ;
+    rdfs:label "Muide Daily Water Demand"@en ;
+    rdfs:comment "Average daily water consumption: 750 m3/day (150 L/person/day)"@en ;
+    qudt:numericValue "750"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+# Water quality requirements (potable water from DWP-2)
+ghent:Muide_Water_Quality a wf:WaterQualityObservation ;
+    rdfs:label "Muide Supplied Water Quality"@en ;
+    wf:observedParameter wf:pH ;
+    wf:observedValue "7.3"^^xsd:double ;
+    wf:observedAt "ghent:Muide_PotableWater_In" .
+
+ghent:Muide_Water_Chlorine a wf:WaterQualityObservation ;
+    rdfs:label "Muide Supplied Water Residual Chloramine"@en ;
+    wf:observedParameter wf:Chlorine ;
+    wf:observedValue "0.6"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Residual chloramine at distribution endpoint"@en ;
+    wf:observedAt "ghent:Muide_PotableWater_In" .
+
+# Wastewater characteristics (typical domestic)
+ghent:Muide_Wastewater_BOD a wf:WaterQualityObservation ;
+    rdfs:label "Muide Wastewater BOD"@en ;
+    wf:observedParameter wf:BOD ;
+    wf:observedValue "230.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Typical domestic BOD concentration"@en ;
+    wf:observedAt "ghent:Muide_Wastewater_Out" .
+
+ghent:Muide_Wastewater_TSS a wf:WaterQualityObservation ;
+    rdfs:label "Muide Wastewater TSS"@en ;
+    wf:observedParameter wf:TSS ;
+    wf:observedValue "180.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Typical domestic TSS concentration"@en ;
+    wf:observedAt "ghent:Muide_Wastewater_Out" .
+
+ghent:Muide_Wastewater_TN a wf:WaterQualityObservation ;
+    rdfs:label "Muide Wastewater Total Nitrogen"@en ;
+    wf:observedParameter wf:TotalNitrogen ;
+    wf:observedValue "38.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Typical domestic nitrogen load"@en ;
+    wf:observedAt "ghent:Muide_Wastewater_Out" .

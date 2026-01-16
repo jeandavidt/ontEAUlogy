@@ -1,0 +1,123 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+
+# ==============================================================================
+# ChipTech - Electronics Manufacturing
+# ==============================================================================
+# Location: Downstream zone
+# Water Demand: 200 m3/day (including ultra-pure water)
+# Water Source: DWP-2 (ultra-pure water from RO system)
+# Wastewater Destination: WWTP-2
+# Characteristics: Needs ultra-pure water, low contaminant discharge
+
+ghent:ChipTech a wf:ElectronicsManufacturing ;
+    rdfs:label "ChipTech Electronics Manufacturing"@en ;
+    rdfs:comment "Semiconductor and electronics manufacturing facility in the downstream zone. Requires ultra-pure water for manufacturing processes."@en ;
+    geo:lat "51.0480"^^xsd:double ;
+    geo:long "3.7280"^^xsd:double ;
+    wf:hasInputPort ghent:ChipTech_UltraPureWater_In ;
+    wf:hasOutputPort ghent:ChipTech_ProcessWater_Out ;
+    wf:hasOutputPort ghent:ChipTech_Wastewater_Out ;
+    wf:hasComponent ghent:ChipTech_Fab ;
+    wf:hasComponent ghent:ChipTech_UPW_System ;
+    wf:hasComponent ghent:ChipTech_Etch .
+
+# Ports
+ghent:ChipTech_UltraPureWater_In a wf:InputPort ;
+    rdfs:label "ChipTech Ultra-Pure Water Inlet"@en ;
+    rdfs:comment "Ultra-pure water connection from DWP-2 RO system"@en ;
+    wf:hasFlowType wf:UltraPureWaterFlow ;
+    wf:hasSource ghent:DWP2_UltraPureWater_Out .
+
+ghent:ChipTech_ProcessWater_Out a wf:OutputPort ;
+    rdfs:label "ChipTech Process Water Outlet"@en ;
+    rdfs:comment "Ultra-pure water for manufacturing"@en ;
+    wf:hasFlowType wf:UltraPureWaterFlow .
+
+ghent:ChipTech_Wastewater_Out a wf:OutputPort ;
+    rdfs:label "ChipTech Wastewater Outlet"@en ;
+    rdfs:comment "Low-contaminant semiconductor wastewater to WWTP-2"@en ;
+    wf:hasFlowType wf:IndustrialWastewaterFlow ;
+    wf:flowsTo ghent:WWTP2_Influent_In .
+
+# Treatment components
+ghent:ChipTech_Fab a wf:ProcessUnit ;
+    rdfs:label "ChipTech Fabrication Line"@en ;
+    rdfs:comment "Semiconductor wafer fabrication cleanroom"@en .
+
+ghent:ChipTech_UPW_System a wf:WaterTreatmentUnit ;
+    rdfs:label "ChipTech UPW Systems"@en ;
+    rdfs:comment "On-site ultra-pure water polishing systems"@en .
+
+ghent:ChipTech_Etch a wf:ProcessUnit ;
+    rdfs:label "ChipTech Etching Systems"@en ;
+    rdfs:comment "Chemical etching processes for circuit formation"@en .
+
+# Water demand
+ghent:ChipTech_WaterDemand a qudt:QuantityValue ;
+    rdfs:label "ChipTech Daily Water Demand"@en ;
+    qudt:numericValue "200"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+# Ultra-pure water quality requirements (extremely stringent)
+ghent:ChipTech_UPW_Resistivity a wf:WaterQualityRequirement ;
+    rdfs:label "ChipTech UPW Resistivity"@en ;
+    wf:hasWaterQualityParameter wf:Resistivity ;
+    wf:hasLimitValue "18.2"^^xsd:double ;
+    wf:hasLimitType wf:MinimumLimit ;
+    qudt:unit unit:OhmMeter ;
+    rdfs:comment "18.2 MOhm-cm resistivity for semiconductor manufacturing"@en .
+
+ghent:ChipTech_UPW_TOC a wf:WaterQualityRequirement ;
+    rdfs:label "ChipTech UPW TOC Limit"@en ;
+    wf:hasWaterQualityParameter wf:TOC ;
+    wf:hasLimitValue "0.5"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    qudt:unit unit:MicroGramPerLiter ;
+    rdfs:comment "Ultra-low total organic carbon"@en .
+
+ghent:ChipTech_UPW_TDS a wf:WaterQualityRequirement ;
+    rdfs:label "ChipTech UPW TDS Limit"@en ;
+    wf:hasWaterQualityParameter wf:TDS ;
+    wf:hasLimitValue "1.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    qudt:unit unit:MicroGramPerLiter ;
+    rdfs:comment "Ultra-low total dissolved solids"@en .
+
+# Wastewater characteristics (low volume, specific contaminants)
+ghent:ChipTech_Wastewater_TDS a wf:WaterQualityObservation ;
+    rdfs:label "ChipTech Wastewater TDS"@en ;
+    wf:observedParameter wf:TDS ;
+    wf:observedValue "500.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Elevated TDS from etching chemicals"@en ;
+    wf:observedAt "ghent:ChipTech_Wastewater_Out" .
+
+ghent:ChipTech_Wastewater_Metals a wf:WaterQualityObservation ;
+    rdfs:label "ChipTech Wastewater Heavy Metals"@en ;
+    wf:observedParameter wf:HeavyMetals ;
+    wf:observedValue "2.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Trace heavy metals from plating/etching"@en ;
+    wf:observedAt "ghent:ChipTech_Wastewater_Out" .
+
+ghent:ChipTech_Wastewater_Flow a qudt:QuantityValue ;
+    rdfs:label "ChipTech Wastewater Flow"@en ;
+    rdfs:comment "Approximately 80% of intake is recovered as UPW, 20% becomes wastewater"@en ;
+    qudt:numericValue "40"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+# Special discharge requirements
+ghent:ChipTech_VLAREM_Metals a wf:WaterQualityRequirement ;
+    rdfs:label "VLAREM II Heavy Metals Discharge Limit"@en ;
+    wf:hasWaterQualityParameter wf:HeavyMetals ;
+    wf:hasLimitValue "5.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:hasRegulatoryStandard wf:VLAREM_II .
