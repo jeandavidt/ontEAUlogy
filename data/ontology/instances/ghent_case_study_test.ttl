@@ -1,0 +1,250 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix cap: <https://ugentbiomath.github.io/waterframe/capability#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+
+# Test instances for the new ontology modules
+# This file validates that information.ttl, capabilities.ttl, and qualities.ttl work together
+
+# ========== GHENT WASTEWATER TREATMENT PLANT ==========
+
+wf:GhentWWTP a wf:WastewaterTreatmentPlant ;
+    rdfs:label "Ghent Wastewater Treatment Plant" ;
+    wf:hasComponent wf:GhentPrimaryTreatment ;
+    wf:hasComponent wf:GhentSecondaryTreatment ;
+    wf:hasComponent wf:GhentTertiaryTreatment ;
+    wf:hasComponent wf:GhentDisinfection .
+
+wf:GhentPrimaryTreatment a wf:PrimaryTreatment ;
+    rdfs:label "Ghent Primary Treatment" ;
+    wf:hasInputPort wf:GhentPrimary_In ;
+    wf:hasOutputPort wf:GhentPrimary_Out ;
+    wf:hasOutputPort wf:GhentPrimary_Sludge .
+
+wf:GhentSecondaryTreatment a wf:SecondaryTreatment ;
+    rdfs:label "Ghent Secondary Treatment (Aeration Tank)" ;
+    wf:hasInputPort wf:GhentSecondary_In ;
+    wf:hasOutputPort wf:GhentSecondary_Out .
+
+wf:GhentTertiaryTreatment a wf:TertiaryTreatment ;
+    rdfs:label "Ghent Tertiary Treatment" ;
+    wf:hasInputPort wf:GhentTertiary_In ;
+    wf:hasOutputPort wf:GhentTertiary_Out .
+
+wf:GhentDisinfection a wf:DisinfectionUnit ;
+    rdfs:label "Ghent UV Disinfection" ;
+    wf:hasInputPort wf:GhentUV_In ;
+    wf:hasOutputPort wf:GhentUV_Out .
+
+# Flow connections
+wf:GhentPrimary_Out wf:flowsTo wf:GhentSecondary_In .
+wf:GhentSecondary_Out wf:flowsTo wf:GhentTertiary_In .
+wf:GhentTertiary_Out wf:flowsTo wf:GhentUV_In .
+
+# ========== ASM1 MODEL FOR SECONDARY TREATMENT ==========
+
+wf:ASM1_Model a wf:SimulationModel ;
+    rdfs:label "Activated Sludge Model No. 1 (ASM1)" ;
+    wf:representsEntity wf:GhentSecondaryTreatment ;
+    wf:hasCapability cap:DynamicSimulation ;
+    wf:hasCapability cap:MassBalance ;
+    wf:hasCapability cap:WaterQualityPrediction ;
+    cap:description "Mathematical model for carbon and nitrogen removal in activated sludge processes." ;
+    wf:hasParameter wf:mu_max ;
+    wf:hasParameter wf:K_s ;
+    wf:hasParameter wf:K_oh ;
+    wf:hasParameter wf:Y_H ;
+    wf:hasStateVariable wf:S_S ;
+    wf:hasStateVariable wf:S_NH ;
+    wf:hasStateVariable wf:X_BH ;
+    wf:hasInputVariable wf:InflowRate_Var ;
+    wf:hasInputVariable wf:InflowCOD_Var ;
+    wf:hasInputVariable wf:InflowTKN_Var ;
+    wf:hasOutputVariable wf:EffluentCOD_Var ;
+    wf:hasOutputVariable wf:EffluentTN_Var ;
+    wf:hasSubmodel wf:GhentWWTP_Model .
+
+wf:GhentWWTP_Model a wf:ProcessModel ;
+    rdfs:label "Full WWTP Plant Model" ;
+    wf:representsEntity wf:GhentWWTP ;
+    wf:hasSubmodel wf:ASM1_Model ;
+    wf:hasInput wf:GhentWWTP_Input ;
+    wf:hasOutput wf:GhentWWTP_Output .
+
+# ========== MODEL PARAMETERS ==========
+
+wf:mu_max a wf:Parameter ;
+    rdfs:label "Maximum specific growth rate" ;
+    wf:numericalValue "0.4"^^xsd:double ;
+    wf:hasUnit qudt:perDay ;
+    wf:minValue "0.1"^^xsd:double ;
+    wf:maxValue "1.0"^^xsd:double ;
+    wf:isDecisionVariable "false"^^xsd:boolean ;
+    wf:parameterName "mu_max" .
+
+wf:K_s a wf:Parameter ;
+    rdfs:label "Half-saturation coefficient for substrate" ;
+    wf:numericalValue "20.0"^^xsd:double ;
+    wf:hasUnit qudt:milligramPerLiter ;
+    wf:minValue "5.0"^^xsd:double ;
+    wf:maxValue "100.0"^^xsd:double ;
+    wf:isDecisionVariable "false"^^xsd:boolean ;
+    wf:parameterName "K_s" .
+
+wf:K_oh a wf:Parameter ;
+    rdfs:label "Oxygen half-saturation coefficient" ;
+    wf:numericalValue "0.5"^^xsd:double ;
+    wf:hasUnit qudt:milligramPerLiter ;
+    wf:minValue "0.1"^^xsd:double ;
+    wf:maxValue "2.0"^^xsd:double ;
+    wf:isDecisionVariable "false"^^xsd:boolean ;
+    wf:parameterName "K_oh" .
+
+wf:Y_H a wf:Parameter ;
+    rdfs:label "Heterotrophic yield coefficient" ;
+    wf:numericalValue "0.67"^^xsd:double ;
+    wf:minValue "0.4"^^xsd:double ;
+    wf:maxValue "0.8"^^xsd:double ;
+    wf:isDecisionVariable "true"^^xsd:boolean ;
+    wf:parameterName "Y_H" .
+
+# ========== STATE VARIABLES ==========
+
+wf:S_S a wf:StateVariable ;
+    rdfs:label "Soluble readily biodegradable substrate" ;
+    wf:hasUnit qudt:milligramPerLiter ;
+    wf:parameterName "S_S" .
+
+wf:S_NH a wf:StateVariable ;
+    rdfs:label "Soluble ammonia nitrogen" ;
+    wf:hasUnit qudt:milligramPerLiter ;
+    wf:parameterName "S_NH" .
+
+wf:X_BH a wf:StateVariable ;
+    rdfs:label "Active heterotrophic biomass" ;
+    wf:hasUnit qudt:milligramPerLiter ;
+    wf:parameterName "X_BH" .
+
+# ========== INPUT/OUTPUT VARIABLES ==========
+
+wf:InflowRate_Var a wf:InputVariable ;
+    rdfs:label "Inflow rate" ;
+    wf:hasUnit qudt:cubicMeterPerDay ;
+    wf:parameterName "Q_in" ;
+    wf:isDecisionVariable "true"^^xsd:boolean .
+
+wf:InflowCOD_Var a wf:InputVariable ;
+    rdfs:label "Influent COD concentration" ;
+    wf:hasUnit qudt:milligramPerLiter ;
+    wf:parameterName "S_S_in" ;
+    wf:isDecisionVariable "true"^^xsd:boolean .
+
+wf:InflowTKN_Var a wf:InputVariable ;
+    rdfs:label "Influent TKN concentration" ;
+    wf:hasUnit qudt:milligramPerLiter ;
+    wf:parameterName "S_NH_in" ;
+    wf:isDecisionVariable "true"^^xsd:boolean .
+
+wf:EffluentCOD_Var a wf:OutputVariable ;
+    rdfs:label "Effluent COD concentration" ;
+    wf:hasUnit qudt:milligramPerLiter ;
+    wf:parameterName "S_S_eff" .
+
+wf:EffluentTN_Var a wf:OutputVariable ;
+    rdfs:label "Effluent total nitrogen" ;
+    wf:hasUnit qudt:milligramPerLiter ;
+    wf:parameterName "TN_eff" .
+
+# ========== MODEL INPUT/OUTPUT (with metadata) ==========
+
+wf:GhentWWTP_Input a wf:ModelInput ;
+    rdfs:label "Ghent WWTP Model Input" ;
+    wf:correspondsToVariable wf:InflowRate_Var ;
+    wf:parameterName "Q_in" ;
+    wf:hasUnit qudt:cubicMeterPerDay ;
+    wf:defaultValue "5000.0"^^xsd:double ;
+    wf:minValue "1000.0"^^xsd:double ;
+    wf:maxValue "10000.0"^^xsd:double .
+
+wf:GhentWWTP_Output a wf:ModelOutput ;
+    rdfs:label "Ghent WWTP Model Output" ;
+    wf:correspondsToVariable wf:EffluentCOD_Var ;
+    wf:parameterName "S_S_eff" ;
+    wf:hasUnit qudt:milligramPerLiter .
+
+# ========== SOFTWARE SYSTEM ==========
+
+wf:BioWin_Simulator a wf:SoftwareSystem ;
+    rdfs:label "BioWin Simulator" ;
+    wf:hasCapability cap:DynamicSimulation ;
+    wf:hasCapability cap:MassBalance ;
+    wf:hasCapability cap:WaterQualityPrediction ;
+    wf:hasCapability cap:Optimization ;
+    wf:hasCapability cap:BiokineticModeling ;
+    wf:hasCapability cap:NutrientRemoval ;
+    wf:apiEndpoint "https://api.biwin.example.com/v1/simulate" ;
+    wf:apiVersion "6.1" ;
+    wf:implementedBy wf:ASM1_Model .
+
+# ========== WATER QUALITY OBSERVATIONS ==========
+
+wf:GhentEffluent_Sample_2024_01 a wf:WaterQualityObservation ;
+    rdfs:label "Ghent Effluent Sample January 2024" ;
+    wf:observedParameter wf:BOD ;
+    wf:observedValue "8.5"^^xsd:double ;
+    wf:observedAt "GhentWWTP_Outfall" ;
+    wf:observedOn "2024-01-15T10:30:00"^^xsd:dateTime .
+
+wf:GhentEffluent_Sample_2024_01_N a wf:WaterQualityObservation ;
+    rdfs:label "Ghent Effluent Sample January 2024 (Nitrogen)" ;
+    wf:observedParameter wf:TotalNitrogen ;
+    wf:observedValue "12.0"^^xsd:double ;
+    wf:observedAt "GhentWWTP_Outfall" ;
+    wf:observedOn "2024-01-15T10:30:00"^^xsd:dateTime .
+
+wf:GhentEffluent_Sample_2024_01_P a wf:WaterQualityObservation ;
+    rdfs:label "Ghent Effluent Sample January 2024 (Phosphorus)" ;
+    wf:observedParameter wf:TotalPhosphorus ;
+    wf:observedValue "1.5"^^xsd:double ;
+    wf:observedAt "GhentWWTP_Outfall" ;
+    wf:observedOn "2024-01-15T10:30:00"^^xsd:dateTime .
+
+# ========== WATER QUALITY REQUIREMENTS ==========
+
+wf:EU_BOD_Discharge_Limit a wf:WaterQualityRequirement ;
+    rdfs:label "EU BOD Discharge Limit" ;
+    wf:hasWaterQualityParameter wf:BOD ;
+    wf:hasLimitValue "25.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasRegulatoryStandard wf:EU_Water_Framework_Directive .
+
+wf:EU_TN_Discharge_Limit a wf:WaterQualityRequirement ;
+    rdfs:label "EU Total Nitrogen Discharge Limit" ;
+    wf:hasWaterQualityParameter wf:TotalNitrogen ;
+    wf:hasLimitValue "15.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasRegulatoryStandard wf:EU_Water_Framework_Directive .
+
+wf:EU_TP_Discharge_Limit a wf:WaterQualityRequirement ;
+    rdfs:label "EU Total Phosphorus Discharge Limit" ;
+    wf:hasWaterQualityParameter wf:TotalPhosphorus ;
+    wf:hasLimitValue "2.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasRegulatoryStandard wf:EU_Water_Framework_Directive .
+
+# ========== REGULATORY STANDARDS ==========
+
+wf:EU_Water_Framework_Directive a wf:RegulatoryStandard ;
+    rdfs:label "EU Water Framework Directive" ;
+    rdfs:comment "European Union Water Framework Directive discharge standards." .
+
+# ========== FIT-FOR-PURPOSE CLASSIFICATIONS ==========
+
+wf:Irrigation_EU_Standard a owl:Class ;
+    rdfs:subClassOf wf:IrrigationWater ;
+    rdfs:label "EU Irrigation Water Standard" ;
+    rdfs:comment "Water meeting EU standards for agricultural irrigation." .
