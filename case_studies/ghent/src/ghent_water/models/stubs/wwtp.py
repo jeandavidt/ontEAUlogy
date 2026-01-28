@@ -2,6 +2,7 @@
 
 Simulates wastewater treatment processes with configurable
 treatment efficiencies for BOD, COD, TSS, nutrients, and pathogens.
+Includes scenario support and VLAREM II compliance checking.
 """
 
 import random
@@ -11,20 +12,80 @@ import json
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from ..base import BaseWaterModel
+from ..base import BaseWaterModel, ModelStatus
+
+
+# VLAREM II compliance limits (Belgian water regulations)
+VLAREM_II_LIMITS = {
+    "BOD": 25,  # mg/L
+    "COD": 125,  # mg/L
+    "TSS": 35,  # mg/L
+    "Total_N": 15,  # mg/L as N
+    "Total_P": 2,  # mg/L as P
+}
+
+# Supported scenarios
+SCENARIOS = ["baseline", "high_load", "low_efficiency", "high_efficiency", "storm_event"]
+
+
+def check_vlarem_compliance(effluent: Dict) -> Dict[str, Any]:
+    """Check effluent against VLAREM II limits.
+    
+    Args:
+        effluent: Dictionary containing effluent parameters.
+        
+    Returns:
+        Dictionary with compliance status and violations.
+    """
+    violations = {}
+    is_compliant = True
+    
+    # Map effluent keys to VLAREM parameter names
+    param_mapping = {
+        "effluent_BOD": ("BOD", VLAREM_II_LIMITS["BOD"]),
+        "effluent_COD": ("COD", VLAREM_II_LIMITS["COD"]),
+        "effluent_TSS": ("TSS", VLAREM_II_LIMITS["TSS"]),
+        "effluent_TN": ("Total_N", VLAREM_II_LIMITS["Total_N"]),
+        "effluent_TP": ("Total_P", VLAREM_II_LIMITS["Total_P"]),
+    }
+    
+    for key, (name, limit) in param_mapping.items():
+        if key in effluent:
+            value = effluent[key]
+            is_violation = value > limit
+            violations[name] = {
+                "value": value,
+                "limit": limit,
+                "unit": "mg/L",
+                "is_violation": is_violation,
+                "excess_pct": ((value - limit) / limit * 100) if is_violation else 0,
+            }
+            if is_violation:
+                is_compliant = False
+    
+    return {
+        "is_compliant": is_compliant,
+        "violations": violations,
+        "regulation": "VLAREM II",
+    }
 
 
 # Pydantic models for request/response validation
 class WWTPSimulationInput(BaseModel):
     """Input parameters for WWTP simulation."""
 
-    influent_flow: float = Field(..., description="Influent flow rate (m³/d)")
-    influent_BOD: float = Field(..., description="Influent BOD concentration (mg/L)")
-    influent_COD: float = Field(..., description="Influent COD concentration (mg/L)")
-    influent_TSS: float = Field(..., description="Influent total suspended solids (mg/L)")
-    influent_TN: float = Field(..., description="Influent total nitrogen (mg/L)")
-    influent_TP: float = Field(..., description="Influent total phosphorus (mg/L)")
-    influent_coliforms: float = Field(..., description="Influent coliform count (CFU/100mL)")
+    influent_flow: float = Field(default=25000.0, description="Influent flow rate (m³/d)")
+    influent_BOD: float = Field(default=250.0, description="Influent BOD concentration (mg/L)")
+    influent_COD: float = Field(default=500.0, description="Influent COD concentration (mg/L)")
+    influent_TSS: float = Field(
+        default=300.0, description="Influent total suspended solids (mg/L)"
+    )
+    influent_TN: float = Field(default=45.0, description="Influent total nitrogen (mg/L)")
+    influent_TP: float = Field(default=8.0, description="Influent total phosphorus (mg/L)")
+    influent_coliforms: float = Field(
+        default=1e7, description="Influent coliform count (CFU/100mL)"
+    )
+    scenario: str = Field(default="baseline", description="Simulation scenario")
 
 
 class WWTPSimulationOutput(BaseModel):
@@ -45,6 +106,8 @@ class WWTPSimulationOutput(BaseModel):
     removal_efficiency_TN: float = Field(..., description="TN removal efficiency (%)")
     removal_efficiency_TP: float = Field(..., description="TP removal efficiency (%)")
     removal_efficiency_coliforms: float = Field(..., description="Coliform removal efficiency (%)")
+    compliance_status: Dict[str, Any] = Field(..., description="VLAREM II compliance status")
+    scenario: str = Field(..., description="Applied scenario")
 
 
 class WastewaterTreatmentPlantStub(BaseWaterModel):
@@ -146,6 +209,11 @@ class WastewaterTreatmentPlantStub(BaseWaterModel):
             """Return TTL self-description."""
             return {"ttl": self.generate_ttl_description()}
 
+        @self.app.get("/describe/agent")
+        async def describe_agent():
+            """Return agent-aware TTL self-description."""
+            return {"ttl": self.generate_agent_ttl()}
+
         @self.app.post("/simulate")
         async def simulate(inputs: WWTPSimulationInput):
             """Run simulation with given inputs."""
@@ -216,22 +284,42 @@ class WastewaterTreatmentPlantStub(BaseWaterModel):
         """Run wastewater treatment simulation.
 
         Applies treatment efficiencies to influent parameters.
+        Supports multiple scenarios for different operating conditions.
+        Returns compliance status against VLAREM II limits.
         """
-        # Extract input values
-        influent_flow = self._get_parameter_value(inputs, "influent_flow", 80000.0)
-        influent_BOD = self._get_parameter_value(inputs, "influent_BOD", 200.0)
-        influent_COD = self._get_parameter_value(inputs, "influent_COD", 400.0)
-        influent_TSS = self._get_parameter_value(inputs, "influent_TSS", 250.0)
-        influent_TN = self._get_parameter_value(inputs, "influent_TN", 40.0)
-        influent_TP = self._get_parameter_value(inputs, "influent_TP", 8.0)
-        influent_coliforms = self._get_parameter_value(inputs, "influent_coliforms", 1000000.0)
-
+        # Get scenario from inputs (default to baseline)
+        scenario = inputs.get("scenario", "baseline")
+        
+        # Apply scenario effects to influent conditions
+        scenario_modifiers = self._get_scenario_modifiers(scenario)
+        
+        # Extract input values with scenario-adjusted defaults
+        base_influent_flow = self._get_parameter_value(inputs, "influent_flow", 80000.0)
+        base_influent_BOD = self._get_parameter_value(inputs, "influent_BOD", 200.0)
+        base_influent_COD = self._get_parameter_value(inputs, "influent_COD", 400.0)
+        base_influent_TSS = self._get_parameter_value(inputs, "influent_TSS", 250.0)
+        base_influent_TN = self._get_parameter_value(inputs, "influent_TN", 40.0)
+        base_influent_TP = self._get_parameter_value(inputs, "influent_TP", 8.0)
+        base_influent_coliforms = self._get_parameter_value(inputs, "influent_coliforms", 1000000.0)
+        
+        # Apply scenario modifiers
+        influent_flow = base_influent_flow * scenario_modifiers.get("flow_factor", 1.0)
+        influent_BOD = base_influent_BOD * scenario_modifiers.get("bod_factor", 1.0)
+        influent_COD = base_influent_COD * scenario_modifiers.get("cod_factor", 1.0)
+        influent_TSS = base_influent_TSS * scenario_modifiers.get("tss_factor", 1.0)
+        influent_TN = base_influent_TN * scenario_modifiers.get("tn_factor", 1.0)
+        influent_TP = base_influent_TP * scenario_modifiers.get("tp_factor", 1.0)
+        influent_coliforms = base_influent_coliforms * scenario_modifiers.get("coliform_factor", 1.0)
+        
         # Calculate flow (typically small losses to sludge)
         effluent_flow = influent_flow * (1 - random.uniform(0.01, 0.03))
-
+        
+        # Get scenario-adjusted treatment efficiencies
+        efficiencies = self._get_scenario_efficiencies(scenario)
+        
         # Apply treatment efficiencies with variance
         def apply_efficiency(value: float, param: str) -> tuple[float, float]:
-            eff = self.treatment_efficiencies.get(param, 90.0) + random.uniform(-2, 2)
+            eff = efficiencies.get(param, 90.0) + random.uniform(-2, 2)
             eff = max(0, min(100, eff))
             return value * (1 - eff / 100), eff
 
@@ -251,6 +339,18 @@ class WastewaterTreatmentPlantStub(BaseWaterModel):
         base_energy = effluent_flow * 0.05  # kWh per m³
         energy_consumption = base_energy * (1 + influent_BOD / 400)
 
+        # Build effluent dictionary for compliance checking
+        effluent_dict = {
+            "effluent_BOD": effluent_BOD,
+            "effluent_COD": effluent_COD,
+            "effluent_TSS": effluent_TSS,
+            "effluent_TN": effluent_TN,
+            "effluent_TP": effluent_TP,
+        }
+        
+        # Check compliance with VLAREM II
+        compliance_status = check_vlarem_compliance(effluent_dict)
+
         result = {
             "effluent_flow": round(effluent_flow, 2),
             "effluent_BOD": round(effluent_BOD, 2),
@@ -267,14 +367,72 @@ class WastewaterTreatmentPlantStub(BaseWaterModel):
             "removal_efficiency_TN": round(removal_TN, 2),
             "removal_efficiency_TP": round(removal_TP, 2),
             "removal_efficiency_coliforms": round(removal_coliforms, 2),
+            "compliance_status": compliance_status,
+            "scenario": scenario,
         }
 
-        self._update_state(result)
+        self._update_state(result, ModelStatus.RUNNING)
         return result
-
-    async def get_state(self) -> Dict[str, Any]:
-        """Return current model state."""
-        return self._state
+    
+    def _get_scenario_modifiers(self, scenario: str) -> Dict[str, float]:
+        """Get influent modifiers for a scenario.
+        
+        Args:
+            scenario: Scenario name.
+            
+        Returns:
+            Dictionary of modifiers to apply to influent values.
+        """
+        scenarios = {
+            "baseline": {
+                "flow_factor": 1.0, "bod_factor": 1.0, "cod_factor": 1.0,
+                "tss_factor": 1.0, "tn_factor": 1.0, "tp_factor": 1.0,
+                "coliform_factor": 1.0,
+            },
+            "high_load": {
+                "flow_factor": 1.0, "bod_factor": 1.5, "cod_factor": 1.4,
+                "tss_factor": 1.3, "tn_factor": 1.2, "tp_factor": 1.2,
+                "coliform_factor": 1.5,
+            },
+            "low_efficiency": {
+                "flow_factor": 1.0, "bod_factor": 1.0, "cod_factor": 1.0,
+                "tss_factor": 1.0, "tn_factor": 1.0, "tp_factor": 1.0,
+                "coliform_factor": 1.0,
+            },
+            "high_efficiency": {
+                "flow_factor": 1.0, "bod_factor": 1.0, "cod_factor": 1.0,
+                "tss_factor": 1.0, "tn_factor": 1.0, "tp_factor": 1.0,
+                "coliform_factor": 1.0,
+            },
+            "storm_event": {
+                "flow_factor": 2.0, "bod_factor": 0.7, "cod_factor": 0.8,
+                "tss_factor": 2.0, "tn_factor": 0.9, "tp_factor": 1.1,
+                "coliform_factor": 1.2,
+            },
+        }
+        return scenarios.get(scenario, scenarios["baseline"])
+    
+    def _get_scenario_efficiencies(self, scenario: str) -> Dict[str, float]:
+        """Get treatment efficiencies for a scenario.
+        
+        Args:
+            scenario: Scenario name.
+            
+        Returns:
+            Dictionary of treatment efficiencies.
+        """
+        # Base efficiencies from instance config
+        base_eff = self.treatment_efficiencies.copy()
+        
+        scenario_efficiencies = {
+            "baseline": base_eff,
+            "high_load": {k: v * 0.85 for k, v in base_eff.items()},  # 15% less efficient
+            "low_efficiency": {k: v * 0.7 for k, v in base_eff.items()},  # 30% less efficient
+            "high_efficiency": {k: min(99.9, v * 1.05) for k, v in base_eff.items()},  # 5% more efficient
+            "storm_event": {k: v * 0.6 for k, v in base_eff.items()},  # 40% less efficient (dilution)
+        }
+        
+        return scenario_efficiencies.get(scenario, base_eff)
 
 
 def create_wwtp_model(entity_id: str = "WWTP1", port: int = 8003) -> WastewaterTreatmentPlantStub:

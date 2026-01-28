@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from ..base import BaseWaterModel
+from ..base import BaseWaterModel, ModelStatus
 
 
 # Default per-capita water use
@@ -21,8 +21,10 @@ PER_CAPITA_WATER_USE = 150  # L/person/day
 class ResidentialSimulationInput(BaseModel):
     """Input parameters for residential district simulation."""
 
-    supply_water_flow: float = Field(..., description="Supply water flow rate (m³/d)")
-    population: int = Field(..., description="Population served")
+    supply_water_flow: float = Field(
+        default=5000.0, description="Supply water flow rate (m³/d)"
+    )
+    population: int = Field(default=25000, description="Population served")
 
 
 class ResidentialSimulationOutput(BaseModel):
@@ -125,6 +127,11 @@ class ResidentialStub(BaseWaterModel):
         async def describe_turtle():
             """Return TTL self-description."""
             return {"ttl": self.generate_ttl_description()}
+
+        @self.app.get("/describe/agent")
+        async def describe_agent():
+            """Return agent-aware TTL self-description."""
+            return {"ttl": self.generate_agent_ttl()}
 
         @self.app.post("/simulate")
         async def simulate(inputs: ResidentialSimulationInput):
@@ -230,12 +237,8 @@ class ResidentialStub(BaseWaterModel):
             "per_capita_generation": round(per_capita_generation, 1),
         }
 
-        self._update_state(result)
+        self._update_state(result, ModelStatus.RUNNING)
         return result
-
-    async def get_state(self) -> Dict[str, Any]:
-        """Return current model state."""
-        return self._state
 
 
 def create_residential_model(

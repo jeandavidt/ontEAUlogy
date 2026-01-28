@@ -11,17 +11,27 @@ from typing import Any, Dict, List, Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from ..base import BaseWaterModel
+from ..base import BaseWaterModel, ModelStatus
 
 
 # Pydantic models for request/response validation
 class RiverSimulationInput(BaseModel):
     """Input parameters for river simulation."""
 
-    upstream_flow: float = Field(..., description="Upstream flow rate (m³/d)")
-    upstream_quality: float = Field(..., description="Upstream water quality index (0-1)")
-    discharge_flows: List[float] = Field(..., description="List of discharge flow rates (m³/d)")
-    discharge_qualities: List[float] = Field(..., description="List of discharge quality indices (0-1)")
+    upstream_flow: float = Field(
+        default=100000.0, description="Upstream flow rate (m³/d)"
+    )
+    upstream_quality: float = Field(
+        default=0.8, description="Upstream water quality index (0-1)"
+    )
+    discharge_flows: List[float] = Field(
+        default_factory=lambda: [20000.0, 15000.0],
+        description="List of discharge flow rates (m³/d)",
+    )
+    discharge_qualities: List[float] = Field(
+        default_factory=lambda: [0.6, 0.65],
+        description="List of discharge quality indices (0-1)",
+    )
 
 
 class RiverSimulationOutput(BaseModel):
@@ -44,7 +54,7 @@ class RiverStub(BaseWaterModel):
 
     def __init__(
         self,
-        entity_id: str = "River",
+        entity_id: str = "lieve_river",
         entity_name: str = "Lieve River",
         port: int = 8010,
         river_length: float = 10.0,
@@ -122,6 +132,11 @@ class RiverStub(BaseWaterModel):
         async def describe_turtle():
             """Return TTL self-description."""
             return {"ttl": self.generate_ttl_description()}
+
+        @self.app.get("/describe/agent")
+        async def describe_agent():
+            """Return agent-aware TTL self-description."""
+            return {"ttl": self.generate_agent_ttl()}
 
         @self.app.post("/simulate")
         async def simulate(inputs: RiverSimulationInput):
@@ -249,15 +264,11 @@ class RiverStub(BaseWaterModel):
             "quality_change": round(quality_change, 4),
         }
 
-        self._update_state(result)
+        self._update_state(result, ModelStatus.RUNNING)
         return result
 
-    async def get_state(self) -> Dict[str, Any]:
-        """Return current model state."""
-        return self._state
 
-
-def create_river_model(entity_id: str = "River", port: int = 8010) -> RiverStub:
+def create_river_model(entity_id: str = "lieve_river", port: int = 8010) -> RiverStub:
     """Factory function to create a River model.
 
     Args:

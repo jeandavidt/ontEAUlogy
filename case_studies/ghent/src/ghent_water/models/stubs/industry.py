@@ -11,7 +11,7 @@ import json
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from ..base import BaseWaterModel
+from ..base import BaseWaterModel, ModelStatus
 
 
 # Industry-specific configurations
@@ -84,9 +84,15 @@ INDUSTRY_CONFIGS = {
 class IndustrySimulationInput(BaseModel):
     """Input parameters for industry simulation."""
 
-    supply_water_flow: float = Field(..., description="Supply water flow rate (m³/d)")
-    supply_water_quality: float = Field(..., description="Supply water quality index (0-1)")
-    production_rate: Optional[float] = Field(None, description="Production rate (industry specific)")
+    supply_water_flow: float = Field(
+        default=1000.0, description="Supply water flow rate (m³/d)"
+    )
+    supply_water_quality: float = Field(
+        default=0.95, description="Supply water quality index (0-1)"
+    )
+    production_rate: Optional[float] = Field(
+        default=None, description="Production rate (industry specific)"
+    )
 
 
 class IndustrySimulationOutput(BaseModel):
@@ -222,6 +228,11 @@ class IndustryStub(BaseWaterModel):
             """Return TTL self-description."""
             return {"ttl": self.generate_ttl_description()}
 
+        @self.app.get("/describe/agent")
+        async def describe_agent():
+            """Return agent-aware TTL self-description."""
+            return {"ttl": self.generate_agent_ttl()}
+
         @self.app.post("/simulate")
         async def simulate(inputs: IndustrySimulationInput):
             """Run simulation with given inputs."""
@@ -341,7 +352,7 @@ class IndustryStub(BaseWaterModel):
                 "wastewater_residuals": self._generate_characteristic(waste_chars, "residuals", supply_quality),
             })
 
-        self._update_state(result)
+        self._update_state(result, ModelStatus.RUNNING)
         return result
 
     def _generate_characteristic(
@@ -368,10 +379,6 @@ class IndustryStub(BaseWaterModel):
         value = value * quality_factor
 
         return round(max(0, value), 2)
-
-    async def get_state(self) -> Dict[str, Any]:
-        """Return current model state."""
-        return self._state
 
 
 def create_industry_model(

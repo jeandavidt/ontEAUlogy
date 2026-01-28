@@ -11,18 +11,26 @@ import json
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from ..base import BaseWaterModel, CASE_GHENT, CAP
+from ..base import BaseWaterModel, CASE_GHENT, CAP, ModelStatus
 
 
 # Pydantic models for request/response validation
 class DWPSimulationInput(BaseModel):
     """Input parameters for DWP simulation."""
 
-    raw_water_flow: float = Field(..., description="Raw water intake flow rate (m³/d)")
-    raw_water_turbidity: float = Field(..., description="Raw water turbidity (NTU)")
-    raw_water_toc: float = Field(..., description="Raw water total organic carbon (mg/L)")
-    raw_water_ph: float = Field(..., description="Raw water pH")
-    raw_water_coliforms: float = Field(..., description="Raw water coliform count (CFU/100mL)")
+    raw_water_flow: float = Field(
+        default=40000.0, description="Raw water intake flow rate (m³/d)"
+    )
+    raw_water_turbidity: float = Field(
+        default=10.0, description="Raw water turbidity (NTU)"
+    )
+    raw_water_toc: float = Field(
+        default=5.0, description="Raw water total organic carbon (mg/L)"
+    )
+    raw_water_ph: float = Field(default=7.5, description="Raw water pH")
+    raw_water_coliforms: float = Field(
+        default=100.0, description="Raw water coliform count (CFU/100mL)"
+    )
 
 
 class DWPSimulationOutput(BaseModel):
@@ -131,6 +139,11 @@ class DrinkingWaterPlantStub(BaseWaterModel):
         async def describe_turtle():
             """Return TTL self-description."""
             return {"ttl": self.generate_ttl_description()}
+
+        @self.app.get("/describe/agent")
+        async def describe_agent():
+            """Return agent-aware TTL self-description."""
+            return {"ttl": self.generate_agent_ttl()}
 
         @self.app.post("/simulate")
         async def simulate(inputs: DWPSimulationInput):
@@ -253,12 +266,8 @@ class DrinkingWaterPlantStub(BaseWaterModel):
             "removal_efficiency_coliforms": round(coliform_removal, 2),
         }
 
-        self._update_state(result)
+        self._update_state(result, ModelStatus.RUNNING)
         return result
-
-    async def get_state(self) -> Dict[str, Any]:
-        """Return current model state."""
-        return self._state
 
 
 def create_dwp_model(entity_id: str = "DWP1", port: int = 8001) -> DrinkingWaterPlantStub:

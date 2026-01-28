@@ -15,6 +15,7 @@ from enum import Enum
 
 class EntityType(str, Enum):
     """Types of water system entities."""
+
     DRINKING_WATER_PLANT = "DrinkingWaterPlant"
     WASTEWATER_TREATMENT_PLANT = "WastewaterTreatmentPlant"
     INDUSTRY = "Industry"
@@ -25,6 +26,7 @@ class EntityType(str, Enum):
 @dataclass
 class ParameterConfig:
     """Configuration for a model parameter."""
+
     name: str
     unit: str
     datatype: str = "float"
@@ -38,6 +40,7 @@ class ParameterConfig:
 @dataclass
 class TreatmentConfig:
     """Configuration for treatment/removal process."""
+
     parameter: str
     removal_rate: float  # Percentage (0-100)
     efficiency_variance: float = 5.0  # Variance in efficiency
@@ -46,6 +49,7 @@ class TreatmentConfig:
 @dataclass
 class EntityConfig:
     """Complete configuration for a water system entity."""
+
     entity_id: str
     entity_name: str
     entity_type: EntityType
@@ -70,20 +74,54 @@ DWP_CONFIGS: List[EntityConfig] = [
             ParameterConfig("treatment_efficiency", "%", default=95.0),
         ],
         inputs=[
-            ParameterConfig("raw_water_flow", "m³/d", min_value=0, max_value=60000, default=40000),
-            ParameterConfig("raw_water_turbidity", "NTU", min_value=0, max_value=100, default=10),
-            ParameterConfig("raw_water_toc", "mg/L", min_value=0, max_value=50, default=5),
+            ParameterConfig(
+                "raw_water_flow", "m³/d", min_value=0, max_value=60000, default=40000
+            ),
+            ParameterConfig(
+                "raw_water_turbidity", "NTU", min_value=0, max_value=100, default=10
+            ),
+            ParameterConfig(
+                "raw_water_toc", "mg/L", min_value=0, max_value=50, default=5
+            ),
             ParameterConfig("raw_water_ph", "-", min_value=6, max_value=9, default=7.5),
-            ParameterConfig("raw_water_coliforms", "CFU/100mL", min_value=0, max_value=10000, default=100),
+            ParameterConfig(
+                "raw_water_coliforms",
+                "CFU/100mL",
+                min_value=0,
+                max_value=10000,
+                default=100,
+            ),
         ],
         outputs=[
-            ParameterConfig("treated_water_flow", "m³/d", min_value=0, max_value=60000, default=40000),
-            ParameterConfig("treated_water_turbidity", "NTU", min_value=0, max_value=5, default=0.5),
-            ParameterConfig("treated_water_toc", "mg/L", min_value=0, max_value=10, default=1),
-            ParameterConfig("treated_water_ph", "-", min_value=6.5, max_value=8.5, default=7.2),
-            ParameterConfig("treated_water_coliforms", "CFU/100mL", min_value=0, max_value=10, default=0),
-            ParameterConfig("energy_consumption", "kWh/d", min_value=0, max_value=5000, default=1500),
-            ParameterConfig("chemical_consumption", "kg/d", min_value=0, max_value=500, default=50),
+            ParameterConfig(
+                "treated_water_flow",
+                "m³/d",
+                min_value=0,
+                max_value=60000,
+                default=40000,
+            ),
+            ParameterConfig(
+                "treated_water_turbidity", "NTU", min_value=0, max_value=5, default=0.5
+            ),
+            ParameterConfig(
+                "treated_water_toc", "mg/L", min_value=0, max_value=10, default=1
+            ),
+            ParameterConfig(
+                "treated_water_ph", "-", min_value=6.5, max_value=8.5, default=7.2
+            ),
+            ParameterConfig(
+                "treated_water_coliforms",
+                "CFU/100mL",
+                min_value=0,
+                max_value=10,
+                default=0,
+            ),
+            ParameterConfig(
+                "energy_consumption", "kWh/d", min_value=0, max_value=5000, default=1500
+            ),
+            ParameterConfig(
+                "chemical_consumption", "kg/d", min_value=0, max_value=500, default=50
+            ),
         ],
         capabilities=["SteadyStateSimulation", "MassBalance", "WaterQualityPrediction"],
         treatment_config=[
@@ -103,20 +141,54 @@ DWP_CONFIGS: List[EntityConfig] = [
             ParameterConfig("treatment_efficiency", "%", default=97.0),
         ],
         inputs=[
-            ParameterConfig("raw_water_flow", "m³/d", min_value=0, max_value=80000, default=60000),
-            ParameterConfig("raw_water_turbidity", "NTU", min_value=0, max_value=100, default=8),
-            ParameterConfig("raw_water_toc", "mg/L", min_value=0, max_value=50, default=4),
+            ParameterConfig(
+                "raw_water_flow", "m³/d", min_value=0, max_value=80000, default=60000
+            ),
+            ParameterConfig(
+                "raw_water_turbidity", "NTU", min_value=0, max_value=100, default=8
+            ),
+            ParameterConfig(
+                "raw_water_toc", "mg/L", min_value=0, max_value=50, default=4
+            ),
             ParameterConfig("raw_water_ph", "-", min_value=6, max_value=9, default=7.6),
-            ParameterConfig("raw_water_coliforms", "CFU/100mL", min_value=0, max_value=10000, default=80),
+            ParameterConfig(
+                "raw_water_coliforms",
+                "CFU/100mL",
+                min_value=0,
+                max_value=10000,
+                default=80,
+            ),
         ],
         outputs=[
-            ParameterConfig("treated_water_flow", "m³/d", min_value=0, max_value=80000, default=60000),
-            ParameterConfig("treated_water_turbidity", "NTU", min_value=0, max_value=5, default=0.3),
-            ParameterConfig("treated_water_toc", "mg/L", min_value=0, max_value=10, default=0.8),
-            ParameterConfig("treated_water_ph", "-", min_value=6.5, max_value=8.5, default=7.3),
-            ParameterConfig("treated_water_coliforms", "CFU/100mL", min_value=0, max_value=10, default=0),
-            ParameterConfig("energy_consumption", "kWh/d", min_value=0, max_value=8000, default=2200),
-            ParameterConfig("chemical_consumption", "kg/d", min_value=0, max_value=800, default=75),
+            ParameterConfig(
+                "treated_water_flow",
+                "m³/d",
+                min_value=0,
+                max_value=80000,
+                default=60000,
+            ),
+            ParameterConfig(
+                "treated_water_turbidity", "NTU", min_value=0, max_value=5, default=0.3
+            ),
+            ParameterConfig(
+                "treated_water_toc", "mg/L", min_value=0, max_value=10, default=0.8
+            ),
+            ParameterConfig(
+                "treated_water_ph", "-", min_value=6.5, max_value=8.5, default=7.3
+            ),
+            ParameterConfig(
+                "treated_water_coliforms",
+                "CFU/100mL",
+                min_value=0,
+                max_value=10,
+                default=0,
+            ),
+            ParameterConfig(
+                "energy_consumption", "kWh/d", min_value=0, max_value=8000, default=2200
+            ),
+            ParameterConfig(
+                "chemical_consumption", "kg/d", min_value=0, max_value=800, default=75
+            ),
         ],
         capabilities=["SteadyStateSimulation", "MassBalance", "WaterQualityPrediction"],
         treatment_config=[
@@ -140,24 +212,66 @@ WWTP_CONFIGS: List[EntityConfig] = [
             ParameterConfig("treatment_level", "%", default=95.0),
         ],
         inputs=[
-            ParameterConfig("influent_flow", "m³/d", min_value=0, max_value=120000, default=80000),
-            ParameterConfig("influent_BOD", "mg/L", min_value=0, max_value=500, default=200),
-            ParameterConfig("influent_COD", "mg/L", min_value=0, max_value=1000, default=400),
-            ParameterConfig("influent_TSS", "mg/L", min_value=0, max_value=500, default=250),
-            ParameterConfig("influent_TN", "mg/L", min_value=0, max_value=100, default=40),
-            ParameterConfig("influent_TP", "mg/L", min_value=0, max_value=20, default=8),
-            ParameterConfig("influent_coliforms", "CFU/100mL", min_value=0, max_value=10000000, default=1000000),
+            ParameterConfig(
+                "influent_flow", "m³/d", min_value=0, max_value=120000, default=80000
+            ),
+            ParameterConfig(
+                "influent_BOD", "mg/L", min_value=0, max_value=500, default=200
+            ),
+            ParameterConfig(
+                "influent_COD", "mg/L", min_value=0, max_value=1000, default=400
+            ),
+            ParameterConfig(
+                "influent_TSS", "mg/L", min_value=0, max_value=500, default=250
+            ),
+            ParameterConfig(
+                "influent_TN", "mg/L", min_value=0, max_value=100, default=40
+            ),
+            ParameterConfig(
+                "influent_TP", "mg/L", min_value=0, max_value=20, default=8
+            ),
+            ParameterConfig(
+                "influent_coliforms",
+                "CFU/100mL",
+                min_value=0,
+                max_value=10000000,
+                default=1000000,
+            ),
         ],
         outputs=[
-            ParameterConfig("effluent_flow", "m³/d", min_value=0, max_value=120000, default=80000),
-            ParameterConfig("effluent_BOD", "mg/L", min_value=0, max_value=50, default=10),
-            ParameterConfig("effluent_COD", "mg/L", min_value=0, max_value=100, default=30),
-            ParameterConfig("effluent_TSS", "mg/L", min_value=0, max_value=50, default=10),
-            ParameterConfig("effluent_TN", "mg/L", min_value=0, max_value=30, default=15),
+            ParameterConfig(
+                "effluent_flow", "m³/d", min_value=0, max_value=120000, default=80000
+            ),
+            ParameterConfig(
+                "effluent_BOD", "mg/L", min_value=0, max_value=50, default=10
+            ),
+            ParameterConfig(
+                "effluent_COD", "mg/L", min_value=0, max_value=100, default=30
+            ),
+            ParameterConfig(
+                "effluent_TSS", "mg/L", min_value=0, max_value=50, default=10
+            ),
+            ParameterConfig(
+                "effluent_TN", "mg/L", min_value=0, max_value=30, default=15
+            ),
             ParameterConfig("effluent_TP", "mg/L", min_value=0, max_value=5, default=1),
-            ParameterConfig("effluent_coliforms", "CFU/100mL", min_value=0, max_value=100000, default=1000),
-            ParameterConfig("sludge_production", "kg/d", min_value=0, max_value=5000, default=800),
-            ParameterConfig("energy_consumption", "kWh/d", min_value=0, max_value=15000, default=5000),
+            ParameterConfig(
+                "effluent_coliforms",
+                "CFU/100mL",
+                min_value=0,
+                max_value=100000,
+                default=1000,
+            ),
+            ParameterConfig(
+                "sludge_production", "kg/d", min_value=0, max_value=5000, default=800
+            ),
+            ParameterConfig(
+                "energy_consumption",
+                "kWh/d",
+                min_value=0,
+                max_value=15000,
+                default=5000,
+            ),
         ],
         capabilities=["SteadyStateSimulation", "MassBalance", "WaterQualityPrediction"],
         treatment_config=[
@@ -180,24 +294,68 @@ WWTP_CONFIGS: List[EntityConfig] = [
             ParameterConfig("treatment_level", "%", default=97.0),
         ],
         inputs=[
-            ParameterConfig("influent_flow", "m³/d", min_value=0, max_value=150000, default=100000),
-            ParameterConfig("influent_BOD", "mg/L", min_value=0, max_value=500, default=180),
-            ParameterConfig("influent_COD", "mg/L", min_value=0, max_value=1000, default=350),
-            ParameterConfig("influent_TSS", "mg/L", min_value=0, max_value=500, default=200),
-            ParameterConfig("influent_TN", "mg/L", min_value=0, max_value=100, default=35),
-            ParameterConfig("influent_TP", "mg/L", min_value=0, max_value=20, default=6),
-            ParameterConfig("influent_coliforms", "CFU/100mL", min_value=0, max_value=10000000, default=800000),
+            ParameterConfig(
+                "influent_flow", "m³/d", min_value=0, max_value=150000, default=100000
+            ),
+            ParameterConfig(
+                "influent_BOD", "mg/L", min_value=0, max_value=500, default=180
+            ),
+            ParameterConfig(
+                "influent_COD", "mg/L", min_value=0, max_value=1000, default=350
+            ),
+            ParameterConfig(
+                "influent_TSS", "mg/L", min_value=0, max_value=500, default=200
+            ),
+            ParameterConfig(
+                "influent_TN", "mg/L", min_value=0, max_value=100, default=35
+            ),
+            ParameterConfig(
+                "influent_TP", "mg/L", min_value=0, max_value=20, default=6
+            ),
+            ParameterConfig(
+                "influent_coliforms",
+                "CFU/100mL",
+                min_value=0,
+                max_value=10000000,
+                default=800000,
+            ),
         ],
         outputs=[
-            ParameterConfig("effluent_flow", "m³/d", min_value=0, max_value=150000, default=100000),
-            ParameterConfig("effluent_BOD", "mg/L", min_value=0, max_value=30, default=6),
-            ParameterConfig("effluent_COD", "mg/L", min_value=0, max_value=75, default=20),
-            ParameterConfig("effluent_TSS", "mg/L", min_value=0, max_value=30, default=5),
-            ParameterConfig("effluent_TN", "mg/L", min_value=0, max_value=20, default=10),
-            ParameterConfig("effluent_TP", "mg/L", min_value=0, max_value=3, default=0.5),
-            ParameterConfig("effluent_coliforms", "CFU/100mL", min_value=0, max_value=50000, default=500),
-            ParameterConfig("sludge_production", "kg/d", min_value=0, max_value=6000, default=1000),
-            ParameterConfig("energy_consumption", "kWh/d", min_value=0, max_value=20000, default=6500),
+            ParameterConfig(
+                "effluent_flow", "m³/d", min_value=0, max_value=150000, default=100000
+            ),
+            ParameterConfig(
+                "effluent_BOD", "mg/L", min_value=0, max_value=30, default=6
+            ),
+            ParameterConfig(
+                "effluent_COD", "mg/L", min_value=0, max_value=75, default=20
+            ),
+            ParameterConfig(
+                "effluent_TSS", "mg/L", min_value=0, max_value=30, default=5
+            ),
+            ParameterConfig(
+                "effluent_TN", "mg/L", min_value=0, max_value=20, default=10
+            ),
+            ParameterConfig(
+                "effluent_TP", "mg/L", min_value=0, max_value=3, default=0.5
+            ),
+            ParameterConfig(
+                "effluent_coliforms",
+                "CFU/100mL",
+                min_value=0,
+                max_value=50000,
+                default=500,
+            ),
+            ParameterConfig(
+                "sludge_production", "kg/d", min_value=0, max_value=6000, default=1000
+            ),
+            ParameterConfig(
+                "energy_consumption",
+                "kWh/d",
+                min_value=0,
+                max_value=20000,
+                default=6500,
+            ),
         ],
         capabilities=["SteadyStateSimulation", "MassBalance", "WaterQualityPrediction"],
         treatment_config=[
@@ -208,7 +366,10 @@ WWTP_CONFIGS: List[EntityConfig] = [
             TreatmentConfig("TP", 91.7, 4),
             TreatmentConfig("coliforms", 99.94, 0.05),
         ],
-        metadata={"location": "downstream", "receives_from": ["Dampoort", "Texfin", "FoodPro"]},
+        metadata={
+            "location": "downstream",
+            "receives_from": ["Dampoort", "Texfin", "FoodPro"],
+        },
     ),
 ]
 
@@ -224,16 +385,28 @@ INDUSTRY_CONFIGS: List[EntityConfig] = [
             ParameterConfig("production_rate", "kg/d", default=500),
         ],
         inputs=[
-            ParameterConfig("supply_water_flow", "m³/d", min_value=0, max_value=3000, default=2000),
+            ParameterConfig(
+                "supply_water_flow", "m³/d", min_value=0, max_value=3000, default=2000
+            ),
             ParameterConfig("supply_water_quality", "-", default=1.0),
         ],
         outputs=[
-            ParameterConfig("wastewater_flow", "m³/d", min_value=0, max_value=2500, default=1800),
-            ParameterConfig("wastewater_COD", "mg/L", min_value=100, max_value=2000, default=800),
-            ParameterConfig("wastewater_TSS", "mg/L", min_value=50, max_value=500, default=150),
-            ParameterConfig("wastewater_color", "Pt-Co", min_value=50, max_value=500, default=200),
+            ParameterConfig(
+                "wastewater_flow", "m³/d", min_value=0, max_value=2500, default=1800
+            ),
+            ParameterConfig(
+                "wastewater_COD", "mg/L", min_value=100, max_value=2000, default=800
+            ),
+            ParameterConfig(
+                "wastewater_TSS", "mg/L", min_value=50, max_value=500, default=150
+            ),
+            ParameterConfig(
+                "wastewater_color", "Pt-Co", min_value=50, max_value=500, default=200
+            ),
             ParameterConfig("wastewater_pH", "-", min_value=5, max_value=10, default=8),
-            ParameterConfig("energy_consumption", "kWh/d", min_value=0, max_value=2000, default=500),
+            ParameterConfig(
+                "energy_consumption", "kWh/d", min_value=0, max_value=2000, default=500
+            ),
         ],
         capabilities=["SteadyStateSimulation", "MassBalance"],
         metadata={
@@ -252,16 +425,30 @@ INDUSTRY_CONFIGS: List[EntityConfig] = [
             ParameterConfig("production_rate", "kg/d", default=1000),
         ],
         inputs=[
-            ParameterConfig("supply_water_flow", "m³/d", min_value=0, max_value=2000, default=1500),
+            ParameterConfig(
+                "supply_water_flow", "m³/d", min_value=0, max_value=2000, default=1500
+            ),
             ParameterConfig("supply_water_quality", "-", default=1.0),
         ],
         outputs=[
-            ParameterConfig("wastewater_flow", "m³/d", min_value=0, max_value=1700, default=1300),
-            ParameterConfig("wastewater_COD", "mg/L", min_value=500, max_value=3000, default=1500),
-            ParameterConfig("wastewater_BOD", "mg/L", min_value=300, max_value=2000, default=800),
-            ParameterConfig("wastewater_TSS", "mg/L", min_value=100, max_value=800, default=300),
-            ParameterConfig("wastewater_fat", "mg/L", min_value=20, max_value=200, default=80),
-            ParameterConfig("energy_consumption", "kWh/d", min_value=0, max_value=1500, default=400),
+            ParameterConfig(
+                "wastewater_flow", "m³/d", min_value=0, max_value=1700, default=1300
+            ),
+            ParameterConfig(
+                "wastewater_COD", "mg/L", min_value=500, max_value=3000, default=1500
+            ),
+            ParameterConfig(
+                "wastewater_BOD", "mg/L", min_value=300, max_value=2000, default=800
+            ),
+            ParameterConfig(
+                "wastewater_TSS", "mg/L", min_value=100, max_value=800, default=300
+            ),
+            ParameterConfig(
+                "wastewater_fat", "mg/L", min_value=20, max_value=200, default=80
+            ),
+            ParameterConfig(
+                "energy_consumption", "kWh/d", min_value=0, max_value=1500, default=400
+            ),
         ],
         capabilities=["SteadyStateSimulation", "MassBalance"],
         metadata={
@@ -280,16 +467,28 @@ INDUSTRY_CONFIGS: List[EntityConfig] = [
             ParameterConfig("production_rate", "units/d", default=100),
         ],
         inputs=[
-            ParameterConfig("supply_water_flow", "m³/d", min_value=0, max_value=1000, default=800),
+            ParameterConfig(
+                "supply_water_flow", "m³/d", min_value=0, max_value=1000, default=800
+            ),
             ParameterConfig("supply_water_quality", "-", default=1.0),
         ],
         outputs=[
-            ParameterConfig("wastewater_flow", "m³/d", min_value=0, max_value=900, default=720),
-            ParameterConfig("wastewater_COD", "mg/L", min_value=10, max_value=200, default=50),
-            ParameterConfig("wastewater_TSS", "mg/L", min_value=5, max_value=100, default=20),
-            ParameterConfig("wastewater_metals", "mg/L", min_value=0.1, max_value=10, default=1),
+            ParameterConfig(
+                "wastewater_flow", "m³/d", min_value=0, max_value=900, default=720
+            ),
+            ParameterConfig(
+                "wastewater_COD", "mg/L", min_value=10, max_value=200, default=50
+            ),
+            ParameterConfig(
+                "wastewater_TSS", "mg/L", min_value=5, max_value=100, default=20
+            ),
+            ParameterConfig(
+                "wastewater_metals", "mg/L", min_value=0.1, max_value=10, default=1
+            ),
             ParameterConfig("wastewater_pH", "-", min_value=2, max_value=12, default=6),
-            ParameterConfig("energy_consumption", "kWh/d", min_value=0, max_value=3000, default=1200),
+            ParameterConfig(
+                "energy_consumption", "kWh/d", min_value=0, max_value=3000, default=1200
+            ),
         ],
         capabilities=["SteadyStateSimulation", "MassBalance"],
         metadata={
@@ -308,17 +507,31 @@ INDUSTRY_CONFIGS: List[EntityConfig] = [
             ParameterConfig("production_rate", "kg/d", default=50),
         ],
         inputs=[
-            ParameterConfig("supply_water_flow", "m³/d", min_value=0, max_value=800, default=600),
+            ParameterConfig(
+                "supply_water_flow", "m³/d", min_value=0, max_value=800, default=600
+            ),
             ParameterConfig("supply_water_quality", "-", default=1.0),
         ],
         outputs=[
-            ParameterConfig("wastewater_flow", "m³/d", min_value=0, max_value=700, default=540),
-            ParameterConfig("wastewater_COD", "mg/L", min_value=100, max_value=1500, default=400),
-            ParameterConfig("wastewater_BOD", "mg/L", min_value=50, max_value=800, default=200),
-            ParameterConfig("wastewater_TSS", "mg/L", min_value=10, max_value=200, default=50),
+            ParameterConfig(
+                "wastewater_flow", "m³/d", min_value=0, max_value=700, default=540
+            ),
+            ParameterConfig(
+                "wastewater_COD", "mg/L", min_value=100, max_value=1500, default=400
+            ),
+            ParameterConfig(
+                "wastewater_BOD", "mg/L", min_value=50, max_value=800, default=200
+            ),
+            ParameterConfig(
+                "wastewater_TSS", "mg/L", min_value=10, max_value=200, default=50
+            ),
             ParameterConfig("wastewater_pH", "-", min_value=4, max_value=10, default=7),
-            ParameterConfig("wastewater_residuals", "mg/L", min_value=1, max_value=100, default=10),
-            ParameterConfig("energy_consumption", "kWh/d", min_value=0, max_value=2000, default=800),
+            ParameterConfig(
+                "wastewater_residuals", "mg/L", min_value=1, max_value=100, default=10
+            ),
+            ParameterConfig(
+                "energy_consumption", "kWh/d", min_value=0, max_value=2000, default=800
+            ),
         ],
         capabilities=["SteadyStateSimulation", "MassBalance"],
         metadata={
@@ -337,16 +550,28 @@ INDUSTRY_CONFIGS: List[EntityConfig] = [
             ParameterConfig("production_rate", "hl/d", default=200),
         ],
         inputs=[
-            ParameterConfig("supply_water_flow", "m³/d", min_value=0, max_value=1500, default=1000),
+            ParameterConfig(
+                "supply_water_flow", "m³/d", min_value=0, max_value=1500, default=1000
+            ),
             ParameterConfig("supply_water_quality", "-", default=1.0),
         ],
         outputs=[
-            ParameterConfig("wastewater_flow", "m³/d", min_value=0, max_value=1200, default=900),
-            ParameterConfig("wastewater_COD", "mg/L", min_value=500, max_value=2500, default=1200),
-            ParameterConfig("wastewater_BOD", "mg/L", min_value=300, max_value=1500, default=600),
-            ParameterConfig("wastewater_TSS", "mg/L", min_value=50, max_value=400, default=150),
+            ParameterConfig(
+                "wastewater_flow", "m³/d", min_value=0, max_value=1200, default=900
+            ),
+            ParameterConfig(
+                "wastewater_COD", "mg/L", min_value=500, max_value=2500, default=1200
+            ),
+            ParameterConfig(
+                "wastewater_BOD", "mg/L", min_value=300, max_value=1500, default=600
+            ),
+            ParameterConfig(
+                "wastewater_TSS", "mg/L", min_value=50, max_value=400, default=150
+            ),
             ParameterConfig("wastewater_pH", "-", min_value=4, max_value=9, default=6),
-            ParameterConfig("energy_consumption", "kWh/d", min_value=0, max_value=1500, default=500),
+            ParameterConfig(
+                "energy_consumption", "kWh/d", min_value=0, max_value=1500, default=500
+            ),
         ],
         capabilities=["SteadyStateSimulation", "MassBalance"],
         metadata={
@@ -369,17 +594,39 @@ RESIDENTIAL_CONFIGS: List[EntityConfig] = [
             ParameterConfig("per_capita_water_use", "L/person/d", default=150),
         ],
         inputs=[
-            ParameterConfig("supply_water_flow", "m³/d", min_value=0, max_value=3000, default=2250),
-            ParameterConfig("population", "persons", min_value=0, max_value=30000, default=15000),
+            ParameterConfig(
+                "supply_water_flow", "m³/d", min_value=0, max_value=3000, default=2250
+            ),
+            ParameterConfig(
+                "population", "persons", min_value=0, max_value=30000, default=15000
+            ),
         ],
         outputs=[
-            ParameterConfig("wastewater_flow", "m³/d", min_value=0, max_value=2700, default=2025),
-            ParameterConfig("wastewater_BOD", "mg/L", min_value=150, max_value=400, default=250),
-            ParameterConfig("wastewater_COD", "mg/L", min_value=300, max_value=700, default=450),
-            ParameterConfig("wastewater_TSS", "mg/L", min_value=100, max_value=400, default=200),
-            ParameterConfig("wastewater_TN", "mg/L", min_value=30, max_value=80, default=50),
-            ParameterConfig("wastewater_TP", "mg/L", min_value=3, max_value=12, default=6),
-            ParameterConfig("wastewater_coliforms", "CFU/100mL", min_value=100000, max_value=10000000, default=1000000),
+            ParameterConfig(
+                "wastewater_flow", "m³/d", min_value=0, max_value=2700, default=2025
+            ),
+            ParameterConfig(
+                "wastewater_BOD", "mg/L", min_value=150, max_value=400, default=250
+            ),
+            ParameterConfig(
+                "wastewater_COD", "mg/L", min_value=300, max_value=700, default=450
+            ),
+            ParameterConfig(
+                "wastewater_TSS", "mg/L", min_value=100, max_value=400, default=200
+            ),
+            ParameterConfig(
+                "wastewater_TN", "mg/L", min_value=30, max_value=80, default=50
+            ),
+            ParameterConfig(
+                "wastewater_TP", "mg/L", min_value=3, max_value=12, default=6
+            ),
+            ParameterConfig(
+                "wastewater_coliforms",
+                "CFU/100mL",
+                min_value=100000,
+                max_value=10000000,
+                default=1000000,
+            ),
         ],
         capabilities=["SteadyStateSimulation", "MassBalance"],
         metadata={"discharges_to": "WWTP2"},
@@ -394,17 +641,39 @@ RESIDENTIAL_CONFIGS: List[EntityConfig] = [
             ParameterConfig("per_capita_water_use", "L/person/d", default=150),
         ],
         inputs=[
-            ParameterConfig("supply_water_flow", "m³/d", min_value=0, max_value=2500, default=1800),
-            ParameterConfig("population", "persons", min_value=0, max_value=25000, default=12000),
+            ParameterConfig(
+                "supply_water_flow", "m³/d", min_value=0, max_value=2500, default=1800
+            ),
+            ParameterConfig(
+                "population", "persons", min_value=0, max_value=25000, default=12000
+            ),
         ],
         outputs=[
-            ParameterConfig("wastewater_flow", "m³/d", min_value=0, max_value=2250, default=1620),
-            ParameterConfig("wastewater_BOD", "mg/L", min_value=150, max_value=400, default=250),
-            ParameterConfig("wastewater_COD", "mg/L", min_value=300, max_value=700, default=450),
-            ParameterConfig("wastewater_TSS", "mg/L", min_value=100, max_value=400, default=200),
-            ParameterConfig("wastewater_TN", "mg/L", min_value=30, max_value=80, default=50),
-            ParameterConfig("wastewater_TP", "mg/L", min_value=3, max_value=12, default=6),
-            ParameterConfig("wastewater_coliforms", "CFU/100mL", min_value=100000, max_value=10000000, default=1000000),
+            ParameterConfig(
+                "wastewater_flow", "m³/d", min_value=0, max_value=2250, default=1620
+            ),
+            ParameterConfig(
+                "wastewater_BOD", "mg/L", min_value=150, max_value=400, default=250
+            ),
+            ParameterConfig(
+                "wastewater_COD", "mg/L", min_value=300, max_value=700, default=450
+            ),
+            ParameterConfig(
+                "wastewater_TSS", "mg/L", min_value=100, max_value=400, default=200
+            ),
+            ParameterConfig(
+                "wastewater_TN", "mg/L", min_value=30, max_value=80, default=50
+            ),
+            ParameterConfig(
+                "wastewater_TP", "mg/L", min_value=3, max_value=12, default=6
+            ),
+            ParameterConfig(
+                "wastewater_coliforms",
+                "CFU/100mL",
+                min_value=100000,
+                max_value=10000000,
+                default=1000000,
+            ),
         ],
         capabilities=["SteadyStateSimulation", "MassBalance"],
         metadata={"discharges_to": "WWTP1"},
@@ -424,14 +693,30 @@ RIVER_CONFIGS: List[EntityConfig] = [
             ParameterConfig("dilution_factor", "-", default=1.0),
         ],
         inputs=[
-            ParameterConfig("upstream_flow", "m³/d", min_value=0, max_value=500000, default=200000),
-            ParameterConfig("upstream_quality", "-", min_value=0, max_value=1, default=0.8),
-            ParameterConfig("discharge_flows", "m³/d", min_value=0, max_value=200000, default=[50000, 30000]),
-            ParameterConfig("discharge_qualities", "-", min_value=0, max_value=1, default=[0.6, 0.7]),
+            ParameterConfig(
+                "upstream_flow", "m³/d", min_value=0, max_value=500000, default=200000
+            ),
+            ParameterConfig(
+                "upstream_quality", "-", min_value=0, max_value=1, default=0.8
+            ),
+            ParameterConfig(
+                "discharge_flows",
+                "m³/d",
+                min_value=0,
+                max_value=200000,
+                default=[50000, 30000],
+            ),
+            ParameterConfig(
+                "discharge_qualities", "-", min_value=0, max_value=1, default=[0.6, 0.7]
+            ),
         ],
         outputs=[
-            ParameterConfig("downstream_flow", "m³/d", min_value=0, max_value=600000, default=280000),
-            ParameterConfig("downstream_quality", "-", min_value=0, max_value=1, default=0.75),
+            ParameterConfig(
+                "downstream_flow", "m³/d", min_value=0, max_value=600000, default=280000
+            ),
+            ParameterConfig(
+                "downstream_quality", "-", min_value=0, max_value=1, default=0.75
+            ),
             ParameterConfig("flow_contribution_upstream", "%", default=71.4),
             ParameterConfig("flow_contribution_total_discharge", "%", default=28.6),
         ],
@@ -452,6 +737,11 @@ ALL_CONFIGS: Dict[str, EntityConfig] = {
     **{cfg.entity_id: cfg for cfg in RIVER_CONFIGS},
 }
 
+# Model ports derived from ALL_CONFIGS for external services
+MODEL_PORTS: Dict[str, int] = {
+    entity_id.lower(): config.port for entity_id, config in ALL_CONFIGS.items()
+}
+
 
 def get_config(entity_id: str) -> EntityConfig:
     """Get configuration for a specific entity.
@@ -466,7 +756,9 @@ def get_config(entity_id: str) -> EntityConfig:
         KeyError: If entity_id is not found.
     """
     if entity_id not in ALL_CONFIGS:
-        raise KeyError(f"Unknown entity_id: {entity_id}. Available: {list(ALL_CONFIGS.keys())}")
+        raise KeyError(
+            f"Unknown entity_id: {entity_id}. Available: {list(ALL_CONFIGS.keys())}"
+        )
     return ALL_CONFIGS[entity_id]
 
 
