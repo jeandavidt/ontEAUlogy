@@ -1,0 +1,187 @@
+@prefix ontoagent: <http://www.jparksimulator.com/ontology/ontoad Agent#> .
+@prefix msm: <http://www.theworldavatar.com/ontology/msm.owl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <http://example.org/wateragents/> .
+
+# ===== Basic Agent Registration Example =====
+
+# A water treatment simulation agent
+ex:WaterTreatmentAgent a ontoagent:Agent ;
+    rdfs:label "Water Treatment Simulation Agent" ;
+    rdfs:comment "Simulates wastewater treatment processes including primary, secondary, and tertiary treatment" ;
+    ontoagent:hasService ex:WTTService .
+
+ex:WTTService a msm:Service ;
+    rdfs:label "Water Treatment Service" ;
+    rdfs:comment "Web service for water treatment simulation" ;
+    msm:hasOperation ex:SimulateTreatment, ex:GetTreatmentConfig ;
+    ontoagent:hasGrounding ex:WTTGrounding .
+
+# ===== Operation Definitions =====
+
+ex:SimulateTreatment a msm:Operation ;
+    rdfs:label "Simulate Treatment Process" ;
+    rdfs:comment "Run simulation with given influent and process parameters" ;
+    msm:hasInput ex:InfluentFlowRate, ex:InfluentBOD, ex:InfluentCOD, ex:InfluentTSS ;
+    msm:hasInput ex:RetentionTime, ex:Temperature ;
+    msm:hasOutput ex:EffluentFlowRate, ex:EffluentBOD, ex:EffluentCOD, ex:EffluentTSS ;
+    msm:hasOutput ex:RemovalEfficiency .
+
+ex:GetTreatmentConfig a msm:Operation ;
+    rdfs:label "Get Treatment Configuration" ;
+    rdfs:comment "Retrieve current treatment process configuration" ;
+    msm:hasOutput ex:ProcessConfiguration .
+
+# ===== Parameter Definitions =====
+
+# Input Parameters
+ex:InfluentFlowRate a msm:Parameter ;
+    rdfs:label "Influent Flow Rate" ;
+    rdfs:comment "Flow rate of incoming wastewater (m³/day)" ;
+    msm:hasType xsd:float ;
+    ex:unit "m3/day" ;
+    ex:range "100-10000" .
+
+ex:InfluentBOD a msm:Parameter ;
+    rdfs:label "Influent BOD" ;
+    rdfs:comment "Biochemical Oxygen Demand of influent (mg/L)" ;
+    msm:hasType xsd:float ;
+    ex:unit "mg/L" ;
+    ex:range "100-500" .
+
+ex:InfluentCOD a msm:Parameter ;
+    rdfs:label "Influent COD" ;
+    rdfs:comment "Chemical Oxygen Demand of influent (mg/L)" ;
+    msm:hasType xsd:float ;
+    ex:unit "mg/L" ;
+    ex:range "200-1000" .
+
+ex:InfluentTSS a msm:Parameter ;
+    rdfs:label "Influent TSS" ;
+    rdfs:comment "Total Suspended Solids of influent (mg/L)" ;
+    msm:hasType xsd:float ;
+    ex:unit "mg/L" ;
+    ex:range "50-300" .
+
+ex:RetentionTime a msm:Parameter ;
+    rdfs:label "Retention Time" ;
+    rdfs:comment "Hydraulic retention time (hours)" ;
+    msm:hasType xsd:float ;
+    ex:unit "hours" ;
+    ex:range "4-24" .
+
+ex:Temperature a msm:Parameter ;
+    rdfs:label "Temperature" ;
+    rdfs:comment "Process temperature (°C)" ;
+    msm:hasType xsd:float ;
+    ex:unit "°C" ;
+    ex:range "10-35" .
+
+# Output Parameters
+ex:EffluentFlowRate a msm:Parameter ;
+    rdfs:label "Effluent Flow Rate" ;
+    rdfs:comment "Flow rate of treated wastewater (m³/day)" ;
+    msm:hasType xsd:float ;
+    ex:unit "m3/day" .
+
+ex:EffluentBOD a msm:Parameter ;
+    rdfs:label "Effluent BOD" ;
+    rdfs:comment "BOD of treated effluent (mg/L)" ;
+    msm:hasType xsd:float ;
+    ex:unit "mg/L" .
+
+ex:EffluentCOD a msm:Parameter ;
+    rdfs:label "Effluent COD" ;
+    rdfs:comment "COD of treated effluent (mg/L)" ;
+    msm:hasType xsd:float ;
+    ex:unit "mg/L" .
+
+ex:EffluentTSS a msm:Parameter ;
+    rdfs:label "Effluent TSS" ;
+    rdfs:comment "Total Suspended Solids of effluent (mg/L)" ;
+    msm:hasType xsd:float ;
+    ex:unit "mg/L" .
+
+ex:RemovalEfficiency a msm:Parameter ;
+    rdfs:label "Removal Efficiency" ;
+    rdfs:comment "Overall contaminant removal efficiency (%)" ;
+    msm:hasType xsd:float ;
+    ex:unit "%" .
+
+ex:ProcessConfiguration a msm:Parameter ;
+    rdfs:label "Process Configuration" ;
+    rdfs:comment "Current treatment process settings" ;
+    msm:hasType xsd:string .
+
+# ===== Grounding Information =====
+
+ex:WTTGrounding a ontoagent:HTTPGrounding ;
+    rdfs:label "Water Treatment HTTP Grounding" ;
+    ontoagent:endpoint "http://localhost:8080/api/watertreatment/simulate" ;
+    ontoagent:method "POST" ;
+    ontoagent:contentType "application/json" ;
+    ontoagent:authentication "Bearer" ;
+    ex:timeoutSeconds "300" .
+
+# ===== Composition Example =====
+
+# A composite water system agent
+ex:WaterSystemComposite a ontoagent:Composition ;
+    rdfs:label "Water System Composite Agent" ;
+    rdfs:comment "Coordinates multiple water treatment agents for catchment-wide optimization" ;
+    ontoagent:composedOf ex:WaterTreatmentAgent, ex:WaterQualityAgent, ex:OptimizationAgent ;
+    ontoagent:hasWorkflow ex:WaterSystemWorkflow .
+
+# Workflow definition
+ex:WaterSystemWorkflow a ontoagent:Workflow ;
+    rdfs:label "Water System Optimization Workflow" ;
+    ontoagent:hasStep ex:Step1, ex:Step2, ex:Step3 .
+
+ex:Step1 a ontoagent:WorkflowStep ;
+    rdfs:label "Step 1: Assess Water Quality" ;
+    ontoagent:usesAgent ex:WaterQualityAgent ;
+    ontoagent:precedes ex:Step2 .
+
+ex:Step2 a ontoagent:WorkflowStep ;
+    rdfs:label "Step 2: Simulate Treatment Options" ;
+    ontoagent:usesAgent ex:WaterTreatmentAgent ;
+    ontoagent:precedes ex:Step3 .
+
+ex:Step3 a ontoagent:WorkflowStep ;
+    rdfs:label "Step 3: Optimize System Configuration" ;
+    ontoagent:usesAgent ex:OptimizationAgent .
+
+# ===== Additional Agent Examples =====
+
+# Water quality monitoring agent
+ex:WaterQualityAgent a ontoagent:Agent ;
+    rdfs:label "Water Quality Monitoring Agent" ;
+    ontoagent:hasService ex:WQService .
+
+ex:WQService a msm:Service ;
+    rdfs:label "Water Quality Service" ;
+    msm:hasOperation ex:MonitorQuality, ex:CheckCompliance ;
+    ontoagent:hasGrounding ex:WQGrounding .
+
+ex:WQGrounding a ontoagent:HTTPGrounding ;
+    ontoagent:endpoint "http://localhost:8081/api/waterquality" ;
+    ontoagent:method "GET" .
+
+# Optimization agent
+ex:OptimizationAgent a ontoagent:Agent ;
+    rdfs:label "Optimization Agent" ;
+    rdfs:comment "Multi-objective optimization for water system operations" ;
+    ontoagent:hasService ex:OptService ;
+    ontoagent:supportedObjectives "MinimizeCost, MaximizeReuse, MinimizeEnergy" ;
+    ontoagent:supportedConstraints "FlowBalance, QualityLimits, CapacityLimits" .
+
+ex:OptService a msm:Service ;
+    rdfs:label "Optimization Service" ;
+    msm:hasOperation ex:RunOptimization, ex:GetOptimalSolution ;
+    ontoagent:hasGrounding ex:OptGrounding .
+
+ex:OptGrounding a ontoagent:HTTPGrounding ;
+    ontoagent:endpoint "http://localhost:8082/api/optimization" ;
+    ontoagent:method "POST" .

@@ -1,0 +1,1114 @@
+@prefix wawo: <http://www.semanticweb.org/riverbasin#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# ==============================================================================
+# ONTOLOGY METADATA
+# ==============================================================================
+
+<http://www.semanticweb.org/riverbasin#>
+  rdf:type owl:Ontology ;
+  dc:title "WaWO+ - Water and Wastewater Ontology Plus"@en ;
+  dc:description "Ontology for reasoning about river basins and urban water systems"@en ;
+  dc:creator "L. Oliva-Felipe", "I. Gómez-Sebastià", "M. Verdaguer",
+             "M. Sanchez-Marré", "M. Poch", "U. Cortés" ;
+  dcterms:created "2017"^^xsd:gYear ;
+  owl:versionInfo "2.0 (WaWO+ extension)" ;
+  rdfs:comment "Extended from original WaWO ontology (2001) to support river basin management scenarios"@en .
+
+# ==============================================================================
+# TOP-LEVEL CLASSES
+# ==============================================================================
+
+wawo:WaterMass rdf:type owl:Class ;
+  rdfs:label "Water Mass"@en ;
+  rdfs:comment "A body of water with measurable physical and chemical properties"@en .
+
+wawo:WaterComposition rdf:type owl:Class ;
+  rdfs:label "Water Composition"@en ;
+  rdfs:comment "The chemical and biological composition of water"@en .
+
+wawo:WaterIndicator rdf:type owl:Class ;
+  rdfs:label "Water Indicator"@en ;
+  rdfs:comment "A measurable parameter indicating water quality"@en .
+
+wawo:WaterSource rdf:type owl:Class ;
+  rdfs:label "Water Source"@en ;
+  rdfs:comment "Origin of water in the system"@en .
+
+wawo:Infrastructure rdf:type owl:Class ;
+  rdfs:label "Infrastructure"@en ;
+  rdfs:comment "Physical structures for water management"@en .
+
+wawo:ConveyorUnit rdf:type owl:Class ;
+  rdfs:label "Conveyor Unit"@en ;
+  rdfs:comment "Infrastructure component that transports water"@en .
+
+wawo:Process rdf:type owl:Class ;
+  rdfs:label "Process"@en ;
+  rdfs:comment "A water treatment or management process"@en .
+
+wawo:Event rdf:type owl:Class ;
+  rdfs:label "Event"@en ;
+  rdfs:comment "A temporal occurrence in the water system"@en .
+
+wawo:Situation rdf:type owl:Class ;
+  rdfs:label "Situation"@en ;
+  rdfs:comment "A state or condition in the water system"@en .
+
+wawo:NormComponent rdf:type owl:Class ;
+  rdfs:label "Norm Component"@en ;
+  rdfs:comment "Component of a regulatory norm"@en .
+
+wawo:GeographicalFeature rdf:type owl:Class ;
+  rdfs:label "Geographical Feature"@en ;
+  rdfs:comment "A natural or man-made geographical entity"@en .
+
+wawo:Actor rdf:type owl:Class ;
+  rdfs:label "Actor"@en ;
+  rdfs:comment "An agent or stakeholder in the water system"@en .
+
+wawo:TimeEntity rdf:type owl:Class ;
+  rdfs:label "Time Entity"@en ;
+  rdfs:comment "A temporal entity or timestamp"@en .
+
+wawo:Measure rdf:type owl:Class ;
+  rdfs:label "Measure"@en ;
+  rdfs:comment "A quantified measurement"@en .
+
+wawo:WaterTreatmentFacility rdf:type owl:Class ;
+  rdfs:label "Water Treatment Facility"@en ;
+  rdfs:comment "A facility for treating water or wastewater"@en .
+
+wawo:NetworkSystem rdf:type owl:Class ;
+  rdfs:label "Network System"@en ;
+  rdfs:comment "An interconnected water distribution or collection system"@en .
+
+wawo:MonitoringSystem rdf:type owl:Class ;
+  rdfs:label "Monitoring System"@en ;
+  rdfs:comment "System for monitoring water quality and flow"@en .
+
+wawo:Variable rdf:type owl:Class ;
+  rdfs:label "Variable"@en ;
+  rdfs:comment "A variable in a logical formula or norm"@en .
+
+wawo:Operator rdf:type owl:Class ;
+  rdfs:label "Operator"@en ;
+  rdfs:comment "A logical or mathematical operator"@en .
+
+wawo:RiverBasin rdf:type owl:Class ;
+  rdfs:label "River Basin"@en ;
+  rdfs:comment "A geographical area draining to a common river outlet"@en ;
+  rdfs:subClassOf wawo:GeographicalFeature .
+
+wawo:UrbanWaterSystem rdf:type owl:Class ;
+  rdfs:label "Urban Water System"@en ;
+  rdfs:comment "An integrated urban water management system"@en .
+
+# ==============================================================================
+# WATER MASS HIERARCHY
+# ==============================================================================
+
+wawo:Flow_water_mass rdf:type owl:Class ;
+  rdfs:label "Flow Water Mass"@en ;
+  rdfs:comment "Water in motion with measurable flow rate"@en ;
+  rdfs:subClassOf wawo:WaterMass .
+
+wawo:Static_water_mass rdf:type owl:Class ;
+  rdfs:label "Static Water Mass"@en ;
+  rdfs:comment "Stored or stationary water body"@en ;
+  rdfs:subClassOf wawo:WaterMass .
+
+# Disjointness
+wawo:Flow_water_mass owl:disjointWith wawo:Static_water_mass .
+
+# ==============================================================================
+# WATER COMPOSITION HIERARCHY
+# ==============================================================================
+
+wawo:DrinkingWaterComposition rdf:type owl:Class ;
+  rdfs:label "Drinking Water Composition"@en ;
+  rdfs:comment "Water composition meeting drinking water standards"@en ;
+  rdfs:subClassOf wawo:WaterComposition .
+
+wawo:RiverWaterComposition rdf:type owl:Class ;
+  rdfs:label "River Water Composition"@en ;
+  rdfs:comment "Natural river water composition"@en ;
+  rdfs:subClassOf wawo:WaterComposition .
+
+wawo:WastewaterComposition rdf:type owl:Class ;
+  rdfs:label "Wastewater Composition"@en ;
+  rdfs:comment "Contaminated water requiring treatment"@en ;
+  rdfs:subClassOf wawo:WaterComposition .
+
+# Disjointness
+wawo:DrinkingWaterComposition owl:disjointWith wawo:RiverWaterComposition, wawo:WastewaterComposition .
+wawo:RiverWaterComposition owl:disjointWith wawo:WastewaterComposition .
+
+# ==============================================================================
+# WATER INDICATOR HIERARCHY
+# ==============================================================================
+
+wawo:Chemical rdf:type owl:Class ;
+  rdfs:label "Chemical Indicator"@en ;
+  rdfs:comment "Chemical water quality indicator"@en ;
+  rdfs:subClassOf wawo:WaterIndicator .
+
+wawo:Physical rdf:type owl:Class ;
+  rdfs:label "Physical Indicator"@en ;
+  rdfs:comment "Physical water quality indicator"@en ;
+  rdfs:subClassOf wawo:WaterIndicator .
+
+# Chemical Indicators
+wawo:BiochemicalOxygenDemand rdf:type owl:Class ;
+  rdfs:label "Biochemical Oxygen Demand (BOD)"@en ;
+  rdfs:comment "Amount of oxygen consumed by bacteria breaking down organic matter"@en ;
+  rdfs:subClassOf wawo:Chemical .
+
+wawo:ChemicalOxygenDemand rdf:type owl:Class ;
+  rdfs:label "Chemical Oxygen Demand (COD)"@en ;
+  rdfs:comment "Amount of oxygen required to oxidize organic compounds"@en ;
+  rdfs:subClassOf wawo:Chemical .
+
+wawo:SuspendedSolid rdf:type owl:Class ;
+  rdfs:label "Suspended Solids (SS)"@en ;
+  rdfs:comment "Solid particles suspended in water"@en ;
+  rdfs:subClassOf wawo:Chemical .
+
+wawo:TotalNitrogen rdf:type owl:Class ;
+  rdfs:label "Total Nitrogen (TN)"@en ;
+  rdfs:comment "Total nitrogen content in water"@en ;
+  rdfs:subClassOf wawo:Chemical .
+
+wawo:Ammonia rdf:type owl:Class ;
+  rdfs:label "Ammonia"@en ;
+  rdfs:subClassOf wawo:TotalNitrogen .
+
+wawo:Nitrate rdf:type owl:Class ;
+  rdfs:label "Nitrate"@en ;
+  rdfs:subClassOf wawo:TotalNitrogen .
+
+wawo:Nitrite rdf:type owl:Class ;
+  rdfs:label "Nitrite"@en ;
+  rdfs:subClassOf wawo:TotalNitrogen .
+
+wawo:OrganicNitrogen rdf:type owl:Class ;
+  rdfs:label "Organic Nitrogen"@en ;
+  rdfs:subClassOf wawo:TotalNitrogen .
+
+wawo:TotalPhosphorus rdf:type owl:Class ;
+  rdfs:label "Total Phosphorus (TP)"@en ;
+  rdfs:comment "Total phosphorus content in water"@en ;
+  rdfs:subClassOf wawo:Chemical .
+
+wawo:OrganicPhosphorus rdf:type owl:Class ;
+  rdfs:label "Organic Phosphorus"@en ;
+  rdfs:subClassOf wawo:TotalPhosphorus .
+
+wawo:Orthophosphate rdf:type owl:Class ;
+  rdfs:label "Orthophosphate"@en ;
+  rdfs:subClassOf wawo:TotalPhosphorus .
+
+wawo:Polyphosphate rdf:type owl:Class ;
+  rdfs:label "Polyphosphate"@en ;
+  rdfs:subClassOf wawo:TotalPhosphorus .
+
+wawo:Chlorine rdf:type owl:Class ;
+  rdfs:label "Chlorine"@en ;
+  rdfs:subClassOf wawo:Chemical .
+
+wawo:Hardness rdf:type owl:Class ;
+  rdfs:label "Hardness"@en ;
+  rdfs:subClassOf wawo:Chemical .
+
+wawo:HydrogenIonConcentration rdf:type owl:Class ;
+  rdfs:label "Hydrogen Ion Concentration (pH)"@en ;
+  rdfs:subClassOf wawo:Chemical .
+
+# Emerging Contaminants
+wawo:EmergingContaminant rdf:type owl:Class ;
+  rdfs:label "Emerging Contaminant"@en ;
+  rdfs:comment "Newly identified pollutants of concern"@en ;
+  rdfs:subClassOf wawo:Chemical .
+
+wawo:AnalgesicsAntiInflammatory rdf:type owl:Class ;
+  rdfs:label "Analgesics and Anti-Inflammatory"@en ;
+  rdfs:subClassOf wawo:EmergingContaminant .
+
+wawo:AcetylsalicyllicAcid rdf:type owl:Class ;
+  rdfs:label "Acetylsalicyllic Acid"@en ;
+  rdfs:subClassOf wawo:AnalgesicsAntiInflammatory .
+
+wawo:Diclofenac rdf:type owl:Class ;
+  rdfs:label "Diclofenac"@en ;
+  rdfs:subClassOf wawo:AnalgesicsAntiInflammatory .
+
+wawo:Ibuprofen rdf:type owl:Class ;
+  rdfs:label "Ibuprofen"@en ;
+  rdfs:subClassOf wawo:AnalgesicsAntiInflammatory .
+
+wawo:Naproxen rdf:type owl:Class ;
+  rdfs:label "Naproxen"@en ;
+  rdfs:subClassOf wawo:AnalgesicsAntiInflammatory .
+
+wawo:Antibiotics rdf:type owl:Class ;
+  rdfs:label "Antibiotics"@en ;
+  rdfs:subClassOf wawo:EmergingContaminant .
+
+wawo:Betablockers rdf:type owl:Class ;
+  rdfs:label "Beta-blockers"@en ;
+  rdfs:subClassOf wawo:EmergingContaminant .
+
+wawo:CholesterolRegulators rdf:type owl:Class ;
+  rdfs:label "Cholesterol Regulators"@en ;
+  rdfs:subClassOf wawo:EmergingContaminant .
+
+wawo:PsychiatricUse rdf:type owl:Class ;
+  rdfs:label "Psychiatric Use"@en ;
+  rdfs:subClassOf wawo:EmergingContaminant .
+
+wawo:XRayContrastMedia rdf:type owl:Class ;
+  rdfs:label "X-Ray Contrast Media"@en ;
+  rdfs:subClassOf wawo:EmergingContaminant .
+
+# Heavy Metals
+wawo:HeavyMetal rdf:type owl:Class ;
+  rdfs:label "Heavy Metal"@en ;
+  rdfs:comment "Metallic elements with high density and toxicity"@en ;
+  rdfs:subClassOf wawo:Chemical .
+
+wawo:Aluminium rdf:type owl:Class ;
+  rdfs:label "Aluminium"@en ;
+  rdfs:subClassOf wawo:HeavyMetal .
+
+wawo:Cadmium rdf:type owl:Class ;
+  rdfs:label "Cadmium"@en ;
+  rdfs:subClassOf wawo:HeavyMetal .
+
+wawo:Chromium rdf:type owl:Class ;
+  rdfs:label "Chromium"@en ;
+  rdfs:subClassOf wawo:HeavyMetal .
+
+wawo:Copper rdf:type owl:Class ;
+  rdfs:label "Copper"@en ;
+  rdfs:subClassOf wawo:HeavyMetal .
+
+wawo:Lead rdf:type owl:Class ;
+  rdfs:label "Lead"@en ;
+  rdfs:subClassOf wawo:HeavyMetal .
+
+wawo:Mercury rdf:type owl:Class ;
+  rdfs:label "Mercury"@en ;
+  rdfs:subClassOf wawo:HeavyMetal .
+
+wawo:Nickel rdf:type owl:Class ;
+  rdfs:label "Nickel"@en ;
+  rdfs:subClassOf wawo:HeavyMetal .
+
+wawo:Zinc rdf:type owl:Class ;
+  rdfs:label "Zinc"@en ;
+  rdfs:subClassOf wawo:HeavyMetal .
+
+# Physical Indicators
+wawo:Colour rdf:type owl:Class ;
+  rdfs:label "Colour"@en ;
+  rdfs:subClassOf wawo:Physical .
+
+wawo:Conductivity rdf:type owl:Class ;
+  rdfs:label "Conductivity"@en ;
+  rdfs:subClassOf wawo:Physical .
+
+wawo:Odour rdf:type owl:Class ;
+  rdfs:label "Odour"@en ;
+  rdfs:subClassOf wawo:Physical .
+
+wawo:Taste rdf:type owl:Class ;
+  rdfs:label "Taste"@en ;
+  rdfs:subClassOf wawo:Physical .
+
+wawo:Temperature rdf:type owl:Class ;
+  rdfs:label "Temperature"@en ;
+  rdfs:subClassOf wawo:Physical .
+
+wawo:Turbidity rdf:type owl:Class ;
+  rdfs:label "Turbidity"@en ;
+  rdfs:subClassOf wawo:Physical .
+
+# ==============================================================================
+# WATER SOURCE HIERARCHY
+# ==============================================================================
+
+wawo:CleanWaterProducer rdf:type owl:Class ;
+  rdfs:label "Clean Water Producer"@en ;
+  rdfs:comment "Source of clean or natural water"@en ;
+  rdfs:subClassOf wawo:WaterSource .
+
+wawo:WastewaterProducer rdf:type owl:Class ;
+  rdfs:label "Wastewater Producer"@en ;
+  rdfs:comment "Source of contaminated water"@en ;
+  rdfs:subClassOf wawo:WaterSource .
+
+wawo:CleanWaterProducer owl:disjointWith wawo:WastewaterProducer .
+
+# Clean Water Sources
+wawo:GroundWater rdf:type owl:Class ;
+  rdfs:label "Ground Water"@en ;
+  rdfs:subClassOf wawo:CleanWaterProducer .
+
+wawo:StormWater rdf:type owl:Class ;
+  rdfs:label "Storm Water"@en ;
+  rdfs:subClassOf wawo:CleanWaterProducer .
+
+wawo:SurfaceWater rdf:type owl:Class ;
+  rdfs:label "Surface Water"@en ;
+  rdfs:subClassOf wawo:CleanWaterProducer .
+
+# Wastewater Sources
+wawo:Commerce rdf:type owl:Class ;
+  rdfs:label "Commerce"@en ;
+  rdfs:comment "Commercial wastewater producer"@en ;
+  rdfs:subClassOf wawo:WastewaterProducer .
+
+wawo:Household rdf:type owl:Class ;
+  rdfs:label "Household"@en ;
+  rdfs:comment "Residential wastewater producer"@en ;
+  rdfs:subClassOf wawo:WastewaterProducer .
+
+wawo:Industry rdf:type owl:Class ;
+  rdfs:label "Industry"@en ;
+  rdfs:comment "Industrial wastewater producer"@en ;
+  rdfs:subClassOf wawo:WastewaterProducer .
+
+wawo:Runoff rdf:type owl:Class ;
+  rdfs:label "Runoff"@en ;
+  rdfs:comment "Storm water runoff"@en ;
+  rdfs:subClassOf wawo:WastewaterProducer .
+
+# Industrial Sectors
+wawo:IndustrialSector rdf:type owl:Class ;
+  rdfs:label "Industrial Sector"@en ;
+  rdfs:comment "A type of industrial activity"@en .
+
+wawo:ChemicalIndustry rdf:type owl:Class ;
+  rdfs:label "Chemical Industry"@en ;
+  rdfs:subClassOf wawo:IndustrialSector .
+
+wawo:MetallurgicalIndustry rdf:type owl:Class ;
+  rdfs:label "Metallurgical Industry"@en ;
+  rdfs:subClassOf wawo:IndustrialSector .
+
+wawo:TextileIndustry rdf:type owl:Class ;
+  rdfs:label "Textile Industry"@en ;
+  rdfs:subClassOf wawo:IndustrialSector .
+
+wawo:FoodIndustry rdf:type owl:Class ;
+  rdfs:label "Food Industry"@en ;
+  rdfs:subClassOf wawo:IndustrialSector .
+
+wawo:PaperIndustry rdf:type owl:Class ;
+  rdfs:label "Paper Industry"@en ;
+  rdfs:subClassOf wawo:IndustrialSector .
+
+# ==============================================================================
+# CONVEYOR UNIT HIERARCHY
+# ==============================================================================
+
+wawo:Collector rdf:type owl:Class ;
+  rdfs:label "Collector"@en ;
+  rdfs:comment "Device for collecting water"@en ;
+  rdfs:subClassOf wawo:ConveyorUnit .
+
+wawo:HydraulicPump rdf:type owl:Class ;
+  rdfs:label "Hydraulic Pump"@en ;
+  rdfs:comment "Device for pumping water"@en ;
+  rdfs:subClassOf wawo:ConveyorUnit .
+
+wawo:Pipe rdf:type owl:Class ;
+  rdfs:label "Pipe"@en ;
+  rdfs:comment "Conduit for water transport"@en ;
+  rdfs:subClassOf wawo:ConveyorUnit .
+
+wawo:Spillway rdf:type owl:Class ;
+  rdfs:label "Spillway"@en ;
+  rdfs:comment "Structure for controlled water overflow"@en ;
+  rdfs:subClassOf wawo:ConveyorUnit .
+
+# ==============================================================================
+# PROCESS HIERARCHY
+# ==============================================================================
+
+wawo:WastewaterTreatment rdf:type owl:Class ;
+  rdfs:label "Wastewater Treatment"@en ;
+  rdfs:comment "Process for treating wastewater"@en ;
+  rdfs:subClassOf wawo:Process .
+
+wawo:ConveyorTransport rdf:type owl:Class ;
+  rdfs:label "Conveyor Transport"@en ;
+  rdfs:comment "Transportation of water through conveyors"@en ;
+  rdfs:subClassOf wawo:WastewaterTreatment .
+
+wawo:WaterTankRetaining rdf:type owl:Class ;
+  rdfs:label "Water Tank Retaining"@en ;
+  rdfs:comment "Retention of water in tanks"@en ;
+  rdfs:subClassOf wawo:WastewaterTreatment .
+
+wawo:RetainingWithoutSettling rdf:type owl:Class ;
+  rdfs:label "Retaining Without Settling"@en ;
+  rdfs:subClassOf wawo:WaterTankRetaining .
+
+wawo:RetainingWithSettling rdf:type owl:Class ;
+  rdfs:label "Retaining With Settling"@en ;
+  rdfs:subClassOf wawo:WaterTankRetaining .
+
+wawo:WaterTreatment rdf:type owl:Class ;
+  rdfs:label "Water Treatment"@en ;
+  rdfs:comment "Active treatment of water"@en ;
+  rdfs:subClassOf wawo:WastewaterTreatment .
+
+wawo:CoagulationAndFlocculation rdf:type owl:Class ;
+  rdfs:label "Coagulation and Flocculation"@en ;
+  rdfs:subClassOf wawo:WaterTreatment .
+
+wawo:Disinfection rdf:type owl:Class ;
+  rdfs:label "Disinfection"@en ;
+  rdfs:subClassOf wawo:WaterTreatment .
+
+wawo:Chlorination rdf:type owl:Class ;
+  rdfs:label "Chlorination"@en ;
+  rdfs:subClassOf wawo:Disinfection .
+
+wawo:Ozonation rdf:type owl:Class ;
+  rdfs:label "Ozonation"@en ;
+  rdfs:subClassOf wawo:Disinfection .
+
+wawo:PreChlorination rdf:type owl:Class ;
+  rdfs:label "Pre-Chlorination"@en ;
+  rdfs:subClassOf wawo:Chlorination .
+
+wawo:SecondaryTreatment rdf:type owl:Class ;
+  rdfs:label "Secondary Treatment"@en ;
+  rdfs:comment "Biological treatment process"@en ;
+  rdfs:subClassOf wawo:WaterTreatment .
+
+# ==============================================================================
+# NORM COMPONENT HIERARCHY
+# ==============================================================================
+
+wawo:ConstitutiveComponent rdf:type owl:Class ;
+  rdfs:label "Constitutive Component"@en ;
+  rdfs:comment "Component defining institutional facts"@en ;
+  rdfs:subClassOf wawo:NormComponent .
+
+wawo:DeonticComponent rdf:type owl:Class ;
+  rdfs:label "Deontic Component"@en ;
+  rdfs:comment "Component defining obligations, permissions, prohibitions"@en ;
+  rdfs:subClassOf wawo:NormComponent .
+
+wawo:Context rdf:type owl:Class ;
+  rdfs:label "Context"@en ;
+  rdfs:subClassOf wawo:ConstitutiveComponent .
+
+wawo:InstitutionalFact rdf:type owl:Class ;
+  rdfs:label "Institutional Fact"@en ;
+  rdfs:subClassOf wawo:ConstitutiveComponent .
+
+wawo:BruteFact rdf:type owl:Class ;
+  rdfs:label "Brute Fact"@en ;
+  rdfs:subClassOf wawo:ConstitutiveComponent .
+
+wawo:ActivationCondition rdf:type owl:Class ;
+  rdfs:label "Activation Condition"@en ;
+  rdfs:subClassOf wawo:DeonticComponent .
+
+wawo:MaintenanceCondition rdf:type owl:Class ;
+  rdfs:label "Maintenance Condition"@en ;
+  rdfs:subClassOf wawo:DeonticComponent .
+
+wawo:ExpirationCondition rdf:type owl:Class ;
+  rdfs:label "Expiration Condition"@en ;
+  rdfs:subClassOf wawo:DeonticComponent .
+
+wawo:Deadline rdf:type owl:Class ;
+  rdfs:label "Deadline"@en ;
+  rdfs:subClassOf wawo:DeonticComponent .
+
+wawo:RepairCondition rdf:type owl:Class ;
+  rdfs:label "Repair Condition"@en ;
+  rdfs:subClassOf wawo:DeonticComponent .
+
+# Variable Hierarchy
+wawo:Norm rdf:type owl:Class ;
+  rdfs:label "Norm"@en ;
+  rdfs:subClassOf wawo:Variable .
+
+wawo:RegulativeNorm rdf:type owl:Class ;
+  rdfs:label "Regulative Norm"@en ;
+  rdfs:comment "Norm that regulates behavior"@en ;
+  rdfs:subClassOf wawo:Norm .
+
+wawo:ConstitutiveNorm rdf:type owl:Class ;
+  rdfs:label "Constitutive Norm"@en ;
+  rdfs:comment "Norm that defines institutional facts"@en ;
+  rdfs:subClassOf wawo:Norm .
+
+wawo:RegulativeNorm owl:disjointWith wawo:ConstitutiveNorm .
+
+wawo:DeonticNorm rdf:type owl:Class ;
+  rdfs:label "Deontic Norm"@en ;
+  rdfs:subClassOf wawo:RegulativeNorm .
+
+wawo:Obligation rdf:type owl:Class ;
+  rdfs:label "Obligation"@en ;
+  rdfs:subClassOf wawo:DeonticNorm .
+
+wawo:Permission rdf:type owl:Class ;
+  rdfs:label "Permission"@en ;
+  rdfs:subClassOf wawo:DeonticNorm .
+
+wawo:Prohibition rdf:type owl:Class ;
+  rdfs:label "Prohibition"@en ;
+  rdfs:subClassOf wawo:DeonticNorm .
+
+wawo:Obligation owl:disjointWith wawo:Permission, wawo:Prohibition .
+wawo:Permission owl:disjointWith wawo:Prohibition .
+
+wawo:Sanction rdf:type owl:Class ;
+  rdfs:label "Sanction"@en ;
+  rdfs:subClassOf wawo:Variable .
+
+wawo:Function rdf:type owl:Class ;
+  rdfs:label "Function"@en ;
+  rdfs:subClassOf wawo:Variable .
+
+# Operator Hierarchy
+wawo:Quantifier rdf:type owl:Class ;
+  rdfs:label "Quantifier"@en ;
+  rdfs:subClassOf wawo:Operator .
+
+wawo:Exists rdf:type owl:Class ;
+  rdfs:label "Exists"@en ;
+  rdfs:subClassOf wawo:Quantifier .
+
+wawo:ForAll rdf:type owl:Class ;
+  rdfs:label "For All"@en ;
+  rdfs:subClassOf wawo:Quantifier .
+
+wawo:Implication rdf:type owl:Class ;
+  rdfs:label "Implication"@en ;
+  rdfs:subClassOf wawo:Operator .
+
+wawo:And rdf:type owl:Class ;
+  rdfs:label "And"@en ;
+  rdfs:subClassOf wawo:Operator .
+
+wawo:Not rdf:type owl:Class ;
+  rdfs:label "Not"@en ;
+  rdfs:subClassOf wawo:Operator .
+
+wawo:Or rdf:type owl:Class ;
+  rdfs:label "Or"@en ;
+  rdfs:subClassOf wawo:Operator .
+
+wawo:Formula rdf:type owl:Class ;
+  rdfs:label "Formula"@en ;
+  rdfs:subClassOf wawo:Operator .
+
+wawo:Constant rdf:type owl:Class ;
+  rdfs:label "Constant"@en ;
+  rdfs:subClassOf wawo:Formula .
+
+# ==============================================================================
+# EVENT AND SITUATION HIERARCHY
+# ==============================================================================
+
+wawo:MeteoEvent rdf:type owl:Class ;
+  rdfs:label "Meteorological Event"@en ;
+  rdfs:subClassOf wawo:Event .
+
+wawo:Precipitation rdf:type owl:Class ;
+  rdfs:label "Precipitation"@en ;
+  rdfs:subClassOf wawo:MeteoEvent .
+
+wawo:Rainfall rdf:type owl:Class ;
+  rdfs:label "Rainfall"@en ;
+  rdfs:subClassOf wawo:Precipitation .
+
+wawo:Snowfall rdf:type owl:Class ;
+  rdfs:label "Snowfall"@en ;
+  rdfs:subClassOf wawo:Precipitation .
+
+wawo:NormalSituation rdf:type owl:Class ;
+  rdfs:label "Normal Situation"@en ;
+  rdfs:subClassOf wawo:Situation .
+
+wawo:AbnormalSituation rdf:type owl:Class ;
+  rdfs:label "Abnormal Situation"@en ;
+  rdfs:subClassOf wawo:Situation .
+
+wawo:NormalSituation owl:disjointWith wawo:AbnormalSituation .
+
+wawo:AbnormalPrecipitation rdf:type owl:Class ;
+  rdfs:label "Abnormal Precipitation"@en ;
+  rdfs:subClassOf wawo:AbnormalSituation .
+
+wawo:LightPrecipitation rdf:type owl:Class ;
+  rdfs:label "Light Precipitation"@en ;
+  rdfs:subClassOf wawo:AbnormalPrecipitation .
+
+wawo:MediumPrecipitation rdf:type owl:Class ;
+  rdfs:label "Medium Precipitation"@en ;
+  rdfs:subClassOf wawo:AbnormalPrecipitation .
+
+wawo:HeavyPrecipitation rdf:type owl:Class ;
+  rdfs:label "Heavy Precipitation"@en ;
+  rdfs:subClassOf wawo:AbnormalPrecipitation .
+
+wawo:AbnormalDrought rdf:type owl:Class ;
+  rdfs:label "Abnormal Drought"@en ;
+  rdfs:subClassOf wawo:AbnormalSituation .
+
+wawo:LightDrought rdf:type owl:Class ;
+  rdfs:label "Light Drought"@en ;
+  rdfs:subClassOf wawo:AbnormalDrought .
+
+wawo:MediumDrought rdf:type owl:Class ;
+  rdfs:label "Medium Drought"@en ;
+  rdfs:subClassOf wawo:AbnormalDrought .
+
+wawo:HeavyDrought rdf:type owl:Class ;
+  rdfs:label "Heavy Drought"@en ;
+  rdfs:subClassOf wawo:AbnormalDrought .
+
+wawo:TimeStamp rdf:type owl:Class ;
+  rdfs:label "Time Stamp"@en ;
+  rdfs:subClassOf wawo:TimeEntity .
+
+# ==============================================================================
+# GEOGRAPHICAL FEATURES
+# ==============================================================================
+
+wawo:RiverSection rdf:type owl:Class ;
+  rdfs:label "River Section"@en ;
+  rdfs:subClassOf wawo:GeographicalFeature .
+
+wawo:Stream rdf:type owl:Class ;
+  rdfs:label "Stream"@en ;
+  rdfs:subClassOf wawo:GeographicalFeature .
+
+wawo:Lake rdf:type owl:Class ;
+  rdfs:label "Lake"@en ;
+  rdfs:subClassOf wawo:GeographicalFeature .
+
+wawo:Lagoon rdf:type owl:Class ;
+  rdfs:label "Lagoon"@en ;
+  rdfs:subClassOf wawo:GeographicalFeature .
+
+wawo:Headwater rdf:type owl:Class ;
+  rdfs:label "Headwater"@en ;
+  rdfs:subClassOf wawo:GeographicalFeature .
+
+# ==============================================================================
+# WATER TREATMENT FACILITY
+# ==============================================================================
+
+wawo:WWTP rdf:type owl:Class ;
+  rdfs:label "Wastewater Treatment Plant"@en ;
+  rdfs:comment "Facility for treating wastewater"@en ;
+  rdfs:subClassOf wawo:WaterTreatmentFacility .
+
+# ==============================================================================
+# URBAN WATER SYSTEM
+# ==============================================================================
+
+wawo:SewerSystem rdf:type owl:Class ;
+  rdfs:label "Sewer System"@en ;
+  rdfs:subClassOf wawo:UrbanWaterSystem .
+
+wawo:CollectorNetwork rdf:type owl:Class ;
+  rdfs:label "Collector Network"@en ;
+  rdfs:subClassOf wawo:SewerSystem .
+
+wawo:MeteorologicalRetainer rdf:type owl:Class ;
+  rdfs:label "Meteorological Retainer"@en ;
+  rdfs:comment "Storm water retention tank"@en ;
+  rdfs:subClassOf wawo:SewerSystem .
+
+wawo:GeneralSewageNetwork rdf:type owl:Class ;
+  rdfs:label "General Sewage Network"@en ;
+  rdfs:subClassOf wawo:SewerSystem .
+
+wawo:DrinkingWaterDistributionNetwork rdf:type owl:Class ;
+  rdfs:label "Drinking Water Distribution Network"@en ;
+  rdfs:subClassOf wawo:UrbanWaterSystem .
+
+wawo:WastewaterCollectionNetwork rdf:type owl:Class ;
+  rdfs:label "Wastewater Collection Network"@en ;
+  rdfs:subClassOf wawo:UrbanWaterSystem .
+
+# ==============================================================================
+# ACTORS
+# ==============================================================================
+
+wawo:CompetentAuthority rdf:type owl:Class ;
+  rdfs:label "Competent Authority"@en ;
+  rdfs:subClassOf wawo:Actor .
+
+wawo:RiverBasinAuthority rdf:type owl:Class ;
+  rdfs:label "River Basin Authority"@en ;
+  rdfs:subClassOf wawo:CompetentAuthority .
+
+wawo:WaterManagementOperator rdf:type owl:Class ;
+  rdfs:label "Water Management Operator"@en ;
+  rdfs:subClassOf wawo:Actor .
+
+# ==============================================================================
+# MONITORING SYSTEM
+# ==============================================================================
+
+wawo:Sensor rdf:type owl:Class ;
+  rdfs:label "Sensor"@en ;
+  rdfs:subClassOf wawo:MonitoringSystem .
+
+wawo:Actuator rdf:type owl:Class ;
+  rdfs:label "Actuator"@en ;
+  rdfs:subClassOf wawo:MonitoringSystem .
+
+wawo:SoftwareComponent rdf:type owl:Class ;
+  rdfs:label "Software Component"@en ;
+  rdfs:subClassOf wawo:MonitoringSystem .
+
+wawo:DataExtractionComponent rdf:type owl:Class ;
+  rdfs:label "Data Extraction Component"@en ;
+  rdfs:subClassOf wawo:SoftwareComponent .
+
+# ==============================================================================
+# OBJECT PROPERTIES
+# ==============================================================================
+
+wawo:hasWaterMass rdf:type owl:ObjectProperty ;
+  rdfs:label "has water mass"@en ;
+  rdfs:comment "Relates an entity to the water mass it contains or produces"@en ;
+  rdfs:domain [ rdf:type owl:Class ;
+                owl:unionOf ( wawo:WaterSource wawo:ConveyorUnit wawo:WaterTreatmentFacility wawo:RiverSection ) ] ;
+  rdfs:range wawo:WaterMass .
+
+wawo:hasWaterComposition rdf:type owl:ObjectProperty ;
+  rdfs:label "has water composition"@en ;
+  rdfs:domain wawo:WaterMass ;
+  rdfs:range wawo:WaterComposition .
+
+wawo:hasIndicator rdf:type owl:ObjectProperty ;
+  rdfs:label "has indicator"@en ;
+  rdfs:domain wawo:WaterComposition ;
+  rdfs:range wawo:WaterIndicator .
+
+wawo:received rdf:type owl:ObjectProperty ;
+  rdfs:label "received"@en ;
+  rdfs:comment "Water mass received by a facility"@en ;
+  rdfs:domain wawo:WWTP ;
+  rdfs:range wawo:WaterMass .
+
+wawo:discharged rdf:type owl:ObjectProperty ;
+  rdfs:label "discharged"@en ;
+  rdfs:comment "Water mass discharged by a facility"@en ;
+  rdfs:domain wawo:WWTP ;
+  rdfs:range wawo:WaterMass .
+
+wawo:hasConcentration rdf:type owl:ObjectProperty ;
+  rdfs:label "has concentration"@en ;
+  rdfs:domain wawo:WaterMass ;
+  rdfs:range wawo:WaterIndicator .
+
+wawo:hasMeasure rdf:type owl:ObjectProperty ;
+  rdfs:label "has measure"@en ;
+  rdfs:domain wawo:Event ;
+  rdfs:range wawo:Measure .
+
+wawo:hasTimestampStart rdf:type owl:ObjectProperty ;
+  rdfs:label "has timestamp start"@en ;
+  rdfs:domain wawo:Event ;
+  rdfs:range wawo:TimeStamp .
+
+wawo:hasTimestampEnd rdf:type owl:ObjectProperty ;
+  rdfs:label "has timestamp end"@en ;
+  rdfs:domain wawo:Event ;
+  rdfs:range wawo:TimeStamp .
+
+wawo:isViolated rdf:type owl:ObjectProperty ;
+  rdfs:label "is violated"@en ;
+  rdfs:domain wawo:RegulativeNorm ;
+  rdfs:range wawo:Actor .
+
+wawo:counts_as rdf:type owl:ObjectProperty ;
+  rdfs:label "counts as"@en ;
+  rdfs:comment "Constitutive relation between brute facts and institutional facts"@en ;
+  rdfs:domain wawo:BruteFact ;
+  rdfs:range wawo:InstitutionalFact .
+
+wawo:hasActivationCondition rdf:type owl:ObjectProperty ;
+  rdfs:label "has activation condition"@en ;
+  rdfs:domain wawo:RegulativeNorm ;
+  rdfs:range wawo:ActivationCondition .
+
+wawo:hasMaintenanceCondition rdf:type owl:ObjectProperty ;
+  rdfs:label "has maintenance condition"@en ;
+  rdfs:domain wawo:RegulativeNorm ;
+  rdfs:range wawo:MaintenanceCondition .
+
+wawo:hasExpirationCondition rdf:type owl:ObjectProperty ;
+  rdfs:label "has expiration condition"@en ;
+  rdfs:domain wawo:RegulativeNorm ;
+  rdfs:range wawo:ExpirationCondition .
+
+wawo:hasDeadline rdf:type owl:Class ;
+  rdfs:label "has deadline"@en ;
+  rdfs:domain wawo:RegulativeNorm ;
+  rdfs:range wawo:Deadline .
+
+wawo:hasSanction rdf:type owl:ObjectProperty ;
+  rdfs:label "has sanction"@en ;
+  rdfs:domain wawo:RegulativeNorm ;
+  rdfs:range wawo:Sanction .
+
+wawo:locatedIn rdf:type owl:ObjectProperty ;
+  rdfs:label "located in"@en ;
+  rdfs:domain [ rdf:type owl:Class ;
+                owl:unionOf ( wawo:Infrastructure wawo:WaterSource ) ] ;
+  rdfs:range [ rdf:type owl:Class ;
+               owl:unionOf ( wawo:GeographicalFeature wawo:RiverBasin ) ] .
+
+wawo:connectedTo rdf:type owl:ObjectProperty ;
+  rdfs:label "connected to"@en ;
+  rdfs:domain wawo:ConveyorUnit ;
+  rdfs:range [ rdf:type owl:Class ;
+               owl:unionOf ( wawo:ConveyorUnit wawo:WaterTreatmentFacility ) ] .
+
+wawo:performs rdf:type owl:ObjectProperty ;
+  rdfs:label "performs"@en ;
+  rdfs:domain [ rdf:type owl:Class ;
+                owl:unionOf ( wawo:WaterTreatmentFacility wawo:Actor ) ] ;
+  rdfs:range wawo:Process .
+
+wawo:manages rdf:type owl:ObjectProperty ;
+  rdfs:label "manages"@en ;
+  rdfs:domain wawo:Actor ;
+  rdfs:range [ rdf:type owl:Class ;
+               owl:unionOf ( wawo:UrbanWaterSystem wawo:RiverBasin ) ] .
+
+wawo:produces rdf:type owl:ObjectProperty ;
+  rdfs:label "produces"@en ;
+  rdfs:domain wawo:WastewaterProducer ;
+  rdfs:range wawo:WaterMass .
+
+wawo:treats rdf:type owl:ObjectProperty ;
+  rdfs:label "treats"@en ;
+  rdfs:domain wawo:Process ;
+  rdfs:range wawo:WaterMass .
+
+# ==============================================================================
+# DATA PROPERTIES
+# ==============================================================================
+
+# Concentration Properties
+wawo:biologicalOxygenDemandConcentration rdf:type owl:DatatypeProperty ;
+  rdfs:label "biological oxygen demand concentration"@en ;
+  rdfs:comment "BOD concentration in mg/L"@en ;
+  rdfs:domain wawo:WaterMass ;
+  rdfs:range xsd:float .
+
+wawo:chemicalOxygenDemandConcentration rdf:type owl:DatatypeProperty ;
+  rdfs:label "chemical oxygen demand concentration"@en ;
+  rdfs:comment "COD concentration in mg/L"@en ;
+  rdfs:domain wawo:WaterMass ;
+  rdfs:range xsd:float .
+
+wawo:suspendedSolidConcentration rdf:type owl:DatatypeProperty ;
+  rdfs:label "suspended solid concentration"@en ;
+  rdfs:comment "SS concentration in mg/L"@en ;
+  rdfs:domain wawo:WaterMass ;
+  rdfs:range xsd:float .
+
+wawo:totalNitrogenConcentration rdf:type owl:DatatypeProperty ;
+  rdfs:label "total nitrogen concentration"@en ;
+  rdfs:comment "TN concentration in mg/L"@en ;
+  rdfs:domain wawo:WaterMass ;
+  rdfs:range xsd:float .
+
+wawo:totalPhosphorusConcentration rdf:type owl:DatatypeProperty ;
+  rdfs:label "total phosphorus concentration"@en ;
+  rdfs:comment "TP concentration in mg/L"@en ;
+  rdfs:domain wawo:WaterMass ;
+  rdfs:range xsd:float .
+
+wawo:emergingPollutantConcentration rdf:type owl:DatatypeProperty ;
+  rdfs:label "emerging pollutant concentration"@en ;
+  rdfs:comment "Concentration of emerging contaminants in ng/L or μg/L"@en ;
+  rdfs:domain wawo:WaterMass ;
+  rdfs:range xsd:float .
+
+wawo:heavyMetalConcentration rdf:type owl:DatatypeProperty ;
+  rdfs:label "heavy metal concentration"@en ;
+  rdfs:comment "Heavy metal concentration in mg/L"@en ;
+  rdfs:domain wawo:WaterMass ;
+  rdfs:range xsd:float .
+
+# Physical Properties
+wawo:temperature rdf:type owl:DatatypeProperty ;
+  rdfs:label "temperature"@en ;
+  rdfs:comment "Water temperature in °C"@en ;
+  rdfs:domain wawo:WaterMass ;
+  rdfs:range xsd:float .
+
+wawo:turbidity rdf:type owl:DatatypeProperty ;
+  rdfs:label "turbidity"@en ;
+  rdfs:comment "Water turbidity in NTU"@en ;
+  rdfs:domain wawo:WaterMass ;
+  rdfs:range xsd:float .
+
+wawo:conductivity rdf:type owl:DatatypeProperty ;
+  rdfs:label "conductivity"@en ;
+  rdfs:comment "Electrical conductivity in μS/cm"@en ;
+  rdfs:domain wawo:WaterMass ;
+  rdfs:range xsd:float .
+
+wawo:pH rdf:type owl:DatatypeProperty ;
+  rdfs:label "pH"@en ;
+  rdfs:comment "pH value (0-14)"@en ;
+  rdfs:domain wawo:WaterMass ;
+  rdfs:range xsd:float .
+
+# Quantitative Properties
+wawo:flow rdf:type owl:DatatypeProperty ;
+  rdfs:label "flow"@en ;
+  rdfs:comment "Flow rate in m³/s"@en ;
+  rdfs:domain wawo:Flow_water_mass ;
+  rdfs:range xsd:float .
+
+wawo:volume rdf:type owl:DatatypeProperty ;
+  rdfs:label "volume"@en ;
+  rdfs:comment "Volume in m³"@en ;
+  rdfs:domain wawo:WaterMass ;
+  rdfs:range xsd:float .
+
+wawo:populationEquivalent rdf:type owl:DatatypeProperty ;
+  rdfs:label "population equivalent"@en ;
+  rdfs:comment "Population equivalent (p.e.)"@en ;
+  rdfs:domain [ rdf:type owl:Class ;
+                owl:unionOf ( wawo:WastewaterProducer wawo:WWTP ) ] ;
+  rdfs:range xsd:integer .
+
+wawo:capacity rdf:type owl:DatatypeProperty ;
+  rdfs:label "capacity"@en ;
+  rdfs:comment "Capacity in m³"@en ;
+  rdfs:domain [ rdf:type owl:Class ;
+                owl:unionOf ( wawo:WaterTreatmentFacility wawo:Static_water_mass ) ] ;
+  rdfs:range xsd:float .
+
+# Temporal Properties
+wawo:timestamp rdf:type owl:DatatypeProperty ;
+  rdfs:label "timestamp"@en ;
+  rdfs:domain [ rdf:type owl:Class ;
+                owl:unionOf ( wawo:Event wawo:Measure ) ] ;
+  rdfs:range xsd:dateTime .
+
+wawo:duration rdf:type owl:DatatypeProperty ;
+  rdfs:label "duration"@en ;
+  rdfs:domain wawo:Event ;
+  rdfs:range xsd:duration .
+
+wawo:precipitationAmount rdf:type owl:DatatypeProperty ;
+  rdfs:label "precipitation amount"@en ;
+  rdfs:comment "Precipitation amount in m³ or m³/h"@en ;
+  rdfs:domain wawo:Precipitation ;
+  rdfs:range xsd:float .
+
+# ==============================================================================
+# CLASS DEFINITIONS WITH RESTRICTIONS (OWL 2)
+# ==============================================================================
+
+# Drinking Water Composition Definition
+# Based on Figure 7: Water composition meeting drinking water standards
+wawo:DrinkingWaterComposition
+  rdfs:subClassOf [
+    rdf:type owl:Restriction ;
+    owl:onProperty wawo:biologicalOxygenDemandConcentration ;
+    owl:someValuesFrom [
+      rdf:type rdfs:Datatype ;
+      owl:onDatatype xsd:float ;
+      owl:withRestrictions ( [ xsd:maxExclusive "5.0"^^xsd:float ] )
+    ]
+  ] ;
+  rdfs:subClassOf [
+    rdf:type owl:Restriction ;
+    owl:onProperty wawo:chemicalOxygenDemandConcentration ;
+    owl:someValuesFrom [
+      rdf:type rdfs:Datatype ;
+      owl:onDatatype xsd:float ;
+      owl:withRestrictions ( [ xsd:maxExclusive "10.0"^^xsd:float ] )
+    ]
+  ] ;
+  rdfs:subClassOf [
+    rdf:type owl:Restriction ;
+    owl:onProperty wawo:suspendedSolidConcentration ;
+    owl:someValuesFrom [
+      rdf:type rdfs:Datatype ;
+      owl:onDatatype xsd:float ;
+      owl:withRestrictions ( [ xsd:maxExclusive "10.0"^^xsd:float ] )
+    ]
+  ] ;
+  rdfs:subClassOf [
+    rdf:type owl:Restriction ;
+    owl:onProperty wawo:totalNitrogenConcentration ;
+    owl:someValuesFrom [
+      rdf:type rdfs:Datatype ;
+      owl:onDatatype xsd:float ;
+      owl:withRestrictions ( [ xsd:maxExclusive "2.0"^^xsd:float ] )
+    ]
+  ] ;
+  rdfs:subClassOf [
+    rdf:type owl:Restriction ;
+    owl:onProperty wawo:totalPhosphorusConcentration ;
+    owl:someValuesFrom [
+      rdf:type rdfs:Datatype ;
+      owl:onDatatype xsd:float ;
+      owl:withRestrictions ( [ xsd:maxExclusive "0.5"^^xsd:float ] )
+    ]
+  ] .
+
+# WWTP must have at least one treatment process
+wawo:WWTP
+  rdfs:subClassOf [
+    rdf:type owl:Restriction ;
+    owl:onProperty wawo:performs ;
+    owl:minCardinality "1"^^xsd:nonNegativeInteger
+  ] .
+
+# RiverSection must have exactly one WaterMass at any given time
+wawo:RiverSection
+  rdfs:subClassOf [
+    rdf:type owl:Restriction ;
+    owl:onProperty wawo:hasWaterMass ;
+    owl:cardinality "1"^^xsd:nonNegativeInteger
+  ] .
+
+# RegulativeNorm must have all deontic components
+wawo:RegulativeNorm
+  rdfs:subClassOf [
+    rdf:type owl:Restriction ;
+    owl:onProperty wawo:hasActivationCondition ;
+    owl:cardinality "1"^^xsd:nonNegativeInteger
+  ] ;
+  rdfs:subClassOf [
+    rdf:type owl:Restriction ;
+    owl:onProperty wawo:hasMaintenanceCondition ;
+    owl:cardinality "1"^^xsd:nonNegativeInteger
+  ] ;
+  rdfs:subClassOf [
+    rdf:type owl:Restriction ;
+    owl:onProperty wawo:hasExpirationCondition ;
+    owl:cardinality "1"^^xsd:nonNegativeInteger
+  ] .

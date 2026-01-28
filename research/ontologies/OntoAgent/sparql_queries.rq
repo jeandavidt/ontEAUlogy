@@ -1,0 +1,233 @@
+# SPARQL Queries for OntoAgent Ontology
+
+PREFIX ontoagent: <http://www.jparksimulator.com/ontology/ontoad Agent#>
+PREFIX msm: <http://www.theworldavatar.com/ontology/msm.owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX ex: <http://example.org/wateragents/>
+
+# ===== Agent Discovery Queries =====
+
+# Query 1: Find all available agents
+SELECT ?agent ?label ?comment WHERE {
+    ?agent a ontoagent:Agent ;
+           rdfs:label ?label ;
+           rdfs:comment ?comment .
+}
+ORDER BY ?label
+
+# Query 2: Find agents with specific capabilities
+SELECT ?agent ?label WHERE {
+    ?agent a ontoagent:Agent ;
+           rdfs:label ?label ;
+           ontoagent:supportedObjectives ?objectives .
+    FILTER(CONTAINS(?objectives, "MinimizeCost"))
+}
+
+# Query 3: Discover agents by supported constraints
+SELECT ?agent ?label ?constraints WHERE {
+    ?agent a ontoagent:Agent ;
+           rdfs:label ?label ;
+           ontoagent:supportedConstraints ?constraints .
+}
+
+# ===== Service and Operation Queries =====
+
+# Query 4: Get all services for a specific agent
+SELECT ?agent ?service ?serviceLabel WHERE {
+    ?agent a ontoagent:Agent ;
+           ontoagent:hasService ?service .
+    ?service rdfs:label ?serviceLabel .
+    FILTER(?agent = ex:WaterTreatmentAgent)
+}
+
+# Query 5: Find operations with specific input parameters
+SELECT ?operation ?opLabel ?param ?paramLabel WHERE {
+    ?operation a msm:Operation ;
+               rdfs:label ?opLabel ;
+               msm:hasInput ?param .
+    ?param rdfs:label ?paramLabel .
+    FILTER(?paramLabel = "Influent BOD")
+}
+
+# Query 6: Get all inputs and outputs for an operation
+SELECT ?operation ?param ?paramLabel ?direction ?unit WHERE {
+    VALUES ?operation { ex:SimulateTreatment }
+    {
+        ?operation msm:hasInput ?param .
+        BIND("Input" AS ?direction)
+    }
+    UNION
+    {
+        ?operation msm:hasOutput ?param .
+        BIND("Output" AS ?direction)
+    }
+    ?param rdfs:label ?paramLabel .
+    OPTIONAL { ?param ex:unit ?unit . }
+}
+ORDER BY ?direction ?paramLabel
+
+# ===== Grounding and Invocation Queries =====
+
+# Query 7: Find grounding information for services
+SELECT ?service ?serviceLabel ?endpoint ?method ?auth WHERE {
+    ?service ontoagent:hasGrounding ?grounding .
+    ?service rdfs:label ?serviceLabel .
+    ?grounding ontoagent:endpoint ?endpoint ;
+               ontoagent:method ?method .
+    OPTIONAL { ?grounding ontoagent:authentication ?auth . }
+}
+
+# Query 8: Get invocation details for specific agents
+SELECT ?agent ?agentLabel ?service ?operation ?endpoint ?method WHERE {
+    ?agent a ontoagent:Agent ;
+           rdfs:label ?agentLabel ;
+           ontoagent:hasService ?service .
+    ?service msm:hasOperation ?operation ;
+             ontoagent:hasGrounding ?grounding .
+    ?grounding ontoagent:endpoint ?endpoint ;
+               ontoagent:method ?method .
+}
+
+# ===== Composition and Workflow Queries =====
+
+# Query 9: Find composite agents and their components
+SELECT ?composite ?compositeLabel ?component ?componentLabel WHERE {
+    ?composite a ontoagent:Composition ;
+               rdfs:label ?compositeLabel ;
+               ontoagent:composedOf ?component .
+    ?component rdfs:label ?componentLabel .
+}
+
+# Query 10: Get workflow steps and their order
+SELECT ?workflow ?stepLabel ?agentUsed ?agentLabel ?precedingStep WHERE {
+    ?workflow a ontoagent:Workflow ;
+              ontoagent:hasStep ?step .
+    ?step rdfs:label ?stepLabel ;
+          ontoagent:usesAgent ?agentUsed ;
+          OPTIONAL { ?step ontoagent:precedes ?precedingStep . }
+    ?agentUsed rdfs:label ?agentLabel .
+}
+ORDER BY ?stepLabel
+
+# Query 11: Find all agents involved in workflows
+SELECT DISTINCT ?agent ?agentLabel ?workflow WHERE {
+    ?workflow a ontoagent:Workflow ;
+              ontoagent:hasStep ?step .
+    ?step ontoagent:usesAgent ?agent .
+    ?agent rdfs:label ?agentLabel .
+}
+
+# ===== Parameter and Configuration Queries =====
+
+# Query 12: Get parameters with ranges and units
+SELECT ?param ?paramLabel ?type ?unit ?range WHERE {
+    ?param a msm:Parameter ;
+           rdfs:label ?paramLabel ;
+           msm:hasType ?type .
+    OPTIONAL { ?param ex:unit ?unit . }
+    OPTIONAL { ?param ex:range ?range . }
+}
+ORDER BY ?paramLabel
+
+# Query 13: Find operations that can handle specific parameter types
+SELECT ?operation ?opLabel ?paramType WHERE {
+    ?operation a msm:Operation ;
+               rdfs:label ?opLabel ;
+               msm:hasInput ?param .
+    ?param msm:hasType ?paramType .
+    FILTER(?paramType = "http://www.w3.org/2001/XMLSchema#float")
+}
+
+# Query 14: Get service configurations
+SELECT ?agent ?service ?config WHERE {
+    ?agent ontoagent:hasService ?service .
+    ?service msm:hasOperation ?operation .
+    ?operation msm:hasOutput ?config .
+    FILTER(CONTAINS(STR(?config), "Configuration"))
+}
+
+# ===== Cross-Domain Integration Queries =====
+
+# Query 15: Find agents with compatible data types
+SELECT ?agent1 ?agent2 ?commonParameter WHERE {
+    ?agent1 ontoagent:hasService ?service1 .
+    ?agent2 ontoagent:hasService ?service2 .
+    ?service1 msm:hasOperation ?op1 .
+    ?service2 msm:hasOperation ?op2 .
+    ?op1 msm:hasOutput ?output .
+    ?op2 msm:hasInput ?input .
+    ?output a ?paramType .
+    ?input a ?paramType .
+    BIND(?paramType AS ?commonParameter)
+    FILTER(?agent1 != ?agent2)
+}
+
+# Query 16: Discover potential agent compositions based on I/O compatibility
+SELECT ?upstreamAgent ?upstreamOp ?downstreamAgent ?downstreamOp ?compatibleType WHERE {
+    ?upstreamAgent a ontoagent:Agent ;
+                   ontoagent:hasService ?upstreamService .
+    ?upstreamService msm:hasOperation ?upstreamOp .
+    ?upstreamOp msm:hasOutput ?output .
+    
+    ?downstreamAgent a ontoagent:Agent ;
+                    ontoagent:hasService ?downstreamService .
+    ?downstreamService msm:hasOperation ?downstreamOp .
+    ?downstreamOp msm:hasInput ?input .
+    
+    ?output a ?compatibleType .
+    ?input a ?compatibleType .
+    
+    FILTER(?upstreamAgent != ?downstreamAgent)
+}
+
+# ===== Performance and Monitoring Queries =====
+
+# Query 17: Get agents with timeout specifications
+SELECT ?agent ?service ?endpoint ?timeout WHERE {
+    ?agent ontoagent:hasService ?service .
+    ?service ontoagent:hasGrounding ?grounding .
+    ?grounding ontoagent:endpoint ?endpoint .
+    OPTIONAL { ?grounding ex:timeoutSeconds ?timeout . }
+}
+
+# Query 18: Find agents with specific authentication methods
+SELECT ?agent ?service ?authMethod WHERE {
+    ?agent ontoagent:hasService ?service .
+    ?service ontoagent:hasGrounding ?grounding .
+    ?grounding ontoagent:authentication ?authMethod .
+}
+
+# ===== Advanced Analysis Queries =====
+
+# Query 19: Analyze agent capabilities overlap
+SELECT ?capability COUNT(DISTINCT ?agent) AS ?agentCount WHERE {
+    ?agent a ontoagent:Agent ;
+           ontoagent:supportedObjectives ?capability .
+}
+GROUP BY ?capability
+ORDER BY DESC(?agentCount)
+
+# Query 20: Find workflow cycles and dependencies
+SELECT ?workflow ?cycleLength WHERE {
+    ?workflow a ontoagent:Workflow ;
+              ontoagent:hasStep ?step1 .
+    ?step1 ontoagent:precedes ?step2 .
+    ?step2 ontoagent:precedes ?step3 .
+    ?step3 ontoagent:precedes ?step1 .
+    BIND(3 AS ?cycleLength)
+}
+
+# Query 21: Get complete agent metadata for API integration
+SELECT ?agent ?label ?endpoint ?method ?contentType ?auth WHERE {
+    ?agent a ontoagent:Agent ;
+           rdfs:label ?label ;
+           ontoagent:hasService ?service .
+    ?service ontoagent:hasGrounding ?grounding .
+    ?grounding ontoagent:endpoint ?endpoint ;
+               ontoagent:method ?method .
+    OPTIONAL { 
+        ?grounding ontoagent:contentType ?contentType ;
+                   ontoagent:authentication ?auth .
+    }
+}
+ORDER BY ?label
