@@ -1,0 +1,152 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+
+<https://ugentbiomath.github.io/waterframe/bridges/sosa_alignment>
+    a owl:Ontology ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/qualities> ;
+    owl:imports <http://www.w3.org/ns/sosa/> ;
+    dc:title "waterFRAME: SOSA/SSN Alignment Bridge" ;
+    dc:creator "Jean-David Therrien" ;
+    rdfs:comment "Aligns waterFRAME observations with SOSA/SSN sensor ontology." .
+
+# ========== WATERFRAME SENSOR CLASSES (Subclass of SOSA Sensor) ==========
+
+wf:WaterQualitySensor a owl:Class ;
+    rdfs:subClassOf sosa:Sensor ;
+    rdfs:label "Water quality sensor" ;
+    rdfs:comment "A sensor that measures water quality parameters." .
+
+wf:FlowSensor a owl:Class ;
+    rdfs:subClassOf sosa:Sensor ;
+    rdfs:label "Flow sensor" ;
+    rdfs:comment "A sensor that measures water flow rate." .
+
+wf:WeatherSensor a owl:Class ;
+    rdfs:subClassOf sosa:Sensor ;
+    rdfs:label "Weather sensor" ;
+    rdfs:comment "A sensor that measures weather conditions." .
+
+# ========== ALIGN WATERFRAME PARAMETERS TO SOSA OBSERVABLE PROPERTY ==========
+
+# All water quality parameters are observable properties
+wf:WaterQualityParameter rdfs:subClassOf sosa:ObservableProperty .
+
+# Specific parameter alignments (optional, for clarity)
+wf:BOD rdfs:subClassOf sosa:ObservableProperty .
+wf:COD rdfs:subClassOf sosa:ObservableProperty .
+wf:TSS rdfs:subClassOf sosa:ObservableProperty .
+wf:Ammonia rdfs:subClassOf sosa:ObservableProperty .
+wf:DissolvedOxygen rdfs:subClassOf sosa:ObservableProperty .
+wf:Temperature rdfs:subClassOf sosa:ObservableProperty .
+wf:pH rdfs:subClassOf sosa:ObservableProperty .
+wf:Turbidity rdfs:subClassOf sosa:ObservableProperty .
+wf:TotalNitrogen rdfs:subClassOf sosa:ObservableProperty .
+wf:TotalPhosphorus rdfs:subClassOf sosa:ObservableProperty .
+wf:Chlorine rdfs:subClassOf sosa:ObservableProperty .
+
+# ========== NEW PARAMETERS NEEDED (Not in qualities.ttl) ==========
+
+wf:AirTemperature a owl:Class ;
+    rdfs:subClassOf sosa:ObservableProperty ;
+    rdfs:label "Air temperature" ;
+    rdfs:comment "Air temperature measurement. Measured in degrees Celsius." ;
+    wf:hasUnit qudt:degreeCelsius .
+
+wf:Precipitation a owl:Class ;
+    rdfs:subClassOf sosa:ObservableProperty ;
+    rdfs:label "Precipitation" ;
+    rdfs:comment "Liquid precipitation measurement. Measured in millimeters." ;
+    wf:hasUnit <http://qudt.org/vocab/unit/MilliM> .
+
+wf:FlowRate a owl:Class ;
+    rdfs:subClassOf sosa:ObservableProperty ;
+    rdfs:label "Flow rate" ;
+    rdfs:comment "Water flow rate measurement. Measured in cubic meters per second or per day." ;
+    wf:hasUnit qudt:CubicMeterPerSecond .
+
+# ========== ALIGN WATERFRAME OBSERVATION TO SOSA ==========
+
+wf:WaterQualityObservation rdfs:subClassOf sosa:Observation ;
+    rdfs:label "Water quality observation" ;
+    rdfs:comment "An observation event where water quality is measured, aligned with SOSA Observation." .
+
+# ========== SENSOR-TO-PORT LINKING (OntoCAPE Pattern) ==========
+
+# Property to link sensor to port it monitors
+wf:monitorsPort a owl:ObjectProperty ;
+    rdfs:label "monitors port" ;
+    rdfs:comment "Links a sensor to port it monitors (OntoCAPE pattern)." ;
+    rdfs:domain sosa:Sensor ;
+    rdfs:range wf:Port .
+
+# Property to link sensor to entity it's attached to
+wf:attachedTo a owl:ObjectProperty ;
+    rdfs:label "attached to" ;
+    rdfs:comment "Links a sensor to the water system component it's attached to." ;
+    rdfs:domain sosa:Sensor ;
+    rdfs:range wf:WaterSystemComponent .
+
+# ========== SENSOR METADATA PROPERTIES ==========
+
+wf:hasSamplingRate a owl:DatatypeProperty ;
+    rdfs:label "has sampling rate" ;
+    rdfs:comment "The sampling frequency of sensor in Hz (readings per second)." ;
+    rdfs:domain sosa:Sensor ;
+    rdfs:range xsd:double .
+
+wf:hasSensorReading a owl:ObjectProperty ;
+    rdfs:label "has sensor reading" ;
+    rdfs:comment "Links a sensor to its readings (inverse of sosa:madeObservation)." ;
+    rdfs:domain sosa:Sensor ;
+    rdfs:range sosa:Observation ;
+    owl:inverseOf sosa:madeObservation .
+
+# ========== WEATHER FORECAST CLASSES ==========
+
+wf:WeatherForecast a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000052 ;  # Processual entity
+    rdfs:label "Weather forecast" ;
+    rdfs:comment "A prediction of future weather conditions." .
+
+wf:Nowcast a owl:Class ;
+    rdfs:subClassOf wf:WeatherForecast ;
+    rdfs:label "Nowcast" ;
+    rdfs:comment "Short-term weather forecast (0-1 hour ahead)." .
+
+wf:ShortTermForecast a owl:Class ;
+    rdfs:subClassOf wf:WeatherForecast ;
+    rdfs:label "Short-term forecast" ;
+    rdfs:comment "Weather forecast (1-24 hours ahead)." .
+
+# ========== FORECAST PROPERTIES ==========
+
+wf:hasForecast a owl:ObjectProperty ;
+    rdfs:label "has forecast" ;
+    rdfs:comment "Links a weather sensor to its forecasts." ;
+    rdfs:domain wf:WeatherSensor ;
+    rdfs:range wf:WeatherForecast .
+
+wf:forecastTime a owl:DatatypeProperty ;
+    rdfs:label "forecast time" ;
+    rdfs:comment "The time for which forecast is valid." ;
+    rdfs:domain wf:WeatherForecast ;
+    rdfs:range xsd:dateTime .
+
+wf:forecastHorizon a owl:DatatypeProperty ;
+    rdfs:label "forecast horizon" ;
+    rdfs:comment "How far ahead forecast is (e.g., PT1H for 1 hour)." ;
+    rdfs:domain wf:WeatherForecast ;
+    rdfs:range xsd:duration .
+
+wf:confidence a owl:DatatypeProperty ;
+    rdfs:label "confidence" ;
+    rdfs:comment "Forecast confidence level (0-1)." ;
+    rdfs:domain wf:WeatherForecast ;
+    rdfs:range xsd:double .

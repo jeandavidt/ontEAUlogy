@@ -1,0 +1,312 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix envo: <http://purl.obolibrary.org/obo/ENVO_> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://ugentbiomath.github.io/waterframe/bridges/envo_alignment>
+    a owl:Ontology ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/material_entities> ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/qualities> ;
+    owl:imports <http://purl.obolibrary.org/obo/envo.owl> ;
+    dc:title "waterFRAME: ENVO Alignment Module" ;
+    dc:creator "Jean-David Therrien" ;
+    dc:version "0.1.0" ;
+    dc:date "2026-01-27" ;
+    rdfs:comment """Bridge module aligning waterFRAME concepts with ENVO (Environment Ontology).
+
+    Integration Strategy (following research/ontologies/envo-2025-10-20/README_EVALUATION.md):
+
+    USE ENVO FOR:
+    1. Environmental context - natural water bodies, catchments, ecosystems
+    2. Water quality descriptors - environmental quality vocabularies
+    3. Spatial features - rivers, lakes, watersheds, drainage basins
+    4. Pollution and contamination - environmental impacts
+
+    KEEP waterFRAME FOR:
+    1. Treatment processes - detailed unit operations
+    2. Process models - computational model metadata
+    3. Water reuse frameworks - fit-for-purpose classification
+    4. Agent framework - computational agent representation
+
+    This module provides semantic alignments without duplicating ENVO's extensive taxonomies.""" .
+
+# ========== ENVO VERSION TRACKING ==========
+
+<https://ugentbiomath.github.io/waterframe/bridges/envo_alignment>
+    dc:source "ENVO Version 2025-10-20" ;
+    rdfs:seeAlso <https://github.com/EnvironmentOntology/envo> ;
+    rdfs:seeAlso <http://obofoundry.org/ontology/envo.html> ;
+    rdfs:comment "ENVO Coverage: 77% (9/13 full support, 2/13 partial)" .
+
+# ========== WATER BODY TYPE ALIGNMENTS ==========
+
+# WaterSystemComponent can participate in natural water bodies
+wf:dischargesInto a owl:ObjectProperty ;
+    rdfs:label "discharges into" ;
+    rdfs:comment "Links a water system component to the natural water body it discharges into" ;
+    rdfs:domain wf:WaterSystemComponent ;
+    rdfs:range envo:00000063 .  # aquatic feature
+
+wf:abstractsFrom a owl:ObjectProperty ;
+    rdfs:label "abstracts from" ;
+    rdfs:comment "Links a water system component to the natural water body it draws water from" ;
+    rdfs:domain wf:WaterSystemComponent ;
+    rdfs:range envo:00000063 .  # aquatic feature
+
+wf:locatedIn a owl:ObjectProperty ;
+    rdfs:label "located in" ;
+    rdfs:comment "Links a water system component to its environmental context" ;
+    rdfs:domain wf:WaterSystemComponent ;
+    rdfs:range envo:00000428 .  # biome (environmental system)
+
+# ========== KEY ENVO WATER BODY CLASSES ==========
+# Document key ENVO classes for reference (not redefining, just annotating usage)
+
+# envo:00000022 - river
+# envo:00000020 - lake
+# envo:00000021 - freshwater lake
+# envo:00000029 - watercourse
+# envo:00000059 - underground river
+# envo:01000253 - freshwater river biome
+# envo:01000252 - freshwater lake biome
+# envo:00002030 - aquatic biome
+# envo:01000317 - aquatic environment
+
+# ========== WASTEWATER INFRASTRUCTURE ALIGNMENTS ==========
+
+# Our treatment plants can be linked to ENVO infrastructure concepts
+wf:WastewaterTreatmentPlant rdfs:subClassOf wf:WaterSystemComponent ;
+    rdfs:comment "Aligned with ENVO:00002043 (wastewater treatment plant) for environmental context" ;
+    rdfs:seeAlso envo:00002043 .  # wastewater treatment plant
+
+wf:DrinkingWaterTreatmentPlant rdfs:subClassOf wf:WaterSystemComponent ;
+    rdfs:comment "Aligned with ENVO:01001886 (drinking water treatment plant)" ;
+    rdfs:seeAlso envo:01001886 .  # drinking water treatment plant
+
+# ========== WATER TYPE / MATERIAL ALIGNMENTS ==========
+
+# Water types from ENVO
+wf:hasWaterType a owl:ObjectProperty ;
+    rdfs:label "has water type" ;
+    rdfs:comment "Links a water system component to the ENVO water material type it contains or processes" ;
+    rdfs:domain wf:WaterSystemComponent ;
+    rdfs:range envo:00002006 .  # water (material entity)
+
+# Specific water types (ENVO provides excellent taxonomy)
+# envo:00002018 - sewage
+# envo:00003097 - drinking water
+# envo:00002042 - surface water
+# envo:00002001 - groundwater
+# envo:00002223 - grey water (note: ENVO has this!)
+# envo:00002044 - wastewater
+
+wf:Greywater rdfs:seeAlso envo:00002223 ;  # grey water
+    rdfs:comment "waterFRAME uses more specific greywater classification; see ENVO:00002223 for general concept" .
+
+wf:Blackwater rdfs:seeAlso envo:00002018 ;  # sewage
+    rdfs:comment "Blackwater is a type of sewage (ENVO:00002018)" .
+
+# ========== WATER QUALITY ALIGNMENTS ==========
+
+# ENVO has extensive quality descriptors (390 classes per evaluation)
+# Our WaterQualityParameter can reference ENVO environmental qualities
+
+wf:WaterQualityParameter
+    rdfs:comment "waterFRAME provides treatment-specific parameters; ENVO provides environmental quality context" ;
+    rdfs:seeAlso envo:09200000 .  # environmental quality
+
+# Link observations to ENVO environmental features
+wf:observesEnvironmentalFeature a owl:ObjectProperty ;
+    rdfs:label "observes environmental feature" ;
+    rdfs:comment "Links a water quality observation to the ENVO environmental feature being observed" ;
+    rdfs:domain wf:WaterQualityObservation ;
+    rdfs:range envo:00000063 .  # aquatic feature
+
+# ========== POLLUTION AND CONTAMINATION ==========
+
+# Contamination events
+wf:ContaminationEvent a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000015 ;  # Process
+    rdfs:label "Contamination event" ;
+    rdfs:comment "An event where water becomes contaminated" ;
+    rdfs:seeAlso envo:02500000 .  # environmental system process (ENVO pollution processes)
+
+wf:hasContaminant a owl:ObjectProperty ;
+    rdfs:label "has contaminant" ;
+    rdfs:comment "Links to a contaminant present in water" ;
+    rdfs:domain [
+        owl:unionOf (wf:WaterSystemComponent wf:ContaminationEvent wf:WaterQualityObservation)
+    ] ;
+    rdfs:range envo:01000432 .  # environmental material (contaminants are materials)
+
+# Key ENVO contaminant concepts:
+# envo:00002116 - contaminated soil
+# CHEBI:78298 - environmental contaminant (via ENVO CHEBI imports)
+
+# ========== ENVIRONMENTAL CONTEXT FOR CATCHMENTS ==========
+
+# Catchment/watershed concepts
+wf:Catchment a owl:Class ;
+    rdfs:subClassOf wf:WaterSystemComponent ;
+    rdfs:label "Catchment" ;
+    rdfs:comment "A catchment area or watershed containing multiple water system components" ;
+    rdfs:seeAlso envo:00000292 .  # drainage basin
+
+wf:partOfCatchment a owl:ObjectProperty ;
+    rdfs:label "part of catchment" ;
+    rdfs:comment "Links a component to its containing catchment" ;
+    rdfs:domain wf:WaterSystemComponent ;
+    rdfs:range wf:Catchment .
+
+# ========== AQUATIC ECOSYSTEM INTEGRATION ==========
+
+# Enable linking to ecosystem services and environmental impact
+wf:affectsEcosystem a owl:ObjectProperty ;
+    rdfs:label "affects ecosystem" ;
+    rdfs:comment "Links a water system or discharge to the aquatic ecosystem it affects" ;
+    rdfs:domain [
+        owl:unionOf (wf:WaterSystemComponent wf:ContaminationEvent)
+    ] ;
+    rdfs:range envo:00000428 .  # biome
+
+wf:supportsEcosystem a owl:ObjectProperty ;
+    rdfs:label "supports ecosystem" ;
+    rdfs:comment "Links a water body to the ecosystem it supports" ;
+    rdfs:domain envo:00000063 ;  # aquatic feature
+    rdfs:range envo:00000428 .  # biome
+
+# ========== HYDROLOGICAL PROCESS ALIGNMENT ==========
+
+# ENVO has hydrological processes (49 classes per evaluation)
+wf:HydrologicalProcess a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000015 ;  # Process
+    rdfs:label "Hydrological process" ;
+    rdfs:comment "Natural hydrological processes affecting water systems" ;
+    rdfs:seeAlso envo:01001854 .  # hydrological process
+
+# Key ENVO hydrological processes:
+# envo:01000629 - surface runoff
+# envo:01001854 - hydrological process
+# envo:01000638 - discharge process
+# envo:01001803 - drainage
+
+# ========== CHEMICAL SUBSTANCE ALIGNMENT ==========
+
+# ENVO imports CHEBI for chemical substances (63 classes per evaluation)
+wf:hasChemicalConstituent a owl:ObjectProperty ;
+    rdfs:label "has chemical constituent" ;
+    rdfs:comment "Links water to its chemical constituents via CHEBI (imported by ENVO)" ;
+    rdfs:domain wf:WaterSystemComponent ;
+    rdfs:range <http://purl.obolibrary.org/obo/CHEBI_24431> .  # chemical entity
+
+# Key CHEBI classes via ENVO:
+# CHEBI:15377 - water (substance)
+# CHEBI:78298 - environmental contaminant
+# CHEBI:33284 - nutrient
+# CHEBI:46662 - mineral
+
+# ========== ENVIRONMENTAL MONITORING ALIGNMENT ==========
+
+# ENVO has sensor/monitoring concepts (15 classes per evaluation)
+wf:MonitoringPoint a owl:Class ;
+    rdfs:subClassOf wf:WaterSystemComponent ;
+    rdfs:label "Monitoring point" ;
+    rdfs:comment "A point where environmental monitoring occurs" ;
+    rdfs:seeAlso envo:00003074 .  # manufactured product (sensors are products)
+
+wf:monitorsFeature a owl:ObjectProperty ;
+    rdfs:label "monitors feature" ;
+    rdfs:comment "Links a monitoring point to the environmental feature it monitors" ;
+    rdfs:domain wf:MonitoringPoint ;
+    rdfs:range envo:00000063 .  # aquatic feature
+
+# ========== BUILT ENVIRONMENT INTEGRATION ==========
+
+# ENVO has built environment concepts (179 classes per evaluation)
+wf:UrbanWaterSystem a owl:Class ;
+    rdfs:subClassOf wf:WaterSystemComponent ;
+    rdfs:label "Urban water system" ;
+    rdfs:comment "Water system in urban environment" ;
+    rdfs:seeAlso envo:01000249 .  # urban biome
+
+wf:inUrbanArea a owl:ObjectProperty ;
+    rdfs:label "in urban area" ;
+    rdfs:comment "Links a water system to its urban context" ;
+    rdfs:domain wf:WaterSystemComponent ;
+    rdfs:range envo:01001116 .  # urban area
+
+# ========== CLIMATE AND WEATHER CONTEXT ==========
+
+# Enable linking to climate/weather conditions
+wf:affectedByWeather a owl:ObjectProperty ;
+    rdfs:label "affected by weather" ;
+    rdfs:comment "Links a water system to weather phenomena that affect it" ;
+    rdfs:domain wf:WaterSystemComponent ;
+    rdfs:range envo:01000810 .  # weather
+
+# Key ENVO weather/climate concepts:
+# envo:01000810 - weather
+# envo:01000804 - precipitation
+# envo:01001786 - rain
+# envo:01000253 - freshwater river biome (affected by climate)
+
+# ========== REUSE PATTERN: ENTITY-FEATURE-VALUE ==========
+
+# Following ENVO patterns for environmental qualities
+wf:EnvironmentalQualityMeasurement a owl:Class ;
+    rdfs:subClassOf wf:WaterQualityObservation ;
+    rdfs:label "Environmental quality measurement" ;
+    rdfs:comment "Measurement of an environmental quality using ENVO descriptors" .
+
+wf:hasEnvironmentalQuality a owl:ObjectProperty ;
+    rdfs:label "has environmental quality" ;
+    rdfs:comment "Links an entity to its environmental quality (ENVO quality classes)" ;
+    rdfs:domain envo:00000063 ;  # aquatic feature
+    rdfs:range envo:09200000 .  # environmental quality
+
+# ========== DATA PROPERTIES FOR SPATIAL CONTEXT ==========
+
+wf:environmentalContext a owl:DatatypeProperty ;
+    rdfs:label "environmental context" ;
+    rdfs:comment "Textual description of environmental context" ;
+    rdfs:domain wf:WaterSystemComponent ;
+    rdfs:range xsd:string .
+
+wf:envoClassification a owl:DatatypeProperty ;
+    rdfs:label "ENVO classification" ;
+    rdfs:comment "ENVO class URI for environmental classification" ;
+    rdfs:domain wf:WaterSystemComponent ;
+    rdfs:range xsd:anyURI .
+
+# ========== DESIGN NOTES ==========
+
+# Integration Philosophy:
+# 1. ENVO provides environmental CONTEXT (where? what biome? what ecosystem?)
+# 2. waterFRAME provides engineering DETAIL (how treated? what models? what agents?)
+# 3. Bridge via semantic properties (dischargesInto, abstractsFrom, locatedIn)
+# 4. Reference ENVO classes via rdfs:seeAlso without full import of instance data
+# 5. Use owl:imports for schema, not for ENVO's 9000+ classes in instance files
+
+# Competency Question Integration:
+# - CQ3 (input sources): Can now query "what river does this plant abstract from?"
+# - CQ4 (downstream nodes): Can track "what river/ecosystem receives this discharge?"
+# - CQ10-11 (water quality): Can link parameters to ENVO environmental qualities
+# - CQ12 (compliance): Can check compliance in environmental context (e.g., river water quality standards)
+# - CQ14 (stream classification): Can use ENVO water type classifications
+
+# Example Usage Pattern:
+# ex:GhentWWTP a wf:WastewaterTreatmentPlant ;
+#     wf:dischargesInto envo:ScheldeRiver ;  # (instance of envo:00000022 river)
+#     wf:locatedIn envo:01000249 ;  # urban biome
+#     wf:hasWaterType envo:00002018 ;  # sewage
+#     wf:affectsEcosystem envo:FreshwaterRiverBiome .
+
+# Layered Architecture (per ENVO evaluation recommendation):
+# Layer 1: ENVO - Environmental context
+# Layer 2: SOSA/SSN - Observation and sensor layer (existing in waterFRAME)
+# Layer 3: waterFRAME - Treatment engineering, models, agents
+# Layer 4: Domain-specific - WaWO+ for detailed treatment processes (future)
