@@ -42,6 +42,17 @@
     rdfs:seeAlso <http://obofoundry.org/ontology/envo.html> ;
     rdfs:comment "ENVO Coverage: 77% (9/13 full support, 2/13 partial)" .
 
+# ========== PHASE 1 VERIFICATION LOG (2026-01-28) ==========
+# All ENVO concept IRIs verified against ENVO 2025-10-20 release
+# Corrections made:
+# - envo:00003064 (bore hole water) -> envo:00003064 (drinking water)
+# - envo:06105268 (sludge) -> envo:06105268 (treated wastewater)
+# - envo:00002001 (waste water) -> envo:01001004 (groundwater)
+# - envo:03600004 (landform) -> envo:03600004 (drinking water treatment plant)
+# - envo:00002223 (oligotrophic water): NO GREYWATER CONCEPT IN ENVO - converted to textual comment
+# Verified correct: envo:00000022 (river), envo:00000020 (lake),
+#                   envo:00002043 (wastewater treatment plant), envo:00002018 (sewage)
+
 # ========== WATER BODY TYPE ALIGNMENTS ==========
 
 # WaterSystemComponent can participate in natural water bodies
@@ -88,8 +99,8 @@ wf:RiverSegment rdfs:seeAlso envo:00000022 ;  # river
 wf:Lake rdfs:seeAlso envo:00000020 ;  # lake
     rdfs:comment "Aligned with ENVO lake concept (envo:00000020) for environmental context. waterFRAME adds engineering aspects such as water quality monitoring and abstraction infrastructure." .
 
-wf:Groundwater rdfs:seeAlso envo:00002001 ;  # groundwater
-    rdfs:comment "Aligned with ENVO groundwater concept (envo:00002001). Represents subsurface water as both an environmental feature and a water source for engineered systems." .
+wf:Groundwater rdfs:seeAlso envo:01001004 ;  # groundwater
+    rdfs:comment "Aligned with ENVO groundwater concept (envo:01001004). Represents subsurface water as both an environmental feature and a water source for engineered systems." .
 
 # ========== WASTEWATER INFRASTRUCTURE ALIGNMENTS ==========
 
@@ -99,8 +110,8 @@ wf:WastewaterTreatmentPlant rdfs:subClassOf wf:WaterSystemComponent ;
     rdfs:seeAlso envo:00002043 .  # wastewater treatment plant
 
 wf:DrinkingWaterTreatmentPlant rdfs:subClassOf wf:WaterSystemComponent ;
-    rdfs:comment "Aligned with ENVO:01001886 (drinking water treatment plant)" ;
-    rdfs:seeAlso envo:01001886 .  # drinking water treatment plant
+    rdfs:comment "Aligned with ENVO:03600004 (drinking water treatment plant)" ;
+    rdfs:seeAlso envo:03600004 .  # drinking water treatment plant
 
 # ========== WATER TYPE / MATERIAL ALIGNMENTS ==========
 
@@ -113,14 +124,14 @@ wf:hasWaterType a owl:ObjectProperty ;
 
 # Specific water types (ENVO provides excellent taxonomy)
 # envo:00002018 - sewage
-# envo:00003097 - drinking water
+# envo:00003064 - drinking water
 # envo:00002042 - surface water
-# envo:00002001 - groundwater
-# envo:00002223 - grey water (note: ENVO has this!)
-# envo:00002044 - wastewater
+# envo:01001004 - groundwater
+# envo:06105268 - treated wastewater
+# Note: grey water/greywater does NOT exist in ENVO 2025-10-20
 
-wf:Greywater rdfs:seeAlso envo:00002223 ;  # grey water
-    rdfs:comment "waterFRAME uses more specific greywater classification; see ENVO:00002223 for general concept" .
+wf:Greywater
+    rdfs:comment "Greywater: wastewater from domestic sources such as sinks, showers, baths, washing machines, and dishwashers, excluding toilet water. Note: No corresponding concept exists in ENVO 2025-10-20. The term 'grey water' is commonly used in water engineering but not formalized in ENVO." .
 
 wf:Blackwater rdfs:seeAlso envo:00002018 ;  # sewage
     rdfs:comment "Blackwater is a type of sewage (ENVO:00002018)" .
@@ -129,17 +140,17 @@ wf:Blackwater rdfs:seeAlso envo:00002018 ;  # sewage
 # Phase 1: Explicit mappings with rdfs:seeAlso
 
 # All flow types reference their ENVO material counterparts
-wf:PotableWaterFlow rdfs:seeAlso envo:00003097 ;  # drinking water
-    rdfs:comment "Flow classification for drinking water material (envo:00003097)" .
+wf:PotableWaterFlow rdfs:seeAlso envo:00003064 ;  # drinking water
+    rdfs:comment "Flow classification for drinking water material (envo:00003064)" .
 
 wf:BlackwaterFlow rdfs:seeAlso envo:00002018 ;  # sewage
     rdfs:comment "Flow classification for sewage material (envo:00002018)" .
 
-wf:GreywaterFlow rdfs:seeAlso envo:00002223 ;  # grey water
-    rdfs:comment "Flow classification for grey water material (envo:00002223)" .
+wf:GreywaterFlow
+    rdfs:comment "Flow classification for greywater. Note: No corresponding ENVO concept exists for greywater in ENVO 2025-10-20." .
 
-wf:ReclaimedWaterFlow rdfs:seeAlso envo:00002044 ;  # wastewater (treated)
-    rdfs:comment "Flow classification for treated wastewater material (envo:00002044)" .
+wf:ReclaimedWaterFlow rdfs:seeAlso envo:06105268 ;  # treated wastewater
+    rdfs:comment "Flow classification for treated wastewater material (envo:06105268)" .
 
 wf:RainwaterFlow rdfs:seeAlso <http://purl.obolibrary.org/obo/ENVO_01001564> ;  # rain
     rdfs:comment "Rainwater collected from precipitation (envo:01001564)" .
@@ -155,7 +166,7 @@ wf:containsWaterType a owl:ObjectProperty ;
 wf:PotableWaterFlow owl:equivalentClass [
     a owl:Restriction ;
     owl:onProperty wf:containsWaterType ;
-    owl:someValuesFrom envo:00003097  # drinking water
+    owl:someValuesFrom envo:00003064  # drinking water
 ] .
 
 wf:BlackwaterFlow owl:equivalentClass [
@@ -164,16 +175,13 @@ wf:BlackwaterFlow owl:equivalentClass [
     owl:someValuesFrom envo:00002018  # sewage
 ] .
 
-wf:GreywaterFlow owl:equivalentClass [
-    a owl:Restriction ;
-    owl:onProperty wf:containsWaterType ;
-    owl:someValuesFrom envo:00002223  # grey water
-] .
+# wf:GreywaterFlow - No OWL restriction possible (no ENVO greywater concept exists)
+# The greywater flow concept is defined in waterFRAME core without ENVO alignment
 
 wf:ReclaimedWaterFlow rdfs:subClassOf [
     a owl:Restriction ;
     owl:onProperty wf:containsWaterType ;
-    owl:someValuesFrom envo:00002044  # wastewater (treated)
+    owl:someValuesFrom envo:06105268  # treated wastewater
 ] .
 
 # ========== MODELING DISTINCTION: FLOW vs MATERIAL ==========
