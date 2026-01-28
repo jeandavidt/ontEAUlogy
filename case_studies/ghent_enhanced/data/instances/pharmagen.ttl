@@ -1,0 +1,145 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+
+# ==============================================================================
+# PharmaGen - Pharmaceutical Industry
+# ==============================================================================
+# Location: Downstream zone
+# Water Demand: 400 m3/day (includes WFI - Water for Injection)
+# Water Source: DWP-2 (ultra-pure water from RO system)
+# Wastewater Destination: WWTP-2
+# Characteristics: Requires high-purity water, produces pharmaceutical wastewater
+
+ghent:PharmaGen a wf:PharmaceuticalIndustry ;
+    rdfs:label "PharmaGen Pharmaceutical Company"@en ;
+    rdfs:comment "Pharmaceutical manufacturing facility in the downstream zone. Requires ultra-pure water including WFI for drug production."@en ;
+    geo:lat "51.0500"^^xsd:double ;
+    geo:long "3.7220"^^xsd:double ;
+    wf:hasInputPort ghent:PharmaGen_UltraPureWater_In ;
+    wf:hasOutputPort ghent:PharmaGen_ProcessWater_Out ;
+    wf:hasOutputPort ghent:PharmaGen_Wastewater_Out ;
+    wf:hasComponent ghent:PharmaGen_Formulation ;
+    wf:hasComponent ghent:PharmaGen_WFI_System ;
+    wf:hasComponent ghent:PharmaGen_CIP ;
+    wf:hasComponent ghent:PharmaGen_Synthesis .
+
+# Ports
+ghent:PharmaGen_UltraPureWater_In a wf:InputPort ;
+    rdfs:label "PharmaGen Ultra-Pure Water Inlet"@en ;
+    rdfs:comment "Ultra-pure water connection from DWP-2 RO system"@en ;
+    wf:hasFlowType wf:UltraPureWaterFlow ;
+    wf:hasSource ghent:DWP2_UltraPureWater_Out .
+
+ghent:PharmaGen_ProcessWater_Out a wf:OutputPort ;
+    rdfs:label "PharmaGen Process Water Outlet"@en ;
+    rdfs:comment "Ultra-pure water for manufacturing"@en ;
+    wf:hasFlowType wf:UltraPureWaterFlow .
+
+ghent:PharmaGen_Wastewater_Out a wf:OutputPort ;
+    rdfs:label "PharmaGen Wastewater Outlet"@en ;
+    rdfs:comment "Pharmaceutical manufacturing wastewater to WWTP-2"@en ;
+    wf:hasFlowType wf:IndustrialWastewaterFlow ;
+    wf:flowsTo ghent:WWTP2_Influent_In .
+
+# Treatment components
+ghent:PharmaGen_Formulation a wf:ProcessUnit ;
+    rdfs:label "PharmaGen Formulation Line"@en ;
+    rdfs:comment "Drug formulation and filling operations"@en .
+
+ghent:PharmaGen_WFI_System a wf:WaterTreatmentUnit ;
+    rdfs:label "PharmaGen WFI Systems"@en ;
+    rdfs:comment "Water for Injection generation and distribution"@en .
+
+ghent:PharmaGen_CIP a wf:ProcessUnit ;
+    rdfs:label "PharmaGen CIP Systems"@en ;
+    rdfs:comment "Clean-in-place systems for equipment sterilization"@en .
+
+ghent:PharmaGen_Synthesis a wf:ProcessUnit ;
+    rdfs:label "PharmaGen Chemical Synthesis"@en ;
+    rdfs:comment "Active pharmaceutical ingredient synthesis"@en .
+
+# Water demand
+ghent:PharmaGen_WaterDemand a qudt:QuantityValue ;
+    rdfs:label "PharmaGen Daily Water Demand"@en ;
+    qudt:numericValue "400"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+# Ultra-pure water quality requirements (WFI quality)
+ghent:PharmaGen_WFI_Conductivity a wf:WaterQualityRequirement ;
+    rdfs:label "PharmaGen WFI Conductivity"@en ;
+    wf:hasWaterQualityParameter wf:Conductivity ;
+    wf:hasLimitValue "1.3"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    qudt:unit unit:MicroSiemensPerCentimeter ;
+    rdfs:comment "WFI conductivity limit per pharmacopeia"@en .
+
+ghent:PharmaGen_WFI_TOC a wf:WaterQualityRequirement ;
+    rdfs:label "PharmaGen WFI TOC Limit"@en ;
+    wf:hasWaterQualityParameter wf:TOC ;
+    wf:hasLimitValue "0.5"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    qudt:unit unit:MicroGramPerLiter ;
+    rdfs:comment "WFI total organic carbon limit"@en .
+
+ghent:PharmaGen_WFI_Endotoxin a wf:WaterQualityRequirement ;
+    rdfs:label "PharmaGen WFI Endotoxin Limit"@en ;
+    wf:hasWaterQualityParameter wf:Endotoxin ;
+    wf:hasLimitValue "0.25"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    qudt:unit unit:EndotoxinUnitPerMilliliter ;
+    rdfs:comment "WFI endotoxin limit per pharmacopeia"@en .
+
+# Wastewater characteristics (pharmaceutical residues)
+ghent:PharmaGen_Wastewater_COD a wf:WaterQualityObservation ;
+    rdfs:label "PharmaGen Wastewater COD"@en ;
+    wf:observedParameter wf:COD ;
+    wf:observedValue "800.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Moderate COD from organic solvents and cleaning"@en ;
+    wf:observedAt "ghent:PharmaGen_Wastewater_Out" .
+
+ghent:PharmaGen_Wastewater_TOC a wf:WaterQualityObservation ;
+    rdfs:label "PharmaGen Wastewater TOC"@en ;
+    wf:observedParameter wf:TOC ;
+    wf:observedValue "300.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Elevated TOC from organic compounds"@en ;
+    wf:observedAt "ghent:PharmaGen_Wastewater_Out" .
+
+ghent:PharmaGen_Wastewater_TSS a wf:WaterQualityObservation ;
+    rdfs:label "PharmaGen Wastewater TSS"@en ;
+    wf:observedParameter wf:TSS ;
+    wf:observedValue "100.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Moderate TSS from formulation processes"@en ;
+    wf:observedAt "ghent:PharmaGen_Wastewater_Out" .
+
+ghent:PharmaGen_Wastewater_Micropollutants a wf:WaterQualityObservation ;
+    rdfs:label "PharmaGen Wastewater Micropollutants"@en ;
+    wf:observedParameter wf:Micropollutants ;
+    wf:observedValue "5.0"^^xsd:double ;
+    qudt:unit unit:MicroGramPerLiter ;
+    rdfs:comment "Active pharmaceutical ingredients and metabolites"@en ;
+    wf:observedAt "ghent:PharmaGen_Wastewater_Out" .
+
+# Wastewater flow
+ghent:PharmaGen_Wastewater_Flow a qudt:QuantityValue ;
+    rdfs:label "PharmaGen Wastewater Flow"@en ;
+    rdfs:comment "Approximately 70% of intake is consumed in products/process, 30% becomes wastewater"@en ;
+    qudt:numericValue "120"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+# Discharge limits (VLAREM II + pharmaceutical-specific)
+ghent:PharmaGen_VLAREM_COD a wf:WaterQualityRequirement ;
+    rdfs:label "VLAREM II COD Discharge Limit"@en ;
+    wf:hasWaterQualityParameter wf:COD ;
+    wf:hasLimitValue "1000.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:hasRegulatoryStandard wf:VLAREM_II .

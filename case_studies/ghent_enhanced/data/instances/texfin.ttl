@@ -1,0 +1,116 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+
+# ==============================================================================
+# Texfin - Textile Industry
+# ==============================================================================
+# Location: Upstream zone
+# Water Demand: 500 m3/day
+# Water Source: DWP-1
+# Wastewater Destination: WWTP-1
+# Characteristics: High COD output, textile dyeing/finishing processes
+
+ghent:Texfin a wf:TextileIndustry ;
+    rdfs:label "Texfin Textile Company"@en ;
+    rdfs:comment "Textile manufacturing facility in the upstream zone. Produces dyed and finished fabrics with significant COD load in wastewater."@en ;
+    geo:lat "51.0610"^^xsd:double ;
+    geo:long "3.6920"^^xsd:double ;
+    wf:hasInputPort ghent:Texfin_PotableWater_In ;
+    wf:hasOutputPort ghent:Texfin_ProcessWater_Out ;
+    wf:hasOutputPort ghent:Texfin_Wastewater_Out ;
+    wf:hasComponent ghent:Texfin_Dyeing ;
+    wf:hasComponent ghent:Texfin_Finishing ;
+    wf:hasComponent ghent:Texfin_Rinse .
+
+# Ports
+ghent:Texfin_PotableWater_In a wf:InputPort ;
+    rdfs:label "Texfin Potable Water Inlet"@en ;
+    rdfs:comment "Potable water connection from DWP-1"@en ;
+    wf:hasFlowType wf:PotableWaterFlow ;
+    wf:hasSource ghent:DWP1_PotableWater_Out .
+
+ghent:Texfin_ProcessWater_Out a wf:OutputPort ;
+    rdfs:label "Texfin Process Water Outlet"@en ;
+    rdfs:comment "Process water for dyeing and finishing"@en ;
+    wf:hasFlowType wf:ProcessWaterFlow .
+
+ghent:Texfin_Wastewater_Out a wf:OutputPort ;
+    rdfs:label "Texfin Wastewater Outlet"@en ;
+    rdfs:comment "High-COD textile wastewater to WWTP-1"@en ;
+    wf:hasFlowType wf:IndustrialWastewaterFlow ;
+    wf:flowsTo ghent:WWTP1_Influent_In .
+
+# Treatment components
+ghent:Texfin_Dyeing a wf:ProcessUnit ;
+    rdfs:label "Texfin Dyeing Line"@en ;
+    rdfs:comment "Fabric dyeing process using synthetic dyes"@en .
+
+ghent:Texfin_Finishing a wf:ProcessUnit ;
+    rdfs:label "Texfin Finishing Process"@en ;
+    rdfs:comment "Fabric finishing and coating processes"@en .
+
+ghent:Texfin_Rinse a wf:ProcessUnit ;
+    rdfs:label "Texfin Rinse Systems"@en ;
+    rdfs:comment "Multiple rinse stages for dye removal"@en .
+
+# Water demand
+ghent:Texfin_WaterDemand a qudt:QuantityValue ;
+    rdfs:label "Texfin Daily Water Demand"@en ;
+    qudt:numericValue "500"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+# Input water quality requirements
+ghent:Texfin_Water_TSS a wf:WaterQualityRequirement ;
+    rdfs:label "Texfin Input Water TSS Limit"@en ;
+    wf:hasWaterQualityParameter wf:TSS ;
+    wf:hasLimitValue "5.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    qudt:unit unit:MilligramPerLiter .
+
+# Wastewater characteristics (high COD - textile industry)
+ghent:Texfin_Wastewater_COD a wf:WaterQualityObservation ;
+    rdfs:label "Texfin Wastewater COD"@en ;
+    wf:observedParameter wf:COD ;
+    wf:observedValue "1500.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Very high COD from textile dyeing - requires dilution in combined flow"@en ;
+    wf:observedAt "ghent:Texfin_Wastewater_Out" .
+
+ghent:Texfin_Wastewater_BOD a wf:WaterQualityObservation ;
+    rdfs:label "Texfin Wastewater BOD"@en ;
+    wf:observedParameter wf:BOD ;
+    wf:observedValue "400.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "High BOD from organic dyes"@en ;
+    wf:observedAt "ghent:Texfin_Wastewater_Out" .
+
+ghent:Texfin_Wastewater_TSS a wf:WaterQualityObservation ;
+    rdfs:label "Texfin Wastewater TSS"@en ;
+    wf:observedParameter wf:TSS ;
+    wf:observedValue "350.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "High TSS from fiber fragments and dye particles"@en ;
+    wf:observedAt "ghent:Texfin_Wastewater_Out" .
+
+ghent:Texfin_Wastewater_Color a wf:WaterQualityObservation ;
+    rdfs:label "Texfin Wastewater Color"@en ;
+    wf:observedParameter wf:Color ;
+    wf:observedValue "500.0"^^xsd:double ;
+    qudt:unit unit:ColorUnit ;
+    rdfs:comment "High color from dye residues"@en ;
+    wf:observedAt "ghent:Texfin_Wastewater_Out" .
+
+# Discharge limits (VLAREM II for industrial discharge to WWTP)
+ghent:Texfin_VLAREM_COD a wf:WaterQualityRequirement ;
+    rdfs:label "VLAREM II COD Discharge Limit (to sewer)"@en ;
+    wf:hasWaterQualityParameter wf:COD ;
+    wf:hasLimitValue "2000.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:hasRegulatoryStandard wf:VLAREM_II .

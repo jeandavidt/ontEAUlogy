@@ -1,0 +1,90 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+
+# ==============================================================================
+# Dampoort Residential District
+# ==============================================================================
+# Location: Upstream zone
+# Population: 3,000 inhabitants
+# Water Demand: 450 m3/day
+# Water Source: DWP-1
+# Wastewater Destination: WWTP-1
+
+ghent:Dampoort a wf:ResidentialDistrict ;
+    rdfs:label "Dampoort Residential District"@en ;
+    rdfs:comment "Residential area in the upstream zone of Ghent. Serves approximately 3,000 inhabitants with water supplied by DWP-1."@en ;
+    geo:lat "51.0620"^^xsd:double ;
+    geo:long "3.6980"^^xsd:double ;
+    wf:hasInputPort ghent:Dampoort_PotableWater_In ;
+    wf:hasOutputPort ghent:Dampoort_Wastewater_Out .
+
+# Ports
+ghent:Dampoort_PotableWater_In a wf:InputPort ;
+    rdfs:label "Dampoort Potable Water Inlet"@en ;
+    rdfs:comment "Potable water connection from DWP-1"@en ;
+    wf:hasFlowType wf:PotableWaterFlow ;
+    wf:hasSource ghent:DWP1_PotableWater_Out .
+
+ghent:Dampoort_Wastewater_Out a wf:OutputPort ;
+    rdfs:label "Dampoort Wastewater Outlet"@en ;
+    rdfs:comment "Domestic wastewater collection to WWTP-1"@en ;
+    wf:hasFlowType wf:BlackwaterFlow ;
+    wf:flowsTo ghent:WWTP1_Influent_In .
+
+# Population and demand
+ghent:Dampoort_Population a qudt:QuantityValue ;
+    rdfs:label "Dampoort Population"@en ;
+    qudt:numericValue "3000"^^xsd:integer ;
+    qudt:unit unit:Person .
+
+ghent:Dampoort_WaterDemand a qudt:QuantityValue ;
+    rdfs:label "Dampoort Daily Water Demand"@en ;
+    rdfs:comment "Average daily water consumption: 450 m3/day (150 L/person/day)"@en ;
+    qudt:numericValue "450"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+# Water quality requirements (potable water from DWP-1)
+ghent:Dampoort_Water_Quality a wf:WaterQualityObservation ;
+    rdfs:label "Dampoort Supplied Water Quality"@en ;
+    wf:observedParameter wf:pH ;
+    wf:observedValue "7.2"^^xsd:double ;
+    wf:observedAt "ghent:Dampoort_PotableWater_In" .
+
+ghent:Dampoort_Water_Chlorine a wf:WaterQualityObservation ;
+    rdfs:label "Dampoort Supplied Water Residual Chlorine"@en ;
+    wf:observedParameter wf:Chlorine ;
+    wf:observedValue "0.4"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Residual chlorine at distribution endpoint"@en ;
+    wf:observedAt "ghent:Dampoort_PotableWater_In" .
+
+# Wastewater characteristics (typical domestic)
+ghent:Dampoort_Wastewater_BOD a wf:WaterQualityObservation ;
+    rdfs:label "Dampoort Wastewater BOD"@en ;
+    wf:observedParameter wf:BOD ;
+    wf:observedValue "250.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Typical domestic BOD concentration"@en ;
+    wf:observedAt "ghent:Dampoort_Wastewater_Out" .
+
+ghent:Dampoort_Wastewater_TSS a wf:WaterQualityObservation ;
+    rdfs:label "Dampoort Wastewater TSS"@en ;
+    wf:observedParameter wf:TSS ;
+    wf:observedValue "200.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Typical domestic TSS concentration"@en ;
+    wf:observedAt "ghent:Dampoort_Wastewater_Out" .
+
+ghent:Dampoort_Wastewater_TN a wf:WaterQualityObservation ;
+    rdfs:label "Dampoort Wastewater Total Nitrogen"@en ;
+    wf:observedParameter wf:TotalNitrogen ;
+    wf:observedValue "40.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Typical domestic nitrogen load"@en ;
+    wf:observedAt "ghent:Dampoort_Wastewater_Out" .

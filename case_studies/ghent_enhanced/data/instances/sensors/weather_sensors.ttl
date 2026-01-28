@@ -1,0 +1,22 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix ssn: <http://www.w3.org/ns/ssn/> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+
+# ==============================================================================
+# Weather Sensors
+# ==============================================================================
+
+# Ghent Weather Station
+ghent:Ghent_Weather_Station a wf:WeatherSensor, sosa:Sensor ;
+    rdfs:label "Ghent Weather Station"@en ;
+    rdfs:comment "Weather monitoring station in Ghent area"@en ;
+    sosa:observes wf:AirTemperature, wf:Precipitation ;
+    wf:hasSamplingRate "1.0"^^xsd:double ;
+    geo:lat "51.057"^^xsd:double ;
+    geo:long "3.713"^^xsd:double .

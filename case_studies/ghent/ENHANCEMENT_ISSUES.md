@@ -176,4 +176,135 @@
 
 ---
 
-**Last Updated:** 2026-01-27
+## Enhanced Ghent Case Study Creation
+
+### Status: ✅ COMPLETED
+**Created:** 2026-01-28
+**Location:** `case_studies/ghent_enhanced/`
+
+### Overview
+Successfully created enhanced version of Ghent case study demonstrating all Phase 1-4 ontology enhancements.
+
+### Files Created/Enhanced
+
+**System Configuration:**
+- ✅ `data/system.ttl` - Enhanced with regulatory frameworks and baseline scenario reference
+- ✅ `data/display_metadata.ttl` - Migrated (unchanged from original)
+
+**Core Infrastructure (Enhanced):**
+- ✅ `data/instances/wwtp1.ttl` - Water composition + PROV-O provenance
+- ✅ `data/instances/wwtp2.ttl` - Advanced treatment composition + PROV-O
+- ✅ `data/instances/dwp1.ttl` - EU drinking water standards + composition
+- ✅ `data/instances/dwp2.ttl` - EU drinking water standards + composition
+- ✅ `data/instances/lieve_river.ttl` - Surface water compositions for 3 segments
+
+**Scenario Framework:**
+- ✅ `data/instances/baseline_scenario.ttl` - OWL-Time baseline scenario for 2026
+
+**Supporting Files (Migrated):**
+- ✅ All industrial facility files (texfin, foodpro, chiptech, pharmagen, brewco)
+- ✅ All residential files (dampoort_residential, muide_residential)
+- ✅ All sensor files (dwp_sensors, wwtp_sensors, flow_sensors, weather_sensors, industrial_and_river_sensors)
+
+**Documentation:**
+- ✅ `README.md` - Comprehensive documentation of enhancements with usage examples
+
+### Phase 1 Enhancements Applied
+
+**Regulatory Frameworks Created:**
+1. `ghent:BelgianDischargeLimits` - VLAREM II for Flanders (gn:2800866)
+2. `ghent:EU_DrinkingWaterDirective` - EU Directive 2020/2184
+3. `ghent:EU_WaterReuseRegulation` - EU Regulation 2020/741
+
+**Water Compositions Created:**
+1. `ghent:DWP1_DrinkingWaterComposition` - Drinking water (EU standards)
+2. `ghent:DWP2_DrinkingWaterComposition` - Advanced drinking water (EU standards)
+3. `ghent:WWTP1_TreatedEffluentComposition` - Conventional treatment (VLAREM II)
+4. `ghent:WWTP2_AdvancedTreatedComposition` - MBR+GAC treatment (exceeds VLAREM II)
+5. `ghent:LieveSegment1_SurfaceWaterComposition` - Clean upstream water
+6. `ghent:LieveSegment2_ImpactedWaterComposition` - Post-WWTP-1 water
+7. `ghent:LieveSegment3_DownstreamWaterComposition` - Post-WWTP-2 water
+
+**Jurisdiction Context:**
+- All frameworks linked to Flanders, Belgium via `wf:appliesInJurisdiction gn:2800866`
+- GeoNames prefix added to all relevant files
+
+### Phase 2 Enhancements Applied
+
+**WaWO+ References:**
+- DrinkingWaterQuality → `<http://www.semanticweb.org/wawo/DrinkingWaterComposition>`
+- Surface water compositions documented with WaWO+ inspiration
+
+**ENVO Integration:**
+- Maintained existing ENVO references in lieve_river.ttl
+- River segments classified with ENVO environmental context
+
+### Phase 3 Enhancements Applied
+
+**Baseline Scenario:**
+- `ghent:Baseline2026` created with full system configuration
+- OWL-Time temporal extent: 2026-01-01 to 2026-12-31
+- Links to all 12 system components (2 DWPs, 2 WWTPs, 2 residential, 5 industrial, 1 river)
+- Comprehensive metadata including:
+  - Scenario name, purpose, description
+  - Water balance summary
+  - Treatment technology summary
+  - Future alternative scenario templates
+
+**System Integration:**
+- `ghent:GhentWaterSystem wf:inScenario ghent:Baseline2026`
+
+### Phase 4 Enhancements Applied
+
+**Provenance Tracking:**
+- Created `ghent:AquaFin_Lab` as prov:Agent
+- Created sampling activities for WWTP-1 and WWTP-2 (January 2026)
+- Enhanced 10 water quality observations per WWTP with:
+  - `prov:wasGeneratedBy` → sampling activity
+  - `prov:wasAttributedTo` → laboratory
+  - `prov:generatedAtTime` → analysis timestamp
+
+**Observations Enhanced:**
+- WWTP-1: 5 influent + 5 effluent observations (BOD, COD, TSS, TN, TP)
+- WWTP-2: 5 influent + 5 effluent observations (BOD, COD, TSS, TN, TP) + Turbidity
+
+### Key Achievements
+
+1. **Complete Feature Demonstration**: All Phase 1-4 features demonstrated in realistic context
+2. **Backward Compatibility**: Original case study unchanged, enhanced version in new directory
+3. **Comprehensive Documentation**: README with usage examples and SPARQL queries
+4. **Extensibility**: Framework for creating alternative scenarios
+5. **Real-World Applicability**: Belgian/EU regulatory context with actual GeoNames references
+
+### Next Steps
+
+1. **Validation**:
+   - Run reasoner consistency checks on enhanced data
+   - Validate SPARQL queries against enhanced dataset
+   - Test scenario framework with alternative scenario creation
+
+2. **Future Enhancements**:
+   - Create example alternative scenarios (water reuse, greywater recycling, climate adaptation)
+   - Add more detailed provenance chains (sample handling, equipment calibration)
+   - Integrate with optimization framework (OntoAgent patterns)
+   - Add real-time sensor data with PROV-O tracking
+
+3. **Documentation**:
+   - Add tutorial for creating new scenarios
+   - Create visualization examples
+   - Document competency question coverage
+
+### Files Ready for Commit
+
+All files in `case_studies/ghent_enhanced/` directory:
+- data/system.ttl
+- data/display_metadata.ttl
+- data/instances/*.ttl (19 files)
+- data/instances/sensors/*.ttl (5 files)
+- README.md
+
+**Total Files**: 26 data files + 1 documentation file
+
+---
+
+**Last Updated:** 2026-01-28

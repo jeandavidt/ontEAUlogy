@@ -1,0 +1,208 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+
+# ==============================================================================
+# WWTP-1 - Wastewater Treatment Plant (Upstream Zone)
+# ==============================================================================
+# Capacity: 2,000 m3/day
+# Location: Upstream zone
+# Receives: Wastewater from Dampoort residential, Texfin, FoodPro
+# Discharges: To Lieve River Segment 2 (impacts DWP-2 source water)
+
+ghent:WWTP1 a wf:WastewaterTreatmentPlant ;
+    rdfs:label "WWTP-1 Wastewater Treatment Plant"@en ;
+    rdfs:comment "Upstream wastewater treatment plant receiving domestic and industrial wastewater. Discharges to Lieve River Segment 2, upstream of DWP-2 intake."@en ;
+    geo:lat "51.0600"^^xsd:double ;
+    geo:long "3.7050"^^xsd:double ;
+    wf:hasInputPort ghent:WWTP1_Influent_In ;
+    wf:hasOutputPort ghent:WWTP1_Effluent_Out ;
+    wf:hasOutputPort ghent:WWTP1_Sludge_Out ;
+    wf:hasComponent ghent:WWTP1_Screening ;
+    wf:hasComponent ghent:WWTP1_GritRemoval ;
+    wf:hasComponent ghent:WWTP1_PrimarySettler ;
+    wf:hasComponent ghent:WWTP1_AerationTank ;
+    wf:hasComponent ghent:WWTP1_SecondarySettler ;
+    wf:hasComponent ghent:WWTP1_NutrientRemoval ;
+    wf:hasComponent ghent:WWTP1_Disinfection .
+
+# Ports
+ghent:WWTP1_Influent_In a wf:InputPort ;
+    rdfs:label "WWTP-1 Influent Inlet"@en ;
+    rdfs:comment "Combined wastewater inlet from Dampoort, Texfin, and FoodPro"@en ;
+    wf:hasFlowType wf:BlackwaterFlow .
+
+ghent:WWTP1_Effluent_Out a wf:OutputPort ;
+    rdfs:label "WWTP-1 Treated Effluent Outlet"@en ;
+    rdfs:comment "Treated effluent discharge to Lieve River Segment 2"@en ;
+    wf:flowsTo ghent:LieveSegment2_WWTP1Discharge .
+
+ghent:WWTP1_Sludge_Out a wf:OutputPort ;
+    rdfs:label "WWTP-1 Sludge Outlet"@en ;
+    rdfs:comment "Waste sludge for further treatment/disposal"@en .
+
+# Treatment components
+ghent:WWTP1_Screening a wf:Screening ;
+    rdfs:label "WWTP-1 Bar Screens"@en ;
+    rdfs:comment "Coarse and fine screening for debris removal"@en .
+
+ghent:WWTP1_GritRemoval a wf:GritRemoval ;
+    rdfs:label "WWTP-1 Grit Chamber"@en ;
+    rdfs:comment "Aerated grit chamber for sand and grit removal"@en .
+
+ghent:WWTP1_PrimarySettler a wf:PrimarySettler ;
+    rdfs:label "WWTP-1 Primary Clarifier"@en ;
+    rdfs:comment "Primary settling for suspended solids removal"@en .
+
+ghent:WWTP1_AerationTank a wf:AerationTank ;
+    rdfs:label "WWTP-1 Activated Sludge Basin"@en ;
+    rdfs:comment "Conventional activated sludge process for BOD removal"@en .
+
+ghent:WWTP1_SecondarySettler a wf:SecondarySettler ;
+    rdfs:label "WWTP-1 Secondary Clarifier"@en ;
+    rdfs:comment "Secondary settling for biomass separation"@en .
+
+ghent:WWTP1_NutrientRemoval a wf:TertiaryTreatment ;
+    rdfs:label "WWTP-1 Nutrient Removal"@en ;
+    rdfs:comment "Biological nitrogen and phosphorus removal (BNR)"@en .
+
+ghent:WWTP1_Disinfection a wf:DisinfectionUnit ;
+    rdfs:label "WWTP-1 UV Disinfection"@en ;
+    rdfs:comment "UV disinfection before discharge"@en .
+
+# Operational parameters
+ghent:WWTP1_Capacity a qudt:QuantityValue ;
+    rdfs:label "WWTP-1 Treatment Capacity"@en ;
+    qudt:numericValue "2000"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+ghent:WWTP1_DailyInfluent a qudt:QuantityValue ;
+    rdfs:label "WWTP-1 Average Daily Influent"@en ;
+    rdfs:comment "Average influent flow: 1750 m3/day (Dampoort 450 + Texfin 500 + FoodPro 800)"@en ;
+    qudt:numericValue "1750"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+# Influent characteristics (mixed domestic + industrial)
+ghent:WWTP1_Influent_BOD a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-1 Influent BOD"@en ;
+    wf:observedParameter wf:BOD ;
+    wf:observedValue "350.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "High BOD due to FoodPro contribution"@en ;
+    wf:observedAt "ghent:WWTP1_Influent_In" .
+
+ghent:WWTP1_Influent_COD a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-1 Influent COD"@en ;
+    wf:observedParameter wf:COD ;
+    wf:observedValue "700.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "High COD due to Texfin contribution"@en ;
+    wf:observedAt "ghent:WWTP1_Influent_In" .
+
+ghent:WWTP1_Influent_TSS a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-1 Influent TSS"@en ;
+    wf:observedParameter wf:TSS ;
+    wf:observedValue "280.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:WWTP1_Influent_In" .
+
+ghent:WWTP1_Influent_TN a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-1 Influent Total Nitrogen"@en ;
+    wf:observedParameter wf:TotalNitrogen ;
+    wf:observedValue "50.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:WWTP1_Influent_In" .
+
+ghent:WWTP1_Influent_TP a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-1 Influent Total Phosphorus"@en ;
+    wf:observedParameter wf:TotalPhosphorus ;
+    wf:observedValue "8.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    wf:observedAt "ghent:WWTP1_Influent_In" .
+
+# Effluent quality (meets VLAREM II discharge limits)
+ghent:WWTP1_Effluent_BOD a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-1 Effluent BOD"@en ;
+    wf:observedParameter wf:BOD ;
+    wf:observedValue "12.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Below VLAREM II limit of 25 mg/L"@en ;
+    wf:observedAt "ghent:WWTP1_Effluent_Out" .
+
+ghent:WWTP1_Effluent_COD a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-1 Effluent COD"@en ;
+    wf:observedParameter wf:COD ;
+    wf:observedValue "60.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Below VLAREM II limit of 125 mg/L"@en ;
+    wf:observedAt "ghent:WWTP1_Effluent_Out" .
+
+ghent:WWTP1_Effluent_TSS a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-1 Effluent TSS"@en ;
+    wf:observedParameter wf:TSS ;
+    wf:observedValue "15.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Below VLAREM II limit of 35 mg/L"@en ;
+    wf:observedAt "ghent:WWTP1_Effluent_Out" .
+
+ghent:WWTP1_Effluent_TN a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-1 Effluent Total Nitrogen"@en ;
+    wf:observedParameter wf:TotalNitrogen ;
+    wf:observedValue "10.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Below VLAREM II limit of 15 mg/L"@en ;
+    wf:observedAt "ghent:WWTP1_Effluent_Out" .
+
+ghent:WWTP1_Effluent_TP a wf:WaterQualityObservation ;
+    rdfs:label "WWTP-1 Effluent Total Phosphorus"@en ;
+    wf:observedParameter wf:TotalPhosphorus ;
+    wf:observedValue "1.5"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Below VLAREM II limit of 2 mg/L"@en ;
+    wf:observedAt "ghent:WWTP1_Effluent_Out" .
+
+# VLAREM II Discharge Requirements
+ghent:WWTP1_VLAREM_BOD a wf:WaterQualityRequirement ;
+    rdfs:label "VLAREM II BOD Discharge Limit"@en ;
+    wf:hasWaterQualityParameter wf:BOD ;
+    wf:hasLimitValue "25.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasRegulatoryStandard wf:VLAREM_II .
+
+ghent:WWTP1_VLAREM_COD a wf:WaterQualityRequirement ;
+    rdfs:label "VLAREM II COD Discharge Limit"@en ;
+    wf:hasWaterQualityParameter wf:COD ;
+    wf:hasLimitValue "125.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasRegulatoryStandard wf:VLAREM_II .
+
+ghent:WWTP1_VLAREM_TSS a wf:WaterQualityRequirement ;
+    rdfs:label "VLAREM II TSS Discharge Limit"@en ;
+    wf:hasWaterQualityParameter wf:TSS ;
+    wf:hasLimitValue "35.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasRegulatoryStandard wf:VLAREM_II .
+
+ghent:WWTP1_VLAREM_TN a wf:WaterQualityRequirement ;
+    rdfs:label "VLAREM II Total Nitrogen Discharge Limit"@en ;
+    wf:hasWaterQualityParameter wf:TotalNitrogen ;
+    wf:hasLimitValue "15.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasRegulatoryStandard wf:VLAREM_II .
+
+ghent:WWTP1_VLAREM_TP a wf:WaterQualityRequirement ;
+    rdfs:label "VLAREM II Total Phosphorus Discharge Limit"@en ;
+    wf:hasWaterQualityParameter wf:TotalPhosphorus ;
+    wf:hasLimitValue "2.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasRegulatoryStandard wf:VLAREM_II .
+
+# Regulatory standard reference
+wf:VLAREM_II a wf:RegulatoryStandard ;
+    rdfs:label "VLAREM II"@en ;
+    rdfs:comment "Flemish Regulations on Environmental Permits (Vlaams Reglement betreffende de Milieuvergunning)"@en .

@@ -1,0 +1,61 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix ssn: <http://www.w3.org/ns/ssn/> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+
+# ==============================================================================
+# WWTP-1 Water Quality Sensors
+# ==============================================================================
+
+# WWTP-1 Outlet Water Quality Sensor
+ghent:WWTP1_Outlet_WaterQuality_Sensor a wf:WaterQualitySensor, sosa:Sensor ;
+    rdfs:label "WWTP-1 Outlet Water Quality Sensor"@en ;
+    rdfs:comment "Multi-parameter water quality sensor monitoring WWTP-1 treated effluent"@en ;
+    sosa:observes wf:BOD, wf:COD, wf:TSS, wf:NH4, wf:DO ;
+    wf:monitorsPort ghent:WWTP1_Effluent_Out ;
+    wf:attachedTo ghent:WWTP1 ;
+    wf:hasSamplingRate "1.0"^^xsd:double ;
+    geo:lat "51.062"^^xsd:double ;
+    geo:long "3.700"^^xsd:double .
+
+# WWTP-1 Inlet Water Quality Sensor
+ghent:WWTP1_Inlet_WaterQuality_Sensor a wf:WaterQualitySensor, sosa:Sensor ;
+    rdfs:label "WWTP-1 Inlet Water Quality Sensor"@en ;
+    rdfs:comment "Multi-parameter water quality sensor monitoring WWTP-1 influent"@en ;
+    sosa:observes wf:BOD, wf:COD, wf:TSS, wf:NH4 ;
+    wf:monitorsPort ghent:WWTP1_Influent_In ;
+    wf:attachedTo ghent:WWTP1 ;
+    wf:hasSamplingRate "1.0"^^xsd:double ;
+    geo:lat "51.061"^^xsd:double ;
+    geo:long "3.699"^^xsd:double .
+
+# ==============================================================================
+# WWTP-2 Water Quality Sensors
+# ==============================================================================
+
+# WWTP-2 Outlet Water Quality Sensor
+ghent:WWTP2_Outlet_WaterQuality_Sensor a wf:WaterQualitySensor, sosa:Sensor ;
+    rdfs:label "WWTP-2 Outlet Water Quality Sensor"@en ;
+    rdfs:comment "Multi-parameter water quality sensor monitoring WWTP-2 treated effluent"@en ;
+    sosa:observes wf:BOD, wf:COD, wf:TSS, wf:NH4, wf:DO ;
+    wf:monitorsPort ghent:WWTP2_Effluent_Out ;
+    wf:attachedTo ghent:WWTP2 ;
+    wf:hasSamplingRate "1.0"^^xsd:double ;
+    geo:lat "51.047"^^xsd:double ;
+    geo:long "3.730"^^xsd:double .
+
+# WWTP-2 Inlet Water Quality Sensor
+ghent:WWTP2_Inlet_WaterQuality_Sensor a wf:WaterQualitySensor, sosa:Sensor ;
+    rdfs:label "WWTP-2 Inlet Water Quality Sensor"@en ;
+    rdfs:comment "Multi-parameter water quality sensor monitoring WWTP-2 influent"@en ;
+    sosa:observes wf:BOD, wf:COD, wf:TSS, wf:NH4 ;
+    wf:monitorsPort ghent:WWTP2_Influent_In ;
+    wf:attachedTo ghent:WWTP2 ;
+    wf:hasSamplingRate "1.0"^^xsd:double ;
+    geo:lat "51.046"^^xsd:double ;
+    geo:long "3.729"^^xsd:double .

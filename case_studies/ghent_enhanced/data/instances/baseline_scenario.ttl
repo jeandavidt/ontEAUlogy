@@ -1,0 +1,191 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# ==============================================================================
+# Ghent Water System 2026 Baseline Scenario
+# ==============================================================================
+# PHASE 3 ENHANCEMENT: Scenario Modeling with OWL-Time
+#
+# This file defines the baseline scenario representing the current state (2026)
+# of the Ghent water system. The scenario uses OWL-Time for temporal extent
+# representation and links all system components as they exist in the current
+# configuration.
+#
+# This baseline serves as the reference point for future alternative scenarios
+# such as:
+# - Water reuse expansion scenarios
+# - Infrastructure upgrade scenarios
+# - Climate adaptation scenarios
+# - Regulatory compliance scenarios
+# ==============================================================================
+
+# ==============================================================================
+# Baseline Scenario Definition
+# ==============================================================================
+
+ghent:Baseline2026 a wf:BaselineScenario ;
+    rdfs:label "Ghent Water System 2026 Baseline"@en ;
+    wf:scenarioName "Ghent Water System 2026 Baseline" ;
+    wf:scenarioPurpose "Represents the current state of Ghent water infrastructure for comparison with future alternatives and optimization scenarios." ;
+    wf:scenarioDescription """The 2026 baseline scenario captures the Ghent water system in its current configuration:
+
+    INFRASTRUCTURE:
+    - Two drinking water plants (DWP-1: 2000 m3/d, DWP-2: 2500 m3/d with advanced treatment)
+    - Two wastewater treatment plants (WWTP-1: 2000 m3/d conventional, WWTP-2: 2500 m3/d with MBR+GAC)
+    - Two residential districts (Dampoort: 3000 people, Muide: 5000 people)
+    - Five industrial facilities (Texfin textile, FoodPro food processing, ChipTech electronics, PharmaGen pharmaceutical, BrewCo brewery)
+    - Lieve River with three modeled segments
+
+    OPERATIONAL CHARACTERISTICS:
+    - Total water demand: 7500 m3/day
+    - Total treatment capacity: 4500 m3/day (DWP) + 4500 m3/day (WWTP)
+    - WWTP-1 operates near capacity (1750 m3/d) while WWTP-2 has available capacity (1950 m3/d)
+    - All facilities meet Belgian VLAREM II discharge standards
+    - DWP-2 produces ultra-pure water for electronics and pharmaceutical industries
+
+    REGULATORY CONTEXT:
+    - Belgian VLAREM II discharge standards (Flanders jurisdiction)
+    - EU Drinking Water Directive (2020/2184)
+    - EU Water Reuse Regulation (2020/741) - framework for future alternatives
+
+    DATA BASIS:
+    - Representative synthetic data based on Ghent metropolitan area characteristics
+    - Baseline period: January 2026
+    - All observations and parameters reflect typical mid-winter operating conditions
+    """ ;
+    wf:hasTemporalExtent ghent:Year2026Interval ;
+    wf:scenarioCreationDate "2026-01-28T12:00:00Z"^^xsd:dateTime ;
+
+    # Link all system components
+    wf:scenarioComponent ghent:LieveRiver ;
+    wf:scenarioComponent ghent:DWP1 ;
+    wf:scenarioComponent ghent:DWP2 ;
+    wf:scenarioComponent ghent:WWTP1 ;
+    wf:scenarioComponent ghent:WWTP2 ;
+    wf:scenarioComponent ghent:Dampoort ;
+    wf:scenarioComponent ghent:Muide ;
+    wf:scenarioComponent ghent:Texfin ;
+    wf:scenarioComponent ghent:FoodPro ;
+    wf:scenarioComponent ghent:ChipTech ;
+    wf:scenarioComponent ghent:PharmaGen ;
+    wf:scenarioComponent ghent:BrewCo .
+
+# ==============================================================================
+# OWL-Time Temporal Extent Definition
+# ==============================================================================
+
+ghent:Year2026Interval a time:Interval ;
+    rdfs:label "Calendar Year 2026"@en ;
+    rdfs:comment "The 2026 calendar year representing the baseline scenario temporal extent." ;
+    time:hasBeginning ghent:Year2026_Start ;
+    time:hasEnd ghent:Year2026_End .
+
+ghent:Year2026_Start a time:Instant ;
+    rdfs:label "2026 Start"@en ;
+    time:inXSDDateTimeStamp "2026-01-01T00:00:00Z"^^xsd:dateTimeStamp ;
+    rdfs:comment "Beginning of 2026 baseline period (midnight UTC, January 1, 2026)" .
+
+ghent:Year2026_End a time:Instant ;
+    rdfs:label "2026 End"@en ;
+    time:inXSDDateTimeStamp "2026-12-31T23:59:59Z"^^xsd:dateTimeStamp ;
+    rdfs:comment "End of 2026 baseline period (one second before midnight UTC, January 1, 2027)" .
+
+# ==============================================================================
+# Scenario Metadata and Context
+# ==============================================================================
+
+ghent:Baseline2026_SystemConfiguration a owl:Thing ;
+    rdfs:label "Baseline 2026 System Configuration Summary"@en ;
+    rdfs:comment """Key characteristics of the baseline configuration:
+
+    WATER BALANCE:
+    - DWP-1 supplies: Dampoort (450 m3/d) + Texfin (500 m3/d) + FoodPro (800 m3/d) = 1750 m3/d
+    - DWP-2 supplies: Muide (750 m3/d) + ChipTech (200 m3/d) + PharmaGen (400 m3/d) + BrewCo (600 m3/d) = 1950 m3/d
+    - WWTP-1 treats: Dampoort (450 m3/d) + Texfin (500 m3/d) + FoodPro (800 m3/d) = 1750 m3/d
+    - WWTP-2 treats: Muide (750 m3/d) + ChipTech (200 m3/d) + PharmaGen (400 m3/d) + BrewCo (600 m3/d) = 1950 m3/d
+
+    WATER QUALITY:
+    - River Segment 1 (upstream): BOD 3 mg/L, pristine
+    - River Segment 2 (post-WWTP-1): BOD 8 mg/L, moderate impact
+    - River Segment 3 (post-WWTP-2): BOD 12 mg/L, cumulative impact
+    - All WWTP effluents meet VLAREM II standards
+    - All DWP outputs meet EU drinking water standards
+
+    TREATMENT TECHNOLOGY:
+    - DWP-1: Conventional (coagulation, sedimentation, filtration, chlorination)
+    - DWP-2: Advanced (conventional + GAC + UV + RO for ultra-pure)
+    - WWTP-1: Conventional activated sludge with BNR
+    - WWTP-2: MBR + GAC + UV (advanced for pharmaceutical removal)
+
+    OPPORTUNITIES FOR IMPROVEMENT:
+    - Water reuse from WWTP-2 (high quality MBR+GAC effluent)
+    - Greywater separation in residential areas
+    - Industrial water cascading between facilities
+    - Stormwater management integration
+    - Energy recovery from wastewater treatment
+    """ .
+
+# ==============================================================================
+# Links to Regulatory Frameworks
+# ==============================================================================
+
+ghent:Baseline2026 wf:scenarioParameter ghent:BelgianDischargeLimits ;
+    wf:scenarioParameter ghent:EU_DrinkingWaterDirective .
+
+# ==============================================================================
+# Example Future Alternative Scenarios (Placeholders)
+# ==============================================================================
+# These scenarios could be developed as alternatives to this baseline:
+#
+# ghent:WaterReuseAlternative2027 a wf:AlternativeScenario ;
+#     wf:scenarioName "WWTP-2 Water Reuse for Industrial Cooling" ;
+#     wf:alternativeTo ghent:Baseline2026 ;
+#     wf:scenarioPurpose "Evaluate direct reuse of WWTP-2 effluent for ChipTech and BrewCo cooling water, reducing DWP-2 demand" .
+#
+# ghent:GreywaterRecycling2028 a wf:AlternativeScenario ;
+#     wf:scenarioName "Residential Greywater Recycling in Muide" ;
+#     wf:alternativeTo ghent:Baseline2026 ;
+#     wf:scenarioPurpose "Assess greywater separation and recycling for toilet flushing in Muide district (5000 people)" .
+#
+# ghent:ClimateAdaptation2030 a wf:AlternativeScenario ;
+#     wf:scenarioName "Climate Change Adaptation (2030 Projections)" ;
+#     wf:alternativeTo ghent:Baseline2026 ;
+#     wf:scenarioPurpose "Model system performance under 2030 climate projections with reduced river flows and increased water demand" .
+#
+# ==============================================================================
+
+# ==============================================================================
+# Notes on Scenario Usage
+# ==============================================================================
+#
+# QUERYING THE BASELINE:
+# To retrieve all components in the baseline scenario:
+#   SELECT ?component WHERE {
+#     ghent:Baseline2026 wf:scenarioComponent ?component .
+#   }
+#
+# To find observations from the baseline period:
+#   SELECT ?obs ?param ?value WHERE {
+#     ?obs a wf:WaterQualityObservation ;
+#          wf:observedParameter ?param ;
+#          wf:observedValue ?value ;
+#          prov:generatedAtTime ?time .
+#     ghent:Baseline2026 wf:hasTemporalExtent ?interval .
+#     ?interval time:hasBeginning/time:inXSDDateTimeStamp ?start ;
+#               time:hasEnd/time:inXSDDateTimeStamp ?end .
+#     FILTER(?time >= ?start && ?time <= ?end)
+#   }
+#
+# CREATING ALTERNATIVES:
+# 1. Define new scenario as wf:AlternativeScenario
+# 2. Link to baseline with wf:alternativeTo
+# 3. Add new/modified components with wf:scenarioComponent
+# 4. Define temporal extent if different from baseline
+# 5. Specify scenario purpose and description
+#
+# ==============================================================================

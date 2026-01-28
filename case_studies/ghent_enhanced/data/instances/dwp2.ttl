@@ -1,0 +1,153 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+
+# ==============================================================================
+# DWP-2 - Drinking Water Plant (Downstream Zone)
+# ==============================================================================
+# Capacity: 2,500 m3/day
+# Location: Downstream zone, draws from Lieve River Segment 2
+# Serves: Muide residential district, ChipTech, PharmaGen, BrewCo
+# Note: Source water impacted by WWTP-1 discharge - requires enhanced treatment
+
+ghent:DWP2 a wf:DrinkingWaterPlant ;
+    rdfs:label "DWP-2 Drinking Water Plant"@en ;
+    rdfs:comment "Downstream drinking water treatment plant serving the Muide area and downstream industrial facilities. Source water is impacted by upstream WWTP-1 discharge, requiring enhanced treatment including advanced oxidation."@en ;
+    geo:lat "51.0560"^^xsd:double ;
+    geo:long "3.7150"^^xsd:double ;
+    wf:hasInputPort ghent:DWP2_RawWater_In ;
+    wf:hasOutputPort ghent:DWP2_PotableWater_Out ;
+    wf:hasOutputPort ghent:DWP2_UltraPureWater_Out ;
+    wf:hasOutputPort ghent:DWP2_Sludge_Out ;
+    wf:hasComponent ghent:DWP2_Coagulation ;
+    wf:hasComponent ghent:DWP2_Sedimentation ;
+    wf:hasComponent ghent:DWP2_Filtration ;
+    wf:hasComponent ghent:DWP2_GAC ;
+    wf:hasComponent ghent:DWP2_UV ;
+    wf:hasComponent ghent:DWP2_RO ;
+    wf:hasComponent ghent:DWP2_Disinfection .
+
+# Ports
+ghent:DWP2_RawWater_In a wf:InputPort ;
+    rdfs:label "DWP-2 Raw Water Inlet"@en ;
+    rdfs:comment "Raw water intake from Lieve River Segment 2 (impacted by WWTP-1)"@en ;
+    wf:hasFlowType wf:RawWaterFlow .
+
+ghent:DWP2_PotableWater_Out a wf:OutputPort ;
+    rdfs:label "DWP-2 Potable Water Outlet"@en ;
+    rdfs:comment "Treated drinking water distribution to residential and food/beverage consumers"@en ;
+    wf:hasFlowType wf:PotableWaterFlow .
+
+ghent:DWP2_UltraPureWater_Out a wf:OutputPort ;
+    rdfs:label "DWP-2 Ultra-Pure Water Outlet"@en ;
+    rdfs:comment "RO-treated ultra-pure water for electronics and pharmaceutical industries"@en ;
+    wf:hasFlowType wf:PotableWaterFlow .
+
+ghent:DWP2_Sludge_Out a wf:OutputPort ;
+    rdfs:label "DWP-2 Treatment Sludge Outlet"@en ;
+    rdfs:comment "Treatment sludge and RO concentrate for disposal"@en .
+
+# Treatment components (enhanced due to impacted source water)
+ghent:DWP2_Coagulation a wf:TreatmentUnit ;
+    rdfs:label "DWP-2 Coagulation/Flocculation"@en ;
+    rdfs:comment "Chemical coagulation and flocculation with enhanced dosing"@en .
+
+ghent:DWP2_Sedimentation a wf:TreatmentUnit ;
+    rdfs:label "DWP-2 Sedimentation Basin"@en ;
+    rdfs:comment "Gravity settling of flocculated particles"@en .
+
+ghent:DWP2_Filtration a wf:TreatmentUnit ;
+    rdfs:label "DWP-2 Dual-Media Filtration"@en ;
+    rdfs:comment "Dual-media (anthracite/sand) filtration"@en .
+
+ghent:DWP2_GAC a wf:TreatmentUnit ;
+    rdfs:label "DWP-2 Granular Activated Carbon"@en ;
+    rdfs:comment "GAC adsorption for organic micropollutant removal"@en .
+
+ghent:DWP2_UV a wf:DisinfectionUnit ;
+    rdfs:label "DWP-2 UV Disinfection"@en ;
+    rdfs:comment "UV disinfection for pathogen inactivation and advanced oxidation"@en .
+
+ghent:DWP2_RO a wf:ReverseOsmosisUnit ;
+    rdfs:label "DWP-2 Reverse Osmosis"@en ;
+    rdfs:comment "RO treatment for ultra-pure water production for electronics/pharma"@en .
+
+ghent:DWP2_Disinfection a wf:DisinfectionUnit ;
+    rdfs:label "DWP-2 Chloramine Disinfection"@en ;
+    rdfs:comment "Chloramination for distribution system protection"@en .
+
+# Operational parameters
+ghent:DWP2_Capacity a qudt:QuantityValue ;
+    rdfs:label "DWP-2 Treatment Capacity"@en ;
+    qudt:numericValue "2500"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+ghent:DWP2_DailyProduction a qudt:QuantityValue ;
+    rdfs:label "DWP-2 Daily Production"@en ;
+    rdfs:comment "Average daily production: 2500 m3/day total (includes ultra-pure)"@en ;
+    qudt:numericValue "2500"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+ghent:DWP2_UltraPureProduction a qudt:QuantityValue ;
+    rdfs:label "DWP-2 Ultra-Pure Water Production"@en ;
+    rdfs:comment "Daily RO ultra-pure water production: 600 m3/day"@en ;
+    qudt:numericValue "600"^^xsd:double ;
+    qudt:unit unit:CubicMeterPerDay .
+
+# Input water quality requirements (impacted raw water - more stringent monitoring)
+ghent:DWP2_RawWater_BOD_Max a wf:WaterQualityRequirement ;
+    rdfs:label "DWP-2 Raw Water BOD Limit"@en ;
+    wf:hasWaterQualityParameter wf:BOD ;
+    wf:hasLimitValue "15.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    rdfs:comment "Maximum acceptable BOD in impacted source water"@en .
+
+ghent:DWP2_RawWater_TN_Max a wf:WaterQualityRequirement ;
+    rdfs:label "DWP-2 Raw Water Total Nitrogen Limit"@en ;
+    wf:hasWaterQualityParameter wf:TotalNitrogen ;
+    wf:hasLimitValue "10.0"^^xsd:double ;
+    wf:hasLimitType wf:MaximumLimit ;
+    rdfs:comment "Maximum acceptable TN due to upstream WWTP discharge"@en .
+
+# Output water quality (potable water)
+ghent:DWP2_Potable_Turbidity a wf:WaterQualityObservation ;
+    rdfs:label "DWP-2 Potable Water Turbidity"@en ;
+    wf:observedParameter wf:Turbidity ;
+    wf:observedValue "0.2"^^xsd:double ;
+    rdfs:comment "Typical effluent turbidity (NTU)"@en ;
+    wf:observedAt "ghent:DWP2_PotableWater_Out" .
+
+ghent:DWP2_Potable_Chlorine a wf:WaterQualityObservation ;
+    rdfs:label "DWP-2 Potable Water Residual Chloramine"@en ;
+    wf:observedParameter wf:Chlorine ;
+    wf:observedValue "0.8"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Residual chloramine for distribution system protection"@en ;
+    wf:observedAt "ghent:DWP2_PotableWater_Out" .
+
+# Ultra-pure water quality (for electronics/pharma)
+ghent:DWP2_UltraPure_TDS a wf:WaterQualityObservation ;
+    rdfs:label "DWP-2 Ultra-Pure Water TDS"@en ;
+    wf:observedParameter wf:TDS ;
+    wf:observedValue "5.0"^^xsd:double ;
+    qudt:unit unit:MilligramPerLiter ;
+    rdfs:comment "Very low TDS for electronics manufacturing"@en ;
+    wf:observedAt "ghent:DWP2_UltraPureWater_Out" .
+
+ghent:DWP2_UltraPure_Conductivity a wf:WaterQualityObservation ;
+    rdfs:label "DWP-2 Ultra-Pure Water Conductivity"@en ;
+    wf:observedParameter wf:Conductivity ;
+    wf:observedValue "10.0"^^xsd:double ;
+    rdfs:comment "Very low conductivity (microS/cm) for electronics"@en ;
+    wf:observedAt "ghent:DWP2_UltraPureWater_Out" .
+
+# Flow connections to consumers
+ghent:DWP2_PotableWater_Out wf:flowsTo ghent:Muide_PotableWater_In .
+ghent:DWP2_PotableWater_Out wf:flowsTo ghent:BrewCo_PotableWater_In .
+ghent:DWP2_UltraPureWater_Out wf:flowsTo ghent:ChipTech_UltraPureWater_In .
+ghent:DWP2_UltraPureWater_Out wf:flowsTo ghent:PharmaGen_UltraPureWater_In .

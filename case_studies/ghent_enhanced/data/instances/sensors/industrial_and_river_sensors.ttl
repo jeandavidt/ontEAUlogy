@@ -1,0 +1,72 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix ssn: <http://www.w3.org/ns/ssn/> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+
+# ==============================================================================
+# Lieve River Water Quality Sensors
+# ==============================================================================
+
+# River Segment 1 Water Quality Sensor (Upstream)
+ghent:LieveSegment1_WaterQuality_Sensor a wf:WaterQualitySensor, sosa:Sensor ;
+    rdfs:label "Lieve River Segment 1 Water Quality Sensor"@en ;
+    rdfs:comment "Multi-parameter water quality sensor monitoring upstream river segment"@en ;
+    sosa:observes wf:BOD, wf:NH4, wf:DO, wf:TSS, wf:Temperature ;
+    wf:monitorsPort ghent:LieveSegment1 ;
+    wf:attachedTo ghent:LieveRiver ;
+    wf:hasSamplingRate "1.0"^^xsd:double ;
+    geo:lat "51.068"^^xsd:double ;
+    geo:long "3.688"^^xsd:double .
+
+# River Segment 2 Water Quality Sensor (Midstream)
+ghent:LieveSegment2_WaterQuality_Sensor a wf:WaterQualitySensor, sosa:Sensor ;
+    rdfs:label "Lieve River Segment 2 Water Quality Sensor"@en ;
+    rdfs:comment "Multi-parameter water quality sensor monitoring midstream river segment"@en ;
+    sosa:observes wf:BOD, wf:NH4, wf:DO, wf:TSS, wf:Temperature ;
+    wf:monitorsPort ghent:LieveSegment2 ;
+    wf:attachedTo ghent:LieveRiver ;
+    wf:hasSamplingRate "1.0"^^xsd:double ;
+    geo:lat "51.055"^^xsd:double ;
+    geo:long "3.710"^^xsd:double .
+
+# River Segment 3 Water Quality Sensor (Downstream)
+ghent:LieveSegment3_WaterQuality_Sensor a wf:WaterQualitySensor, sosa:Sensor ;
+    rdfs:label "Lieve River Segment 3 Water Quality Sensor"@en ;
+    rdfs:comment "Multi-parameter water quality sensor monitoring downstream river segment"@en ;
+    sosa:observes wf:BOD, wf:NH4, wf:DO, wf:TSS, wf:Temperature ;
+    wf:monitorsPort ghent:LieveSegment3 ;
+    wf:attachedTo ghent:LieveRiver ;
+    wf:hasSamplingRate "1.0"^^xsd:double ;
+    geo:lat "51.042"^^xsd:double ;
+    geo:long "3.732"^^xsd:double .
+
+# ==============================================================================
+# Industrial Outlet Water Quality Sensors
+# ==============================================================================
+
+# Texfin Outlet Water Quality Sensor
+ghent:Texfin_Outlet_WaterQuality_Sensor a wf:WaterQualitySensor, sosa:Sensor ;
+    rdfs:label "Texfin Outlet Water Quality Sensor"@en ;
+    rdfs:comment "Multi-parameter water quality sensor monitoring Texfin wastewater outlet"@en ;
+    sosa:observes wf:BOD, wf:TSS, wf:NH4, wf:Temperature ;
+    wf:monitorsPort ghent:Texfin_Wastewater_Out ;
+    wf:attachedTo ghent:Texfin ;
+    wf:hasSamplingRate "1.0"^^xsd:double ;
+    geo:lat "51.066"^^xsd:double ;
+    geo:long "3.692"^^xsd:double .
+
+# FoodPro Outlet Water Quality Sensor
+ghent:FoodPro_Outlet_WaterQuality_Sensor a wf:WaterQualitySensor, sosa:Sensor ;
+    rdfs:label "FoodPro Outlet Water Quality Sensor"@en ;
+    rdfs:comment "Multi-parameter water quality sensor monitoring FoodPro wastewater outlet"@en ;
+    sosa:observes wf:BOD, wf:TSS, wf:NH4, wf:Temperature ;
+    wf:monitorsPort ghent:FoodPro_Wastewater_Out ;
+    wf:attachedTo ghent:FoodPro ;
+    wf:hasSamplingRate "1.0"^^xsd:double ;
+    geo:lat "51.062"^^xsd:double ;
+    geo:long "3.698"^^xsd:double .
