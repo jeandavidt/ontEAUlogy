@@ -1,0 +1,55 @@
+# CQ2: What flows connect Node A to Node B? (Port-based version)
+# This query finds direct flow connections between two specific components via their ports
+# Demonstrates port-based topology following OntoCAPE pattern
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX housecase1: <https://ugentbiomath.github.io/ontology/index.ttl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+# Query 1: Find specific connection between two components (with port details)
+SELECT ?sourceComponent ?sourcePort ?targetPort ?targetComponent ?flowType ?sourceLabel ?targetLabel
+WHERE {
+    # Source component has output port
+    ?sourceComponent wf:hasOutputPort ?sourcePort .
+
+    # Output port connects to input port
+    ?sourcePort wf:flowsTo ?targetPort .
+
+    # Target component has that input port
+    ?targetComponent wf:hasInputPort ?targetPort .
+
+    # Filter for specific components (example: MBR to Greywater Storage)
+    FILTER(?sourceComponent = housecase1:Membrane_bioreactor &&
+           ?targetComponent = housecase1:Purified_greywater_storage)
+
+    # Optional flow type classification
+    OPTIONAL { ?sourcePort wf:hasFlowType ?flowType }
+
+    # Optional labels for readability
+    OPTIONAL { ?sourceComponent rdfs:label ?sourceLabel }
+    OPTIONAL { ?targetComponent rdfs:label ?targetLabel }
+}
+
+# Query 2: Find ALL flow connections in the system (component-level)
+# Uncomment to use:
+# SELECT ?sourceComponent ?targetComponent ?sourceLabel ?targetLabel
+# WHERE {
+#     ?sourceComponent wf:hasOutputPort ?outPort .
+#     ?outPort wf:flowsTo ?inPort .
+#     ?targetComponent wf:hasInputPort ?inPort .
+#     OPTIONAL { ?sourceComponent rdfs:label ?sourceLabel }
+#     OPTIONAL { ?targetComponent rdfs:label ?targetLabel }
+# }
+
+# Query 3: Find all port-to-port connections with flow types
+# Uncomment to use:
+# SELECT ?sourcePort ?targetPort ?flowType ?sourcePortLabel ?targetPortLabel
+# WHERE {
+#     ?sourcePort rdf:type wf:OutputPort .
+#     ?sourcePort wf:flowsTo ?targetPort .
+#     ?targetPort rdf:type wf:InputPort .
+#     OPTIONAL { ?sourcePort wf:hasFlowType ?flowType }
+#     OPTIONAL { ?sourcePort rdfs:label ?sourcePortLabel }
+#     OPTIONAL { ?targetPort rdfs:label ?targetPortLabel }
+# }

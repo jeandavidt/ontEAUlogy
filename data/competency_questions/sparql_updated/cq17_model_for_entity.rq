@@ -1,0 +1,45 @@
+# CQ17: What computational model is associated with Unit Process U?
+# Uses ProcessModel and ComputationalAgent classes
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+# Query 1: Find models representing an entity
+SELECT ?entity ?entityLabel ?model ?modelLabel ?modelType
+WHERE {
+    # Specify the entity of interest
+    # BIND(wf:WWTP1 AS ?entity)
+
+    ?entity rdfs:label ?entityLabel .
+
+    # Find model that represents this entity
+    ?model wf:representsEntity ?entity ;
+           a ?modelType .
+
+    FILTER(?modelType IN (wf:ProcessModel, wf:SimulationModel, wf:MathematicalModel))
+
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+}
+ORDER BY ?entityLabel ?modelLabel
+
+# Query 2: Find computational agents simulating an entity
+SELECT ?entity ?entityLabel ?agent ?agentLabel ?agentType ?model
+WHERE {
+    # Entity to find agents for
+    # BIND(wf:WWTP1 AS ?entity)
+
+    ?entity rdfs:label ?entityLabel .
+
+    # Find agent simulating this entity
+    ?agent wf:simulates ?entity ;
+           a ?agentType .
+
+    # Optionally get the model implemented by the agent
+    OPTIONAL {
+        ?agent wf:implements ?model
+    }
+
+    OPTIONAL { ?agent rdfs:label ?agentLabel }
+}
+ORDER BY ?entityLabel ?agentLabel

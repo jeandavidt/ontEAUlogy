@@ -1,0 +1,25 @@
+# CQ26: What objective function types can Agent A handle?
+# Uses capability system
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX cap: <https://ugentbiomath.github.io/waterframe/capability#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?agent ?agentLabel ?capability ?capLabel ?capType
+WHERE {
+    # Specify agent
+    # BIND(wf:OptimizationAgent1 AS ?agent)
+
+    ?agent a ?agentType .
+    FILTER(?agentType IN (wf:ComputationalAgent, wf:OptimizationAgent))
+
+    OPTIONAL { ?agent rdfs:label ?agentLabel }
+
+    # Get capabilities
+    ?agent wf:hasCapability ?capability .
+    ?capability a ?capType .
+
+    OPTIONAL { ?capability rdfs:label ?capLabel }
+}
+ORDER BY ?agentLabel ?capLabel

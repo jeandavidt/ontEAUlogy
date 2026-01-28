@@ -1,0 +1,35 @@
+# CQ27: What constraint types can Agent A handle?
+# Uses preconditions and postconditions
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?agent ?agentLabel ?operation ?opLabel ?conditionType ?constraint ?constrainedParam
+WHERE {
+    # Specify agent
+    # BIND(wf:OptimizationAgent1 AS ?agent)
+
+    ?agent a ?agentType .
+    FILTER(?agentType IN (wf:ComputationalAgent, wf:OptimizationAgent))
+
+    OPTIONAL { ?agent rdfs:label ?agentLabel }
+
+    # Get operations
+    ?agent wf:offersOperation ?operation .
+    OPTIONAL { ?operation rdfs:label ?opLabel }
+
+    # Get preconditions and postconditions
+    {
+        ?operation wf:hasPrecondition ?condition .
+        BIND("Precondition" AS ?conditionType)
+    } UNION {
+        ?operation wf:hasPostcondition ?condition .
+        BIND("Postcondition" AS ?conditionType)
+    }
+
+    # Get constraint details
+    OPTIONAL { ?condition wf:constraintExpression ?constraint }
+    OPTIONAL { ?condition wf:constrainsParameter ?constrainedParam }
+}
+ORDER BY ?agentLabel ?opLabel ?conditionType

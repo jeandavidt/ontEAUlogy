@@ -1,0 +1,109 @@
+# CQ20: Which parameters of Model M are fixed vs. manipulable (decision variables)?
+# Using information.ttl module with isDecisionVariable property
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# Query 1: Find all decision variables (manipulable in optimization)
+SELECT ?model ?modelLabel ?decisionVar ?dvLabel ?dvName ?unit ?minVal ?maxVal ?defaultVal
+WHERE {
+    # Specify the model of interest
+    BIND(wf:ASM1_Model AS ?model)
+    
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+    
+    # Find all input variables
+    ?model wf:hasInputVariable ?decisionVar .
+    
+    # Filter to only decision variables (isDecisionVariable = true)
+    ?decisionVar wf:isDecisionVariable "true"^^xsd:boolean .
+    
+    OPTIONAL { ?decisionVar rdfs:label ?dvLabel }
+    OPTIONAL { ?decisionVar wf:parameterName ?dvName }
+    OPTIONAL { ?decisionVar wf:hasUnit ?unit }
+    OPTIONAL { ?decisionVar wf:minValue ?minVal }
+    OPTIONAL { ?decisionVar wf:maxValue ?maxVal }
+    OPTIONAL { ?decisionVar wf:defaultValue ?defaultVal }
+}
+ORDER BY ?dvLabel
+
+# Query 2: Find all fixed parameters (not manipulable)
+SELECT ?model ?modelLabel ?fixedParam ?fpLabel ?fpName ?numValue ?unit
+WHERE {
+    BIND(wf:ASM1_Model AS ?model)
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+    
+    # Parameters can come from hasParameter or hasInputVariable
+    {
+        ?model wf:hasParameter ?fixedParam .
+        FILTER NOT EXISTS { ?fixedParam wf:isDecisionVariable "true"^^xsd:boolean }
+    }
+    UNION
+    {
+        ?model wf:hasInputVariable ?fixedParam .
+        ?fixedParam wf:isDecisionVariable "false"^^xsd:boolean .
+    }
+    
+    OPTIONAL { ?fixedParam rdfs:label ?fpLabel }
+    OPTIONAL { ?fixedParam wf:parameterName ?fpName }
+    OPTIONAL { ?fixedParam wf:numericalValue ?numValue }
+    OPTIONAL { ?fixedParam wf:hasUnit ?unit }
+}
+ORDER BY ?fpLabel
+
+# Query 3: Find parameters that are decision variables (using hasParameter)
+SELECT ?model ?modelLabel ?param ?paramLabel ?paramName ?numValue ?minVal ?maxVal
+WHERE {
+    BIND(wf:ASM1_Model AS ?model)
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+    
+    ?model wf:hasParameter ?param .
+    ?param wf:isDecisionVariable "true"^^xsd:boolean .
+    
+    OPTIONAL { ?param rdfs:label ?paramLabel }
+    OPTIONAL { ?param wf:parameterName ?paramName }
+    OPTIONAL { ?param wf:numericalValue ?numValue }
+    OPTIONAL { ?param wf:minValue ?minVal }
+    OPTIONAL { ?param wf:maxValue ?maxVal }
+}
+ORDER BY ?paramLabel
+
+# Query 4: Summary - Count decision variables vs fixed parameters
+SELECT ?model ?modelLabel 
+       (COUNT(DISTINCT ?decisionVar) AS ?numDecisionVars)
+       (COUNT(DISTINCT ?fixedParam) AS ?numFixedParams)
+WHERE {
+    BIND(wf:ASM1_Model AS ?model)
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+    
+    # Decision variables (input variables marked as true)
+    {
+        SELECT DISTINCT ?model ?decisionVar
+        WHERE {
+            ?model wf:hasInputVariable ?decisionVar .
+            ?decisionVar wf:isDecisionVariable "true"^^xsd:boolean .
+        }
+    }
+    
+    # Fixed parameters (either hasParameter or hasInputVariable with false)
+    OPTIONAL {
+        {
+            SELECT DISTINCT ?model ?fixedParam
+            WHERE {
+                ?model wf:hasParameter ?fixedParam .
+                FILTER NOT EXISTS { ?fixedParam wf:isDecisionVariable "true"^^xsd:boolean }
+            }
+        }
+        UNION
+        {
+            SELECT DISTINCT ?model ?fixedParam
+            WHERE {
+                ?model wf:hasInputVariable ?fixedParam .
+                ?fixedParam wf:isDecisionVariable "false"^^xsd:boolean .
+            }
+        }
+    }
+}
+GROUP BY ?model ?modelLabel

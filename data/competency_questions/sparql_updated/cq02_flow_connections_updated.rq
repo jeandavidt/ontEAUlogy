@@ -1,0 +1,35 @@
+# CQ2: What flows connect Node A to Node B?
+# Updated to use port-based connections and flow properties
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+# Query 1: Direct flow connections via flowsTo property
+SELECT ?source ?target ?sourceLabel ?targetLabel
+WHERE {
+    ?source wf:flowsTo ?target .
+
+    OPTIONAL { ?source rdfs:label ?sourceLabel }
+    OPTIONAL { ?target rdfs:label ?targetLabel }
+}
+ORDER BY ?sourceLabel ?targetLabel
+
+# Query 2: Port-based connections
+# SELECT ?sourceNode ?sourcePort ?targetPort ?targetNode ?sourceLabel ?targetLabel
+# WHERE {
+#     # Source node has an output port
+#     ?sourceNode wf:hasOutputPort ?sourcePort .
+#     ?sourcePort a wf:OutputPort .
+#
+#     # Target node has an input port
+#     ?targetNode wf:hasInputPort ?targetPort .
+#     ?targetPort a wf:InputPort .
+#
+#     # Ports are connected (need connection property)
+#     ?sourcePort wf:connectsTo ?targetPort .
+#
+#     OPTIONAL { ?sourceNode rdfs:label ?sourceLabel }
+#     OPTIONAL { ?targetNode rdfs:label ?targetLabel }
+# }
+# ORDER BY ?sourceLabel ?targetLabel

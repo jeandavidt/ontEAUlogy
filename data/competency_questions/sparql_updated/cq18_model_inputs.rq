@@ -1,0 +1,64 @@
+# CQ18: What are the input variables for Model M?
+# Now using information.ttl module with proper ModelVariable classes
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# Query 1: Find all input variables for a specific model
+SELECT ?model ?modelLabel ?inputVar ?inputVarLabel ?parameterName ?unit ?minVal ?maxVal ?isDecisionVar
+WHERE {
+    # Specify the model of interest
+    BIND(wf:ASM1_Model AS ?model)
+    
+    # Get model label
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+    
+    # Get input variables directly linked to the model
+    ?model wf:hasInputVariable ?inputVar .
+    
+    # Get variable properties
+    OPTIONAL { ?inputVar rdfs:label ?inputVarLabel }
+    OPTIONAL { ?inputVar wf:parameterName ?parameterName }
+    OPTIONAL { ?inputVar wf:hasUnit ?unit }
+    OPTIONAL { ?inputVar wf:minValue ?minVal }
+    OPTIONAL { ?inputVar wf:maxValue ?maxVal }
+    OPTIONAL { ?inputVar wf:isDecisionVariable ?isDecisionVar }
+}
+ORDER BY ?inputVarLabel
+
+# Query 2: Find all model parameters with their values and ranges
+SELECT ?model ?modelLabel ?param ?paramLabel ?paramName ?numValue ?unit ?minVal ?maxVal ?isDecisionVar
+WHERE {
+    BIND(wf:ASM1_Model AS ?model)
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+    
+    ?model wf:hasParameter ?param .
+    OPTIONAL { ?param rdfs:label ?paramLabel }
+    OPTIONAL { ?param wf:parameterName ?paramName }
+    OPTIONAL { ?param wf:numericalValue ?numValue }
+    OPTIONAL { ?param wf:hasUnit ?unit }
+    OPTIONAL { ?param wf:minValue ?minVal }
+    OPTIONAL { ?param wf:maxValue ?maxVal }
+    OPTIONAL { ?param wf:isDecisionVariable ?isDecisionVar }
+}
+ORDER BY ?paramLabel
+
+# Query 3: Find decision variables (manipulable parameters)
+SELECT ?model ?modelLabel ?decisionVar ?decisionVarLabel ?parameterName ?unit ?minVal ?maxVal
+WHERE {
+    BIND(wf:ASM1_Model AS ?model)
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+    
+    # Find variables marked as decision variables
+    ?model wf:hasInputVariable ?decisionVar .
+    ?decisionVar wf:isDecisionVariable "true"^^xsd:boolean .
+    
+    OPTIONAL { ?decisionVar rdfs:label ?decisionVarLabel }
+    OPTIONAL { ?decisionVar wf:parameterName ?parameterName }
+    OPTIONAL { ?decisionVar wf:hasUnit ?unit }
+    OPTIONAL { ?decisionVar wf:minValue ?minVal }
+    OPTIONAL { ?decisionVar wf:maxValue ?maxVal }
+}
+ORDER BY ?decisionVarLabel

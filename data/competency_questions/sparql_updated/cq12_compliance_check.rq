@@ -1,0 +1,41 @@
+# CQ12: Does the effluent quality at Plant X meet the requirements for a given reuse category?
+# This query checks observations against requirements and reports compliance status.
+# Requires instances of WaterQualityObservation with hasComplianceStatus and linked requirements.
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# Find observations that are non-compliant
+SELECT ?observation ?parameter ?observedValue ?limitValue ?limitType ?standard ?complianceStatus
+WHERE {
+    # Get water quality observation
+    ?observation a wf:WaterQualityObservation .
+    ?observation wf:observedParameter ?paramClass .
+    ?observation wf:observedValue ?observedValue .
+
+    # Get parameter label
+    ?paramClass rdfs:label ?parameter .
+
+    # Get compliance status
+    ?observation wf:hasComplianceStatus ?statusClass .
+    ?statusClass rdfs:label ?complianceStatus .
+
+    # Optional: Get the requirement that was checked against
+    OPTIONAL {
+        ?requirement a wf:WaterQualityRequirement .
+        ?requirement wf:hasWaterQualityParameter ?paramClass .
+        ?requirement wf:hasLimitValue ?limitValue .
+
+        OPTIONAL {
+            ?requirement wf:hasLimitType ?limitTypeClass .
+            ?limitTypeClass rdfs:label ?limitType .
+        }
+
+        OPTIONAL {
+            ?requirement wf:hasRegulatoryStandard ?standardClass .
+            ?standardClass rdfs:label ?standard .
+        }
+    }
+}
+ORDER BY ?complianceStatus ?parameter

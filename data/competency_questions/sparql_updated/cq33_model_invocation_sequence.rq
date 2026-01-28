@@ -1,0 +1,33 @@
+# CQ33: What models must be invoked to evaluate a candidate solution?
+# Uses agent and model dependencies
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?agent ?agentLabel ?model ?modelLabel ?operation ?opLabel ?entity
+WHERE {
+    # Find agents in the system
+    ?agent a ?agentType .
+    FILTER(?agentType IN (wf:ComputationalAgent, wf:SimulationAgent, wf:OptimizationAgent))
+
+    OPTIONAL { ?agent rdfs:label ?agentLabel }
+
+    # Model implemented by agent
+    OPTIONAL {
+        ?agent wf:implements ?model .
+        ?model rdfs:label ?modelLabel
+    }
+
+    # Entity simulated
+    OPTIONAL {
+        ?agent wf:simulates ?entity
+    }
+
+    # Operations to invoke
+    OPTIONAL {
+        ?agent wf:offersOperation ?operation .
+        ?operation rdfs:label ?opLabel
+    }
+}
+ORDER BY ?entity ?agentLabel

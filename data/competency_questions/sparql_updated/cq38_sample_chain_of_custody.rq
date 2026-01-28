@@ -1,0 +1,54 @@
+# CQ38: What is the chain of custody for Sample S (collection point, method, equipment, timestamp)?
+# Tracks samples from collection to analysis for regulatory compliance
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?sample ?sampleId ?samplingPoint ?pointName ?samplingMethod ?equipment ?flowDirection ?collectedOn ?observations
+WHERE {
+    # Get sample
+    ?sample a wf:WaterSample .
+
+    # Sample ID for tracking
+    OPTIONAL { ?sample wf:sampleId ?sampleId . }
+
+    # Sampling point
+    OPTIONAL {
+        ?sample wf:takenAt ?samplingPoint .
+        OPTIONAL { ?samplingPoint wf:pointName ?pointName . }
+    }
+
+    # Sampling method
+    OPTIONAL {
+        ?sample wf:usedSamplingMethod ?methodClass .
+        ?methodClass rdfs:label ?samplingMethod .
+    }
+
+    # Equipment used
+    OPTIONAL {
+        ?sample wf:collectedBy ?equipmentInstance .
+        ?equipmentInstance a ?equipmentClass .
+        ?equipmentClass rdfs:label ?equipment .
+        FILTER(?equipmentClass != owl:NamedIndividual)
+    }
+
+    # Flow direction (influent/effluent)
+    OPTIONAL {
+        ?sample wf:hasFlowDirection ?flowDirClass .
+        ?flowDirClass rdfs:label ?flowDirection .
+    }
+
+    # Collection timestamp
+    OPTIONAL { ?sample wf:collectedOn ?collectedOn . }
+
+    # Count observations linked to this sample
+    OPTIONAL {
+        SELECT ?sample (COUNT(?obs) as ?observations)
+        WHERE {
+            ?obs wf:hasSample ?sample .
+        }
+        GROUP BY ?sample
+    }
+}
+ORDER BY DESC(?collectedOn)

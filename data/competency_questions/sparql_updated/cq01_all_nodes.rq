@@ -1,0 +1,56 @@
+# CQ1: What are all the nodes (plants, sources, junctions, sinks) in a given catchment?
+# Updated to use current ontology classes
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX bfo: <http://purl.obolibrary.org/obo/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT ?node ?nodeType ?nodeLabel ?comment
+WHERE {
+    # Material entities that are part of water infrastructure
+    {
+        # Treatment plants
+        ?node a ?nodeType .
+        VALUES ?nodeType {
+            wf:WastewaterTreatmentPlant
+            wf:DrinkingWaterPlant
+        }
+    } UNION {
+        # Industrial facilities
+        ?node a ?nodeType .
+        VALUES ?nodeType {
+            wf:IndustrialFacility
+            wf:TextileIndustry
+            wf:FoodProcessingIndustry
+            wf:ElectronicsManufacturing
+            wf:PharmaceuticalIndustry
+            wf:Brewery
+        }
+    } UNION {
+        # Residential areas
+        ?node a ?nodeType .
+        VALUES ?nodeType {
+            wf:ResidentialDistrict
+            wf:Household
+        }
+    } UNION {
+        # Natural water bodies
+        ?node a ?nodeType .
+        VALUES ?nodeType {
+            wf:River
+            wf:RiverSegment
+            wf:Lake
+            wf:Groundwater
+        }
+    } UNION {
+        # Water system components
+        ?node a ?nodeType .
+        ?nodeType rdfs:subClassOf wf:WaterSystemComponent .
+    }
+
+    # Optional metadata
+    OPTIONAL { ?node rdfs:label ?nodeLabel }
+    OPTIONAL { ?node rdfs:comment ?comment }
+}
+ORDER BY ?nodeType ?nodeLabel

@@ -1,0 +1,60 @@
+# CQ30: For a given objective, which nodes have relevant decision variables?
+# CQ32: What is the set of decision variables for a catchment-wide problem?
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# Query 1: Find all decision variables in system
+SELECT ?entity ?entityLabel ?model ?modelLabel ?decisionVar ?varLabel ?paramName ?minVal ?maxVal ?unit
+WHERE {
+    # Find models
+    ?model a wf:ProcessModel .
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+
+    # Model represents an entity
+    OPTIONAL {
+        ?model wf:representsEntity ?entity .
+        ?entity rdfs:label ?entityLabel
+    }
+
+    # Get decision variables
+    {
+        ?model wf:hasParameter ?decisionVar .
+        ?decisionVar wf:isDecisionVariable "true"^^xsd:boolean .
+    } UNION {
+        ?model wf:hasInputVariable ?decisionVar .
+        ?decisionVar wf:isDecisionVariable "true"^^xsd:boolean .
+    } UNION {
+        ?model wf:hasInput ?decisionVar .
+        ?decisionVar a wf:DecisionVariable .
+    }
+
+    # Get variable details
+    OPTIONAL { ?decisionVar rdfs:label ?varLabel }
+    OPTIONAL { ?decisionVar wf:parameterName ?paramName }
+    OPTIONAL { ?decisionVar wf:minValue ?minVal }
+    OPTIONAL { ?decisionVar wf:maxValue ?maxVal }
+    OPTIONAL { ?decisionVar wf:hasUnit ?unit }
+}
+ORDER BY ?entityLabel ?paramName
+
+# Query 2: Decision variables in a specific catchment
+# SELECT ?entity ?entityLabel ?decisionVar ?varLabel ?paramName
+# WHERE {
+#     # Entities in catchment
+#     ?entity wf:locatedInCatchment wf:GhentCatchment .
+#     OPTIONAL { ?entity rdfs:label ?entityLabel }
+#
+#     # Their models
+#     ?model wf:representsEntity ?entity .
+#
+#     # Decision variables (as above)
+#     ?model wf:hasParameter ?decisionVar .
+#     ?decisionVar wf:isDecisionVariable "true"^^xsd:boolean .
+#
+#     OPTIONAL { ?decisionVar rdfs:label ?varLabel }
+#     OPTIONAL { ?decisionVar wf:parameterName ?paramName }
+# }
+# ORDER BY ?entityLabel ?paramName

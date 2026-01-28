@@ -1,0 +1,42 @@
+# CQ39: What is the calculated pollutant load for Parameter P at Discharge Point D?
+# Calculates pollutant load from concentration and flow for load-based limits
+# Load = Concentration x Flow x conversion factor
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?loadCalc ?parameter ?concentration ?flowRate ?calculatedLoad ?loadUnit ?dischargePoint ?calculatedOn
+WHERE {
+    # Get load calculation
+    ?loadCalc a wf:LoadCalculation .
+
+    # Concentration observation
+    ?loadCalc wf:fromConcentration ?concObs .
+    ?concObs wf:observedParameter ?paramClass .
+    ?concObs wf:observedValue ?concentration .
+    ?paramClass rdfs:label ?parameter .
+
+    # Flow measurement
+    ?loadCalc wf:fromFlowMeasurement ?flowMeasurement .
+    ?flowMeasurement wf:flowRate ?flowRate .
+
+    # Calculated load
+    OPTIONAL { ?loadCalc wf:calculatedLoad ?calculatedLoad . }
+
+    # Load unit
+    OPTIONAL {
+        ?loadCalc wf:loadUnit ?loadUnitResource .
+        ?loadUnitResource rdfs:label ?loadUnit .
+    }
+
+    # Discharge point
+    OPTIONAL {
+        ?flowMeasurement wf:measuredAt ?dischargePoint .
+        ?dischargePoint rdfs:label ?dischargePointName .
+    }
+
+    # Calculation timestamp
+    OPTIONAL { ?loadCalc wf:calculatedOn ?calculatedOn . }
+}
+ORDER BY ?parameter DESC(?calculatedOn)

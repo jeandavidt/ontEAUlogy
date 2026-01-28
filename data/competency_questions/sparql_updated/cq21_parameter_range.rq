@@ -1,0 +1,35 @@
+# CQ21: What is the valid range for Parameter P in Model M?
+# Uses ModelVariable properties
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?model ?modelLabel ?param ?paramLabel ?paramName ?minVal ?maxVal ?defaultVal ?unit ?isDecisionVar
+WHERE {
+    # Specify model
+    # BIND(wf:WWTP1_Model AS ?model)
+
+    ?model a wf:ProcessModel .
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+
+    # Get parameters or inputs with ranges
+    {
+        ?model wf:hasParameter ?param .
+    } UNION {
+        ?model wf:hasInput ?param .
+    } UNION {
+        ?model wf:hasInputVariable ?param .
+    }
+
+    # Get range constraints
+    OPTIONAL { ?param rdfs:label ?paramLabel }
+    OPTIONAL { ?param wf:parameterName ?paramName }
+    OPTIONAL { ?param wf:minValue ?minVal }
+    OPTIONAL { ?param wf:maxValue ?maxVal }
+    OPTIONAL { ?param wf:defaultValue ?defaultVal }
+    OPTIONAL { ?param wf:hasUnit ?unit }
+    OPTIONAL { ?param wf:isDecisionVariable ?isDecisionVar }
+}
+ORDER BY ?modelLabel ?paramName

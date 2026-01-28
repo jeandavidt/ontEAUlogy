@@ -1,0 +1,29 @@
+# CQ10: What quality parameters characterize the water at Node N?
+# Updated to use WaterQualityObservation and observation properties
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?observation ?parameter ?paramLabel ?value ?unit ?observedAt ?timestamp
+WHERE {
+    # Find all observations
+    ?observation a wf:WaterQualityObservation ;
+                wf:observedParameter ?parameter ;
+                wf:observedValue ?value .
+
+    # Optional: Filter by specific node/location
+    # FILTER(STR(?observedAt) = "YourNodeIdentifier")
+
+    # Get parameter label
+    OPTIONAL {
+        ?parameter rdfs:label ?paramLabel
+    }
+
+    # Optional observation metadata
+    OPTIONAL { ?observation wf:observedAt ?observedAt }
+    OPTIONAL { ?observation wf:observedOn ?timestamp }
+    OPTIONAL { ?parameter wf:hasUnit ?unit }
+}
+ORDER BY ?observedAt ?paramLabel

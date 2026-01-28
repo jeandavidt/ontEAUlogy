@@ -1,0 +1,49 @@
+# CQ25: What optimization agents are available in the system?
+# Uses ComputationalAgent and agent type hierarchy
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX cap: <https://ugentbiomath.github.io/waterframe/capability#>
+
+# Query 1: All computational agents
+SELECT ?agent ?agentLabel ?agentType ?agentVersion ?capabilities
+WHERE {
+    ?agent a ?agentType .
+
+    # Filter for agent types
+    FILTER(?agentType IN (wf:ComputationalAgent, wf:OptimizationAgent, wf:SimulationAgent,
+                          wf:DataTransformAgent, wf:ReasoningAgent))
+
+    OPTIONAL { ?agent rdfs:label ?agentLabel }
+    OPTIONAL { ?agent wf:agentVersion ?agentVersion }
+
+    # Get capabilities (grouped)
+    OPTIONAL {
+        ?agent wf:hasCapability ?capability .
+        ?capability rdfs:label ?capLabel
+    }
+}
+GROUP BY ?agent ?agentLabel ?agentType ?agentVersion
+ORDER BY ?agentType ?agentLabel
+
+# Query 2: Specifically optimization agents
+SELECT ?agent ?agentLabel ?operations ?software ?endpoint
+WHERE {
+    ?agent a wf:OptimizationAgent .
+    OPTIONAL { ?agent rdfs:label ?agentLabel }
+
+    # Operations offered
+    OPTIONAL {
+        ?agent wf:offersOperation ?op .
+        ?op rdfs:label ?opLabel
+    }
+
+    # Where it runs
+    OPTIONAL {
+        ?agent wf:runsOn ?software .
+        ?software wf:apiEndpoint ?endpoint
+    }
+}
+GROUP BY ?agent ?agentLabel ?software ?endpoint
+ORDER BY ?agentLabel

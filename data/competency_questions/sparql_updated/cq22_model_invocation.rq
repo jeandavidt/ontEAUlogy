@@ -1,0 +1,48 @@
+# CQ22: How is Model M invoked? (API endpoint, function signature, agent reference)
+# Uses SoftwareSystem, ComputationalAgent, and HTTPGrounding
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+# Query 1: Find software system implementing a model
+SELECT ?model ?modelLabel ?software ?apiEndpoint ?apiVersion
+WHERE {
+    # Specify the model
+    # BIND(wf:WWTP1_Model AS ?model)
+
+    ?model a wf:ProcessModel .
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+
+    # Find software system
+    ?model wf:implementedBy ?software .
+
+    # Get API details
+    OPTIONAL { ?software wf:apiEndpoint ?apiEndpoint }
+    OPTIONAL { ?software wf:apiVersion ?apiVersion }
+}
+
+# Query 2: Find agent and operation details with HTTP grounding
+SELECT ?agent ?agentLabel ?operation ?opLabel ?httpMethod ?opPath ?requestFormat ?responseFormat ?requiresAuth
+WHERE {
+    # Find agent implementing a model
+    # ?agent wf:implements wf:WWTP1_Model .
+
+    ?agent a wf:ComputationalAgent .
+    OPTIONAL { ?agent rdfs:label ?agentLabel }
+
+    # Get operations offered by agent
+    ?agent wf:offersOperation ?operation .
+    OPTIONAL { ?operation rdfs:label ?opLabel }
+
+    # Get HTTP grounding details
+    OPTIONAL {
+        ?operation wf:hasHTTPGrounding ?grounding .
+        ?grounding wf:httpMethod ?httpMethod ;
+                  wf:operationPath ?opPath .
+        OPTIONAL { ?grounding wf:requestFormat ?requestFormat }
+        OPTIONAL { ?grounding wf:responseFormat ?responseFormat }
+        OPTIONAL { ?grounding wf:requiresAuthentication ?requiresAuth }
+    }
+}
+ORDER BY ?agentLabel ?opLabel

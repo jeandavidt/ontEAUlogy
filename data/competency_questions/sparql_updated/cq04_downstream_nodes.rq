@@ -1,0 +1,23 @@
+# CQ4: What downstream nodes receive effluent from Plant X?
+# This query finds all nodes that receive flow from a given treatment unit or plant
+PREFIX wf: <https://ugentbiomath.github.io/ontEAUlogy#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?downstreamNode ?nodeType ?nodeLabel ?flowType
+WHERE {
+    # Target plant/treatment unit (replace with actual node)
+    VALUES ?plantX { <https://ugentbiomath.github.io/ontology/index.ttl#Membrane_bioreactor> }
+    
+    # Find direct downstream recipients
+    ?plantX wf:flowsTo ?downstreamNode .
+    
+    # Get node type information
+    ?downstreamNode rdf:type ?nodeType .
+    FILTER(?nodeType != wf:WaterSystemComponent)
+    
+    # Optional flow characteristics and labels
+    OPTIONAL { ?downstreamNode wf:hasFlowType ?flowType }
+    OPTIONAL { ?downstreamNode rdfs:label ?nodeLabel }
+}
+ORDER BY ?nodeType ?nodeLabel

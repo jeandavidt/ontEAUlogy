@@ -1,0 +1,36 @@
+# CQ31: What constraints link outputs of upstream nodes to inputs of downstream nodes?
+# Uses operation composition via dataFlowsTo property chain axiom
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+# Query 1: Find composable operation sequences
+SELECT ?upstreamOp ?upstreamLabel ?downstreamOp ?downstreamLabel ?sharedParam ?paramLabel
+WHERE {
+    # Upstream operation produces output
+    ?upstreamOp wf:producesOutput ?output .
+
+    # Downstream operation requires that output as input
+    ?downstreamOp wf:requiresInput ?input .
+
+    # Check if they're the same parameter type
+    ?output wf:correspondsToVariable ?sharedParam .
+    ?input wf:correspondsToVariable ?sharedParam .
+
+    OPTIONAL { ?upstreamOp rdfs:label ?upstreamLabel }
+    OPTIONAL { ?downstreamOp rdfs:label ?downstreamLabel }
+    OPTIONAL { ?sharedParam rdfs:label ?paramLabel }
+}
+ORDER BY ?upstreamLabel ?downstreamLabel
+
+# Query 2: Use inferred dataFlowsTo property (if reasoner active)
+# SELECT ?upstreamOp ?upstreamLabel ?downstreamOp ?downstreamLabel
+# WHERE {
+#     # Automatically inferred via property chain axiom
+#     ?upstreamOp wf:dataFlowsTo ?downstreamOp .
+#
+#     OPTIONAL { ?upstreamOp rdfs:label ?upstreamLabel }
+#     OPTIONAL { ?downstreamOp rdfs:label ?downstreamLabel }
+# }
+# ORDER BY ?upstreamLabel ?downstreamLabel

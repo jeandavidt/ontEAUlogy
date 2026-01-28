@@ -1,0 +1,60 @@
+# CQ19: What are the output variables for Model M?
+# Now using information.ttl module with proper ModelVariable classes
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# Query 1: Find all output variables for a specific model
+SELECT ?model ?modelLabel ?outputVar ?outputVarLabel ?parameterName ?unit
+WHERE {
+    # Specify the model of interest
+    BIND(wf:ASM1_Model AS ?model)
+    
+    # Get model label
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+    
+    # Get output variables directly linked to the model
+    ?model wf:hasOutputVariable ?outputVar .
+    
+    # Get variable properties
+    OPTIONAL { ?outputVar rdfs:label ?outputVarLabel }
+    OPTIONAL { ?outputVar wf:parameterName ?parameterName }
+    OPTIONAL { ?outputVar wf:hasUnit ?unit }
+}
+ORDER BY ?outputVarLabel
+
+# Query 2: Find all state variables (computed over time)
+SELECT ?model ?modelLabel ?stateVar ?stateVarLabel ?parameterName ?unit
+WHERE {
+    BIND(wf:ASM1_Model AS ?model)
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+    
+    ?model wf:hasStateVariable ?stateVar .
+    
+    OPTIONAL { ?stateVar rdfs:label ?stateVarLabel }
+    OPTIONAL { ?stateVar wf:parameterName ?parameterName }
+    OPTIONAL { ?stateVar wf:hasUnit ?unit }
+}
+ORDER BY ?stateVarLabel
+
+# Query 3: Find what entity the model represents
+SELECT ?model ?modelLabel ?representedEntity ?entityLabel
+WHERE {
+    BIND(wf:ASM1_Model AS ?model)
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+    
+    ?model wf:representsEntity ?representedEntity .
+    OPTIONAL { ?representedEntity rdfs:label ?entityLabel }
+}
+
+# Query 4: Find model submodels (for composite models)
+SELECT ?model ?modelLabel ?submodel ?submodelLabel
+WHERE {
+    BIND(wf:GhentWWTP_Model AS ?model)
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+    
+    ?model wf:hasSubmodel ?submodel .
+    OPTIONAL { ?submodel rdfs:label ?submodelLabel }
+}
