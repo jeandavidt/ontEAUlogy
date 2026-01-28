@@ -1,6 +1,7 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix bfo: <http://purl.obolibrary.org/obo/> .
 @prefix envo: <http://purl.obolibrary.org/obo/ENVO_> .
 @prefix dc: <http://purl.org/dc/terms/> .
@@ -220,3 +221,38 @@ wf:abstractsFrom a owl:ObjectProperty ;
     rdfs:comment "Links a water system component to the natural water body it draws water from. Related to but distinct from dischargesInto (opposite flow direction)." ;
     rdfs:domain wf:WaterSystemComponent ;
     rdfs:range envo:00000063 .  # aquatic feature
+
+# ========== CONVEYANCE PROPERTIES ==========
+# Phase 5: Properties specific to conveyance system components for hydraulic modeling
+
+# Geometric properties for pipes
+wf:hasDiameter a owl:DatatypeProperty ;
+    rdfs:label "has diameter" ;
+    rdfs:domain wf:Pipe ;
+    rdfs:range xsd:double ;
+    rdfs:comment "Internal diameter of pipe in meters." .
+
+wf:hasLength a owl:DatatypeProperty ;
+    rdfs:label "has length" ;
+    rdfs:domain wf:Conveyance ;
+    rdfs:range xsd:double ;
+    rdfs:comment "Length of conveyance element in meters." .
+
+wf:hasSlope a owl:DatatypeProperty ;
+    rdfs:label "has slope" ;
+    rdfs:domain wf:Pipe ;
+    rdfs:range xsd:double ;
+    rdfs:comment "Slope of pipe (dimensionless, positive for downward flow)." .
+
+# Overflow structure properties
+wf:overflowsTo a owl:ObjectProperty ;
+    rdfs:label "overflows to" ;
+    rdfs:domain wf:OverflowStructure ;
+    rdfs:range wf:WaterSystemComponent ;
+    rdfs:comment "Links an overflow structure to where excess water is discharged (another component or natural water body via port-based connection)." .
+
+wf:activationThreshold a owl:ObjectProperty ;
+    rdfs:label "activation threshold" ;
+    rdfs:domain wf:OverflowStructure ;
+    rdfs:range owl:Thing ;  # Will be wf:QuantityValue when qualities module is integrated
+    rdfs:comment "Flow rate or water level that triggers overflow activation. Range should be wf:QuantityValue from qualities module." .

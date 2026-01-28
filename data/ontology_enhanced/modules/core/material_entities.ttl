@@ -90,10 +90,89 @@ wf:Household rdfs:subClassOf bfo:BFO_0000040 ;
     rdfs:label "Household" ;
     rdfs:comment "A dwelling or building containing water system components" .
 
-# Conveyance (implicit pipes made explicit)
+# ========== CONVEYANCE SYSTEMS ==========
+# Section 5: Comprehensive conveyance hierarchy for sewer modeling
+# Supports pipes, CSOs, splitters, junctions, and pumping infrastructure
+
 wf:Conveyance rdfs:subClassOf wf:WaterSystemComponent ;
-    rdfs:label "Conveyance system" ;
-    rdfs:comment "Physical infrastructure for water transport between components" .
+    rdfs:label "Conveyance system component" ;
+    rdfs:comment "Physical infrastructure for water transport between system components. Includes pipes, channels, overflow structures, and flow control elements." .
+
+# === PIPES AND CONDUITS ===
+wf:Pipe rdfs:subClassOf wf:Conveyance ;
+    rdfs:label "Pipe" ;
+    rdfs:comment "Enclosed conduit for water transport." .
+
+wf:PressurizedPipe rdfs:subClassOf wf:Pipe ;
+    rdfs:label "Pressurized pipe" ;
+    rdfs:comment "Pipe operating under positive pressure (e.g., water mains)." .
+
+wf:GravityPipe rdfs:subClassOf wf:Pipe ;
+    rdfs:label "Gravity pipe" ;
+    rdfs:comment "Pipe where water flows by gravity (negative pressure or atmospheric)." .
+
+wf:SewerPipe rdfs:subClassOf wf:GravityPipe ;
+    rdfs:label "Sewer pipe" ;
+    rdfs:comment "Underground pipe for wastewater or stormwater collection." .
+
+wf:CombinedSewer rdfs:subClassOf wf:SewerPipe ;
+    rdfs:label "Combined sewer" ;
+    rdfs:comment "Sewer carrying both sanitary wastewater and stormwater in the same pipe." .
+
+wf:SanitarySewer rdfs:subClassOf wf:SewerPipe ;
+    rdfs:label "Sanitary sewer" ;
+    rdfs:comment "Sewer carrying only domestic and industrial wastewater (no stormwater)." .
+
+wf:StormSewer rdfs:subClassOf wf:SewerPipe ;
+    rdfs:label "Storm sewer" ;
+    rdfs:comment "Sewer carrying only stormwater runoff." .
+
+wf:Canal rdfs:subClassOf wf:Conveyance ;
+    rdfs:label "Canal" ;
+    rdfs:comment "Open channel for water transport." .
+
+# === FLOW DIVIDERS ===
+wf:FlowDivider rdfs:subClassOf wf:Conveyance ;
+    rdfs:label "Flow divider" ;
+    rdfs:comment "Structure that splits one inflow into multiple outflows." .
+
+wf:Splitter rdfs:subClassOf wf:FlowDivider ;
+    rdfs:label "Splitter" ;
+    rdfs:comment "Controlled flow division with specified split ratios." .
+
+wf:OverflowStructure rdfs:subClassOf wf:FlowDivider ;
+    rdfs:label "Overflow structure" ;
+    rdfs:comment "Structure that diverts excess flow when capacity threshold is exceeded." .
+
+wf:CombinedSewerOverflow rdfs:subClassOf wf:OverflowStructure ;
+    rdfs:label "Combined sewer overflow (CSO)" ;
+    rdfs:comment "Overflow structure in combined sewer systems that discharges excess flow (mixed wastewater and stormwater) to receiving waters during wet weather events." .
+
+wf:StormwaterOutfall rdfs:subClassOf wf:OverflowStructure ;
+    rdfs:label "Stormwater outfall" ;
+    rdfs:comment "Structure for controlled stormwater discharge to receiving waters." .
+
+wf:EmergencyOverflow rdfs:subClassOf wf:OverflowStructure ;
+    rdfs:label "Emergency overflow" ;
+    rdfs:comment "Safety overflow activated during extreme events or system failures." .
+
+# === FLOW MERGERS ===
+wf:FlowMerger rdfs:subClassOf wf:Conveyance ;
+    rdfs:label "Flow merger" ;
+    rdfs:comment "Structure that combines multiple inflows into one outflow." .
+
+wf:Junction rdfs:subClassOf wf:FlowMerger ;
+    rdfs:label "Junction" ;
+    rdfs:comment "Meeting point of multiple pipes or channels (e.g., manhole, confluence)." .
+
+# === PUMPING ===
+wf:PumpStation rdfs:subClassOf wf:Conveyance ;
+    rdfs:label "Pump station" ;
+    rdfs:comment "Facility with pumps to move water against gravity or increase pressure." .
+
+wf:LiftStation rdfs:subClassOf wf:PumpStation ;
+    rdfs:label "Lift station" ;
+    rdfs:comment "Pump station in wastewater collection systems to lift sewage from low to high elevation." .
 
 # ========== PORTS (Connection Points) ==========
 # Following OntoCAPE pattern: ports are physical interfaces for material flow

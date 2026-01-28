@@ -1,0 +1,13 @@
+# SPARQL Validation Query for Phase 5: Conveyance System Hierarchy
+# Verifies that all conveyance classes are properly defined with labels and comments
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+SELECT ?class ?label ?comment WHERE {
+  ?class rdfs:subClassOf* wf:Conveyance ;
+         rdfs:label ?label .
+  OPTIONAL { ?class rdfs:comment ?comment }
+}
+ORDER BY ?label
