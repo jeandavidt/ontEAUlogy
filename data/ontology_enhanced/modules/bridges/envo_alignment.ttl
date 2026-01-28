@@ -55,18 +55,9 @@
 
 # ========== WATER BODY TYPE ALIGNMENTS ==========
 
-# WaterSystemComponent can participate in natural water bodies
-wf:dischargesInto a owl:ObjectProperty ;
-    rdfs:label "discharges into" ;
-    rdfs:comment "Links a water system component to the natural water body it discharges into" ;
-    rdfs:domain wf:WaterSystemComponent ;
-    rdfs:range envo:00000063 .  # aquatic feature
-
-wf:abstractsFrom a owl:ObjectProperty ;
-    rdfs:label "abstracts from" ;
-    rdfs:comment "Links a water system component to the natural water body it draws water from" ;
-    rdfs:domain wf:WaterSystemComponent ;
-    rdfs:range envo:00000063 .  # aquatic feature
+# Note: wf:dischargesInto and wf:abstractsFrom are now defined in properties.ttl
+# as part of Phase 4 property hierarchy (dischargesToEnvironment → dischargesInto)
+# This module provides usage context and ENVO alignment documentation
 
 wf:locatedIn a owl:ObjectProperty ;
     rdfs:label "located in" ;

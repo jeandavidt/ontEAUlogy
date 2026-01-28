@@ -1,0 +1,20 @@
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+# Phase 4 Validation: Property Hierarchy and Semantic Connections
+# Verifies the property relationships created in Phase 4
+
+SELECT ?property ?superProperty ?domain ?range ?comment WHERE {
+  VALUES ?property {
+    wf:flowsTo
+    wf:dischargesToEnvironment
+    wf:dischargesInto
+    wf:abstractsFrom
+  }
+  OPTIONAL { ?property rdfs:subPropertyOf ?superProperty }
+  OPTIONAL { ?property rdfs:domain ?domain }
+  OPTIONAL { ?property rdfs:range ?range }
+  OPTIONAL { ?property rdfs:comment ?comment }
+}
+ORDER BY ?property

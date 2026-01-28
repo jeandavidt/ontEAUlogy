@@ -16,7 +16,7 @@ This document tracks issues, blockers, and decisions encountered during the impl
 | Phase 1: ENVO Verification | Not Started | - | CRITICAL PRIORITY |
 | Phase 2: BFO Alignment | Completed | 0 | CRITICAL PRIORITY |
 | Phase 3: WaWO+ Cleanup | Completed | 0 | - |
-| Phase 4: Property Relationships | Not Started | - | - |
+| Phase 4: Property Relationships | Completed | 0 | - |
 | Phase 5: Conveyance System | Not Started | - | - |
 | Phase 6: OWL-Time Simplification | Not Started | - | - |
 | Phase 7: Usage Point Refinement | Not Started | - | - |
@@ -235,9 +235,138 @@ No blocking issues encountered. Implementation was straightforward following the
 
 ---
 
-## Phase 4: Property Relationships
+## Phase 4: Property Relationships - Semantic Connections
 
-*No issues logged yet*
+### Summary
+Phase 4 successfully created explicit semantic connections between three previously disconnected flow properties: flowsTo, dischargesInto, and abstractsFrom. A property hierarchy was established to clarify the distinction between engineered system topology and environmental discharge relationships.
+
+### Implementation Details
+
+**Problem:**
+Three related properties existed with no explicit semantic connections:
+- `wf:flowsTo` - Port-level flow connections (OutputPort → InputPort) for engineered system topology
+- `wf:dischargesInto` - Component-level environmental discharge (component → ENVO aquatic feature)
+- `wf:abstractsFrom` - Component-level source abstraction (component ← ENVO aquatic feature)
+
+These properties serve different competency questions (engineering design vs. environmental compliance) but lacked documentation explaining their relationships.
+
+**Files Modified:**
+- `data/ontology_enhanced/modules/core/properties.ttl` (lines 5, 44-49, 195-221) - Added ENVO prefix, updated flowsTo comment, created property hierarchy
+- `data/ontology_enhanced/modules/bridges/envo_alignment.ttl` (lines 56-69) - Removed duplicate definitions, added reference note
+
+**Files Created:**
+- `case_studies/ghent_enhanced/validation/property_hierarchy_check.sparql` - SPARQL validation query
+
+**Property Hierarchy Created:**
+
+```
+wf:dischargesToEnvironment (root property)
+├── Domain: wf:WaterSystemComponent
+├── Range: bfo:BFO_0000040 (material entity - environmental recipients)
+└── wf:dischargesInto (specialized subproperty)
+    ├── rdfs:subPropertyOf wf:dischargesToEnvironment
+    ├── Domain: wf:WaterSystemComponent
+    └── Range: envo:00000063 (aquatic feature - more specific)
+
+wf:abstractsFrom (related but distinct)
+├── Domain: wf:WaterSystemComponent
+├── Range: envo:00000063 (aquatic feature)
+└── Related to dischargesInto (opposite flow direction)
+
+wf:flowsTo (engineered system property - documented relationship)
+├── Domain: wf:OutputPort
+├── Range: wf:InputPort
+└── Distinct from dischargesInto (different competency questions)
+```
+
+**New Property Added:**
+- `wf:dischargesToEnvironment` - Generic property for environmental discharge to any material entity (water body, soil, atmosphere)
+
+**Properties Modified:**
+- `wf:dischargesInto` - Now defined as subproperty of dischargesToEnvironment with constrained range to ENVO aquatic features
+- `wf:abstractsFrom` - Enhanced comment to explain relationship to dischargesInto
+- `wf:flowsTo` - Updated comment to clarify distinction from environmental discharge properties
+
+### Design Rationale
+
+**Different Competency Questions:**
+- `wf:flowsTo` answers: "How is water routed through the engineered system for simulation?"
+- `wf:dischargesInto` answers: "Where does this facility discharge to the environment for compliance?"
+- `wf:abstractsFrom` answers: "What natural water source does this facility draw from?"
+
+**Property Hierarchy Benefits:**
+1. Makes relationship between generic discharge and aquatic-specific discharge explicit
+2. Allows future expansion (e.g., dischargesToSoil, dischargesToAtmosphere as siblings)
+3. Enables reasoning: anything that dischargesInto also dischargesToEnvironment
+4. Clarifies that environmental discharge is at component level, not port level
+
+**Separation of Concerns:**
+- Port-level properties (flowsTo, receivesFlowFrom) - Operational topology for simulation/design
+- Component-level properties (dischargesInto, abstractsFrom) - Environmental context for compliance/ecology
+
+### Validation Results
+
+**Property Hierarchy Structure:** VERIFIED
+- wf:dischargesInto correctly declared as rdfs:subPropertyOf wf:dischargesToEnvironment
+- wf:dischargesToEnvironment has domain wf:WaterSystemComponent and range bfo:BFO_0000040
+- wf:dischargesInto has constrained range envo:00000063 (aquatic feature)
+- wf:abstractsFrom has same domain/range as dischargesInto but opposite semantic direction
+
+**Documentation Clarity:** VERIFIED
+- wf:flowsTo comment now explains distinction from dischargesInto
+- Property comments explain their different roles and competency questions
+- ENVO alignment module updated to reference properties.ttl definitions
+
+**Consistency Check:** PASSED
+- No duplicate property definitions across modules
+- ENVO prefix added to properties.ttl for aquatic feature references
+- All IRIs correctly formatted using ENVO prefix
+
+### Design Decisions
+
+**Decision 1: Create New Generic Property**
+- Context: Should dischargesInto remain standalone or become part of hierarchy?
+- Decision: Create wf:dischargesToEnvironment as generic parent property
+- Rationale: Enables future expansion for other discharge types (soil, atmosphere) and makes semantics explicit
+- Alternative: Keep dischargesInto standalone (rejected - less extensible, unclear semantics)
+
+**Decision 2: Property Placement**
+- Context: Where to define environmental discharge properties?
+- Decision: Define in properties.ttl (core module), reference from envo_alignment.ttl (bridge module)
+- Rationale: Properties are core infrastructure, ENVO alignment provides usage context
+- Alternative: Define in envo_alignment.ttl (rejected - properties are waterFRAME concepts, not ENVO concepts)
+
+**Decision 3: Documentation Style**
+- Context: How to explain the relationship between flowsTo and dischargesInto?
+- Decision: Enhanced comments explaining "different competency questions" approach
+- Rationale: Makes it clear both properties are correct, serve different purposes
+- Alternative: Make flowsTo and dischargesInto related via property chain (rejected - they operate at different granularities)
+
+### Issues Encountered
+
+No blocking issues encountered. Implementation was straightforward following the plan.
+
+### Future Considerations
+
+1. Could add sibling properties: wf:dischargesToSoil, wf:dischargesToAtmosphere for other discharge types
+2. May want to add inverse property for abstractsFrom (e.g., wf:suppliesWaterTo)
+3. Could create property chains: component hasOutputPort → flowsTo → hasInputPort → component to infer hasDownstreamComponent
+4. Consider adding temporal properties for seasonal abstraction/discharge patterns
+
+### Semantic Impact
+
+**Improved Reasoning:**
+- OWL reasoners can now infer that anything dischargesInto aquatic features also dischargesToEnvironment
+- Clear distinction between operational topology (ports) and environmental context (components)
+- Explicit semantics enable better query patterns for compliance reporting
+
+**Competency Question Coverage:**
+- CQ3 (input sources): Can query "What river does this plant abstract from?" using wf:abstractsFrom
+- CQ4 (downstream nodes): Can query "What ecosystem receives this discharge?" using wf:dischargesInto
+- Enhanced separation of design questions (flowsTo) from environmental questions (dischargesInto)
+
+### Date Completed
+2026-01-28
 
 ---
 
@@ -316,7 +445,14 @@ This section tracks commits made by each subagent during implementation.
   - Validated removal: grep confirms 0 remaining WaWO+ URIs in ontology
 
 ### Phase 4: Property Relationships
-- *Commits will be logged here*
+- `feat(ontology): Phase 4 - add semantic connections between flow properties` (2026-01-28)
+  - Created property hierarchy: dischargesToEnvironment → dischargesInto
+  - Added wf:dischargesToEnvironment as generic environmental discharge property
+  - Updated wf:dischargesInto as specialized subproperty for aquatic features
+  - Enhanced wf:flowsTo comment to clarify distinction from environmental discharge
+  - Moved property definitions from envo_alignment.ttl to properties.ttl
+  - Created validation query: property_hierarchy_check.sparql
+  - Documented design rationale and competency question coverage
 
 ### Phase 5: Conveyance System
 - *Commits will be logged here*
