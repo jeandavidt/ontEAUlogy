@@ -1,0 +1,84 @@
+/* Dark mode improvements for ontology documentation */
+
+/* Improve contrast for code blocks in dark mode */
+[data-md-color-scheme="slate"] .highlight {
+  background-color: #1e1e1e;
+}
+
+[data-md-color-scheme="slate"] code {
+  background-color: #2d2d2d;
+  color: #e0e0e0;
+}
+
+/* Better contrast for inline code */
+[data-md-color-scheme="slate"] :not(pre) > code {
+  background-color: #2d2d2d;
+  color: #e0e0e0;
+  border: 1px solid #404040;
+}
+
+/* Improve link contrast in dark mode */
+[data-md-color-scheme="slate"] a {
+  color: #64b5f6;
+}
+
+[data-md-color-scheme="slate"] a:hover {
+  color: #90caf9;
+}
+
+/* Better table styling in dark mode */
+[data-md-color-scheme="slate"] table th {
+  background-color: #2d2d2d;
+  color: #e0e0e0;
+}
+
+[data-md-color-scheme="slate"] table td {
+  border-color: #404040;
+}
+
+/* Improve admonition contrast in dark mode */
+[data-md-color-scheme="slate"] .admonition {
+  background-color: #2d2d2d;
+  border-left-color: #64b5f6;
+}
+
+/* Better heading visibility in dark mode */
+[data-md-color-scheme="slate"] h1,
+[data-md-color-scheme="slate"] h2,
+[data-md-color-scheme="slate"] h3,
+[data-md-color-scheme="slate"] h4 {
+  color: #e0e0e0;
+}
+
+/* Improve horizontal rule visibility */
+[data-md-color-scheme="slate"] hr {
+  border-color: #404040;
+}
+
+/* Better blockquote styling */
+[data-md-color-scheme="slate"] blockquote {
+  border-left-color: #64b5f6;
+  color: #b0b0b0;
+}
+
+/* Improve entity section readability */
+[data-md-color-scheme="slate"] article h2[id^="https"] {
+  background-color: #2d2d2d;
+  padding: 0.5rem;
+  border-left: 4px solid #64b5f6;
+}
+
+/* Better list styling */
+[data-md-color-scheme="slate"] ul li::marker,
+[data-md-color-scheme="slate"] ol li::marker {
+  color: #64b5f6;
+}
+
+/* Improve navigation items */
+[data-md-color-scheme="slate"] .md-nav__link--active {
+  color: #64b5f6;
+}
+
+[data-md-color-scheme="slate"] .md-nav__link:hover {
+  color: #90caf9;
+}
