@@ -30,9 +30,14 @@ def _():
 
 
 @app.cell
-def _(mo):
+def _(Path, mo):
     import sys
     import argparse
+
+    # Get absolute path to project root (assuming notebook is in notebooks/ directory)
+    _notebook_dir = Path(__file__).parent if hasattr(Path(__file__), 'parent') else Path.cwd()
+    _project_root = _notebook_dir.parent if _notebook_dir.name == "notebooks" else _notebook_dir
+    _default_ontology_path = _project_root / "data" / "ontology" / "waterframe.ttl"
 
     # Parse command-line arguments in script mode
     if mo.app_meta().mode == "script":
@@ -40,20 +45,25 @@ def _(mo):
         parser.add_argument(
             "--ontology",
             "-o",
-            default="data/ontology/waterframe.ttl",
-            help="Path or URI to the ontology file (default: data/ontology/waterframe.ttl)"
+            default=str(_default_ontology_path),
+            help=f"Path or URI to the ontology file (default: {_default_ontology_path})"
         )
         args = parser.parse_args()
         _initial_value = args.ontology
     else:
-        _initial_value = "data/ontology/waterframe.ttl"
+        # Use absolute path in edit mode, or URI for exported HTML
+        if _default_ontology_path.exists():
+            _initial_value = str(_default_ontology_path)
+        else:
+            # Fallback to public URI if local file doesn't exist (for exported HTML)
+            _initial_value = "https://raw.githubusercontent.com/jeandavidt/ontEAUlogy/main/data/ontology/waterframe.ttl"
 
     # Input for ontology file path or URI
     ontology_input = mo.ui.text(
         label="Ontology Path or URI",
         full_width=True,
         value=_initial_value,
-        placeholder="Enter file path or URI (e.g., data/ontology/waterframe.ttl or http://example.org/ontology.ttl)"
+        placeholder="Enter file path or URI (e.g., /path/to/waterframe.ttl or https://example.org/ontology.ttl)"
     )
     ontology_input
     return (ontology_input,)

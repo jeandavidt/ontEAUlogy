@@ -180,42 +180,55 @@ class OntologyDocGenerator:
 
     def _get_class_info(self, entity_uri, info):
         """Get class-specific information."""
-        # Get subclasses
+        # Get subclasses (deduplicate by using a set for intermediate storage)
+        subclasses_set = set()
         for subclass in self.graph.subjects(RDFS.subClassOf, entity_uri):
             subclass_name = self._get_local_name(subclass)
-            info['subclasses'].append(subclass_name)
+            subclasses_set.add(subclass_name)
             info['related_entities'].add(str(subclass))
+        # Preserve existing subclasses and merge with new ones
+        existing_subclasses = set(info.get('subclasses', []))
+        info['subclasses'] = sorted(existing_subclasses | subclasses_set)
 
-        # Get superclasses
+        # Get superclasses (deduplicate by using a set for intermediate storage)
+        superclasses_set = set()
         for superclass in self.graph.objects(entity_uri, RDFS.subClassOf):
             superclass_name = self._get_local_name(superclass)
-            info['superclasses'].append(superclass_name)
+            superclasses_set.add(superclass_name)
             info['related_entities'].add(str(superclass))
+        # Preserve existing superclasses and merge with new ones
+        existing_superclasses = set(info.get('superclasses', []))
+        info['superclasses'] = sorted(existing_superclasses | superclasses_set)
 
         # Get individuals that are instances of this class
+        instances_set = set(info.get('instances', []))
         for individual in self.graph.subjects(RDF.type, entity_uri):
             if individual != entity_uri:  # Avoid self-reference
                 individual_name = self._get_local_name(individual)
-                if 'instances' not in info:
-                    info['instances'] = []
-                info['instances'].append(individual_name)
+                instances_set.add(individual_name)
                 info['related_entities'].add(str(individual))
+        if instances_set:
+            info['instances'] = sorted(instances_set)
 
         return info
 
     def _get_property_info(self, entity_uri, info, object_property=True):
         """Get property-specific information."""
-        # Get domains
+        # Get domains (deduplicate)
+        domains_set = set(info.get('domains', []))
         for domain in self.graph.objects(entity_uri, RDFS.domain):
             domain_name = self._get_local_name(domain)
-            info['domains'].append(domain_name)
+            domains_set.add(domain_name)
             info['related_entities'].add(str(domain))
+        info['domains'] = sorted(domains_set)
 
-        # Get ranges
+        # Get ranges (deduplicate)
+        ranges_set = set(info.get('ranges', []))
         for range_obj in self.graph.objects(entity_uri, RDFS.range):
             range_name = self._get_local_name(range_obj)
-            info['ranges'].append(range_name)
+            ranges_set.add(range_name)
             info['related_entities'].add(str(range_obj))
+        info['ranges'] = sorted(ranges_set)
 
         # Get property characteristics
         characteristics = []
@@ -578,8 +591,16 @@ class OntologyDocGenerator:
         content += f"- **Total Entities:** {classes + object_properties + datatype_properties + individuals}\n\n"
 
         content += "## Navigation\n\n"
-        content += "- **[Browse All Entities](entities.md)** - "
-        content += "Complete documentation of all classes, properties, and individuals\n\n"
+        content += "Browse the ontology documentation organized by modules:\n\n"
+        content += "- **[Agents](modules/agents.md)** - Agent and model-related classes\n"
+        content += "- **[Capabilities](modules/capabilities.md)** - Computational and modeling capabilities\n"
+        content += "- **[Compliance](modules/compliance.md)** - Regulatory compliance entities\n"
+        content += "- **[Information](modules/information.md)** - Information content entities\n"
+        content += "- **[Qualities](modules/qualities.md)** - Observable properties and qualities\n"
+        content += "- **[Sampling](modules/sampling.md)** - Sampling and observation processes\n"
+        content += "- **Core Modules:**\n"
+        content += "  - **[Material Entities](modules/core/material_entities.md)** - Physical entities\n"
+        content += "  - **[Properties](modules/core/properties.md)** - Object and datatype properties\n\n"
 
         if metadata['uri']:
             content += "## Ontology Information\n\n"

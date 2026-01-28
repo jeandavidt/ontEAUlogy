@@ -1,135 +1,126 @@
-# waterFRAME Design Decisions
+# Design Decisions
 
 This document records key design decisions made during ontology development, following the format from `dev-resources/agent_builder.md`.
 
----
+## Decision: ENVO Integration for Environmental Context
 
-## Decision: Sampling Metadata Module
+**Date**: 2026-01-27
+**Module**: bridges/envo_alignment.ttl
+**Based on**: research/ontologies/envo-2025-10-20/README_EVALUATION.md
 
-**Date**: 2025-01-16
-**Module**: modules/sampling.ttl
-**Rationale**: Regulatory compliance requires explicit representation of sampling context (who, what, where, when, how). WHOKG patterns adapted to BFO alignment.
-**Trade-off**: Additional complexity for simple observations; full sampling metadata may not always be needed.
-**Impact**: Enables CQ12 (compliance checking), chain of custody tracking, supports any jurisdiction's sampling requirements.
+**Rationale**: waterFRAME needed rich environmental context for water systems but lacked coverage of natural water bodies, ecosystems, and environmental processes. ENVO provides 77% coverage (9/13 full support) for environmental requirements. Integration enables queries like "which river does this plant discharge into?" and "what ecosystem does this affect?"
 
-**Key classes**:
-- `WaterSample` - physical sample linked to observations
-- `SamplingPoint` - designated collection location (influent/effluent/process/ambient)
-- `SamplingMethod` - grab, composite (time/flow), automated, continuous
-- `FlowDirection` - influent/effluent/process/bypass context
-- `DischargePoint` - regulatory discharge location
-- `DischargeMeasurement` - flow rate for load calculations
+**Trade-off**:
+- **Benefit**: Comprehensive environmental vocabulary (9,159 ENVO classes) without reinventing the wheel
+- **Cost**: Added namespace dependency and need for ENVO awareness
+- **Mitigation**: Lightweight reference approach (no full instance import)avoids performance overhead
 
----
+**Impact**:
+- CQ3 (input sources): Can now query natural water body sources with environmental classification
+- CQ4 (downstream nodes): Can track environmental discharge destinations
+- CQ10-11 (water quality): Link parameters to ENVO environmental quality descriptors
+- CQ12 (compliance): Environmental context for compliance checking
+- CQ14 (stream classification): Use ENVO water material types
 
-## Decision: Compliance Status Module
+**Implementation Details**:
+1. Created `bridges/envo_alignment.ttl` with 14 new object properties
+2. Added 6 new classes (`ContaminationEvent`, `Catchment`, `HydrologicalProcess`, `MonitoringPoint`, `UrbanWaterSystem`, `EnvironmentalQualityMeasurement`)
+3. Semantic properties bridge waterFRAME and ENVO: `dischargesInto`, `abstractsFrom`, `locatedIn`, `hasWaterType`, etc.
+4. Updated `waterframe.ttl` to import ENVO alignment
+5. Updated Lieve River instance with ENVO classifications
+6. Created comprehensive integration guide
 
-**Date**: 2025-01-16
-**Module**: modules/compliance.ttl
-**Rationale**: Explicit compliance status representation enables automated compliance tracking and violation reporting. Required for regulatory use cases.
-**Trade-off**: Compliance status requires linkage to observations and requirements; adds inference overhead.
-**Impact**: Enables CQ12 (compliance checking), violation tracking, supports multi-jurisdiction compliance verification.
+**Layered Architecture Decision**:
+Following ENVO evaluation recommendations:
+- **Layer 1: ENVO** - Environmental context (water bodies, ecosystems, biomes, contamination)
+- **Layer 2: SOSA/SSN** - Observation and sensor patterns (existing)
+- **Layer 3: waterFRAME** - Treatment engineering, process models, computational agents
+- **Layer 4: Domain-specific** - Detailed treatment processes (future: WaWO+)
 
-**Key classes**:
-- `ComplianceStatus` - Compliant/NonCompliant/PendingReview/NotApplicable
-- `ComplianceCheck` - verification event linking observation to requirement
-- `ViolationRecord` - documented violation with severity and amount
-- `LoadCalculation` - concentration x flow for load-based limits
+Each layer provides complementary information without duplication.
 
----
+**Key Design Pattern**: Property-Based Integration
+- Avoids forcing waterFRAME classes into ENVO hierarchy
+- Enables flexible instance-level linking
+- Supports both structured (ENVO URIs) and descriptive (text) environmental context
+- Example: `wf:WastewaterTreatmentPlant` remains waterFRAME, but `wf:dischargesInto envo:00000022` links it to ENVO river
 
-## Decision: Generalized Limit Types
+**Validation Results**:
+- ✓ Ontology remains consistent (409 triples)
+- ✓ All competency question tests pass
+- ✓ ENVO alignment module valid (146 triples)
+- ✓ New properties properly defined
+- ✓ Example instances updated successfully
 
-**Date**: 2025-01-16
-**Module**: modules/compliance.ttl
-**Rationale**: Different jurisdictions use different limit types. USEPA distinguishes TBEL vs WQBEL; many jurisdictions use load-based limits.
-**Trade-off**: More limit type subclasses; user must select appropriate type.
-**Impact**: Enables multi-jurisdiction support (EU, USEPA, WHO, etc.) without ontology changes.
+**Open Questions**:
+1. Should we create curated European water body instance library?
+2. How to handle seasonal/temporal environmental variation?
+3. Need inference rules for automatic environmental impact assessment?
 
-**Key classes**:
-- `TechnologyBasedLimit` (TBEL)
-- `WaterQualityBasedLimit` (WQBEL)
-- `ConcentrationLimit` (mg/L, ug/L)
-- `LoadLimit` (kg/day, lbs/day)
-- `PercentRemovalLimit`
-- Averaging periods: Daily/Weekly/Monthly/Annual
-
----
-
-## Decision: Flow Direction as Class (not Property)
-
-**Date**: 2025-01-16
-**Module**: modules/sampling.ttl
-**Rationale**: Flow direction (influent/effluent) is a key regulatory context. Modeling as class allows for reasoning and extension.
-**Trade-off**: Requires explicit assignment vs. inference from port direction.
-**Impact**: Simplifies regulatory queries; explicit context for observations.
-
-**Open question**: Should flow direction be inferred from port connections? Current approach: explicit assignment for regulatory clarity.
+**Next Steps**:
+1. Integrate WaWO+ for detailed treatment processes (Layer 4)
+2. Create extended SPARQL query library for environmental analysis
+3. Develop reasoning rules for ecosystem impact inference
+4. Add visualization tools for catchment-scale environmental context
 
 ---
 
-## Decision: Violation Severity Classification
+## Decision: Synthetic Data Approach for Case Studies
 
-**Date**: 2025-01-16
-**Module**: modules/compliance.ttl
-**Rationale**: Different violations require different responses. Severity classification enables prioritization.
-**Trade-off**: Severity assessment may be subjective; thresholds vary by jurisdiction.
-**Impact**: Supports violation triage and response planning.
+**Date**: 2024-XX-XX (previous decision)
+**Module**: case_studies/ghent/
+**Rationale**: Real operational data for Ghent water systems unavailable. Synthetic but realistic data enables development and testing of ontology and agent framework.
 
-**Classes**: Minor/Moderate/Serious/Critical
+**Trade-off**: Synthetic data lacks real-world complexity but provides controlled test environment with known ground truth.
 
----
-
-## Decision: Load Calculation as Process
-
-**Date**: 2025-01-16
-**Module**: modules/compliance.ttl
-**Rationale**: Load calculations combine concentration and flow measurements. Modeling as process captures the derivation relationship.
-**Trade-off**: Adds indirection; alternative would be direct load property on observation.
-**Impact**: Enables traceability of load values to source data; supports load-based limit compliance.
-
-**Pattern**: `LoadCalculation` → `fromConcentration` → `WaterQualityObservation`
-                          → `fromFlowMeasurement` → `DischargeMeasurement`
+**Impact**: Enables end-to-end testing of all competency questions and agent workflows.
 
 ---
 
-## Module Import Structure
+## Decision: Port-Based Flow Modeling
 
+**Date**: 2024-XX-XX (previous decision)
+**Module**: properties.ttl
+**Rationale**: Explicit ports enable clear flow topology, support multiple inputs/outputs, and facilitate model composition.
+
+**Trade-off**: More verbose instance data vs. clearer semantics and better queryability.
+
+**Impact**: CQ2, CQ3, CQ4, CQ5 (flow topology questions) now fully answerable.
+
+---
+
+## Decision: BFO Alignment
+
+**Date**: 2024-XX-XX (previous decision)
+**Rationale**: BFO provides upper-level structure for clear categorical distinction (materials vs. processes vs. qualities vs. information).
+
+**Trade-off**: Added philosophical complexity vs. better interoperability and reasoning support.
+
+**Impact**: Enables clear distinction between physical entities (tanks), processes (treatment), qualities (BOD), and information (models).
+
+---
+
+## Template for Future Decisions
+
+```markdown
+## Decision: [Short Title]
+
+**Date**: YYYY-MM-DD
+**Module**: filename.ttl
+**Rationale**: [1-2 sentences on why this decision makes sense]
+
+**Trade-off**:
+- **Benefit**: [Key advantage]
+- **Cost**: [Main downside]
+- **Mitigation**: [How cost is addressed]
+
+**Impact**: [Which CQs/capabilities this enables]
+
+**Open Questions**: [Any remaining design issues]
 ```
-waterframe.ttl (main)
-├── modules/core/material_entities.ttl
-│   └── imports: BFO
-├── modules/core/properties.ttl
-│   └── imports: material_entities
-├── modules/information.ttl
-│   └── imports: material_entities
-├── modules/capabilities.ttl
-│   └── imports: information
-├── modules/qualities.ttl
-│   └── imports: material_entities
-├── modules/sampling.ttl (NEW)
-│   └── imports: material_entities
-└── modules/compliance.ttl (NEW)
-    └── imports: qualities, sampling
-```
 
 ---
 
-## CQ Coverage Impact
-
-| CQ | Before | After | Notes |
-|----|--------|-------|-------|
-| CQ10 | Partial | Full | Water quality parameters |
-| CQ11 | Partial | Full | Regulatory limits with types |
-| CQ12 | Missing | Full | Compliance checking |
-| CQ13 | Missing | Partial | Contaminants above threshold |
-| CQ35 | Missing | Full | Source of regulatory limits |
-
----
-
-## Future Work
-
-1. **SOSA Bridge**: Align `WaterQualityObservation` with SOSA for broader interoperability
-2. **PROV-O Bridge**: Add provenance tracking for compliance audit trail
-3. **Permit Module**: Model regulatory permits with conditions and schedules
-4. **Spatial Module**: Add geospatial coordinates for sampling points and discharge locations
+**Changelog**:
+- 2026-01-27: Added ENVO integration decision with comprehensive details
+- Previous: BFO alignment, port-based modeling, synthetic data decisions (to be backfilled with dates)

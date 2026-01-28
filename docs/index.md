@@ -6,15 +6,25 @@ A modular ontology for water reuse systems with BFO alignment and support for ag
 
 ## Statistics
 
-- **Classes:** 9
-- **Object Properties:** 15
-- **Datatype Properties:** 0
+- **Classes:** 149
+- **Object Properties:** 73
+- **Datatype Properties:** 49
 - **Named Individuals:** 0
-- **Total Entities:** 24
+- **Total Entities:** 271
 
 ## Navigation
 
-- **[Browse All Entities](entities.md)** - Complete documentation of all classes, properties, and individuals
+Browse the ontology documentation organized by modules:
+
+- **[Agents](modules/agents.md)** - Agent and model-related classes
+- **[Capabilities](modules/capabilities.md)** - Computational and modeling capabilities
+- **[Compliance](modules/compliance.md)** - Regulatory compliance entities
+- **[Information](modules/information.md)** - Information content entities
+- **[Qualities](modules/qualities.md)** - Observable properties and qualities
+- **[Sampling](modules/sampling.md)** - Sampling and observation processes
+- **Core Modules:**
+  - **[Material Entities](modules/core/material_entities.md)** - Physical entities
+  - **[Properties](modules/core/properties.md)** - Object and datatype properties
 
 ## Ontology Information
 

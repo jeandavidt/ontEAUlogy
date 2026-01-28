@@ -34,7 +34,6 @@ Flow from toilets and urinals
 ### Superclasses
 
 - [WaterFlow](#https___ugentbiomath.github.io_waterframe_waterflow)
-- [WaterFlow](#https___ugentbiomath.github.io_waterframe_waterflow)
 
 ### Related Entities
 
@@ -59,7 +58,6 @@ Flow from non-toilet fixtures (showers, sinks, washing machines)
 
 ### Superclasses
 
-- [WaterFlow](#https___ugentbiomath.github.io_waterframe_waterflow)
 - [WaterFlow](#https___ugentbiomath.github.io_waterframe_waterflow)
 
 ### Related Entities
@@ -86,7 +84,6 @@ Flow of drinking-quality water
 ### Superclasses
 
 - [WaterFlow](#https___ugentbiomath.github.io_waterframe_waterflow)
-- [WaterFlow](#https___ugentbiomath.github.io_waterframe_waterflow)
 
 ### Related Entities
 
@@ -111,7 +108,6 @@ Flow from rainwater collection systems
 
 ### Superclasses
 
-- [WaterFlow](#https___ugentbiomath.github.io_waterframe_waterflow)
 - [WaterFlow](#https___ugentbiomath.github.io_waterframe_waterflow)
 
 ### Related Entities
@@ -138,7 +134,6 @@ Flow of treated water for reuse
 ### Superclasses
 
 - [WaterFlow](#https___ugentbiomath.github.io_waterframe_waterflow)
-- [WaterFlow](#https___ugentbiomath.github.io_waterframe_waterflow)
 
 ### Related Entities
 
@@ -163,10 +158,10 @@ Classification of water flow types in the system
 
 ### Subclasses
 
-- [GreywaterFlow](#https___ugentbiomath.github.io_waterframe_greywaterflow)
 - [BlackwaterFlow](#https___ugentbiomath.github.io_waterframe_blackwaterflow)
-- [RainwaterFlow](#https___ugentbiomath.github.io_waterframe_rainwaterflow)
+- [GreywaterFlow](#https___ugentbiomath.github.io_waterframe_greywaterflow)
 - [PotableWaterFlow](#https___ugentbiomath.github.io_waterframe_potablewaterflow)
+- [RainwaterFlow](#https___ugentbiomath.github.io_waterframe_rainwaterflow)
 - [ReclaimedWaterFlow](#https___ugentbiomath.github.io_waterframe_reclaimedwaterflow)
 
 ### Related Entities

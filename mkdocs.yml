@@ -90,6 +90,12 @@ plugins:
 nav:
 - Home: index.md
 - Modules:
+  - Agents: modules/agents.md
+  - Capabilities: modules/capabilities.md
+  - Compliance: modules/compliance.md
+  - Information: modules/information.md
+  - Qualities: modules/qualities.md
+  - Sampling: modules/sampling.md
   - Core:
     - Material Entities: modules/core/material_entities.md
     - Properties: modules/core/properties.md
