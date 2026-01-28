@@ -6,6 +6,7 @@
 @prefix unit: <http://qudt.org/vocab/unit/> .
 @prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
 @prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+@prefix envo: <http://purl.obolibrary.org/obo/ENVO_> .
 
 # ==============================================================================
 # LIEVE RIVER - Natural Water Body
@@ -19,7 +20,12 @@ ghent:LieveRiver a wf:River ;
     rdfs:comment "A historic canal/river in the Ghent metropolitan area, used as the primary water source and receiving body for the synthetic case study."@en ;
     wf:hasComponent ghent:LieveSegment1 ;
     wf:hasComponent ghent:LieveSegment2 ;
-    wf:hasComponent ghent:LieveSegment3 .
+    wf:hasComponent ghent:LieveSegment3 ;
+    # ENVO integration: Environmental context
+    wf:envoClassification envo:00000022 ;  # river (ENVO class)
+    wf:locatedIn envo:01000249 ;  # urban biome
+    wf:hasWaterType envo:00002042 ;  # surface water
+    wf:environmentalContext "Temperate freshwater river in urban-impacted catchment, Belgium" .
 
 # ==============================================================================
 # RIVER SEGMENT 1 - Upstream (Source area)
@@ -32,7 +38,10 @@ ghent:LieveSegment1 a wf:RiverSegment ;
     geo:long "3.6900"^^xsd:double ;
     wf:hasInputPort ghent:LieveSegment1_In ;
     wf:hasOutputPort ghent:LieveSegment1_Out ;
-    wf:hasOutputPort ghent:LieveSegment1_Intake .
+    wf:hasOutputPort ghent:LieveSegment1_Intake ;
+    # ENVO: Relatively good water quality, minimal impact
+    wf:hasWaterType envo:00002042 ;  # surface water
+    wf:environmentalContext "Upstream river segment with good aqu quality"@en .
 
 ghent:LieveSegment1_In a wf:InputPort ;
     rdfs:label "Lieve Segment 1 - Upstream Inlet"@en ;

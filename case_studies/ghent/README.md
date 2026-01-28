@@ -4,10 +4,21 @@ Stub model implementations for the Ghent water system case study, using the wate
 
 ## Installation
 
+### Option 1: Local Installation (Recommended for Development)
+
 ```bash
 cd case_studies/ghent
 pip install -e .
 ```
+
+### Option 2: Docker (Recommended for Production/Testing)
+
+```bash
+cd case_studies/ghent
+docker-compose up -d
+```
+
+See [README.docker.md](README.docker.md) for detailed Docker instructions.
 
 ## Running Models
 
