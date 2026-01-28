@@ -1,0 +1,288 @@
+# Agent Competency Question Test Queries
+# These queries test the compositional reasoning capabilities of the agent ontology module
+
+# ========== CQ-AG1: Agent Discovery ==========
+# Question: "Which agents can simulate entity X?"
+
+PREFIX wf: <https://w3id.org/waterframe/>
+PREFIX ghent: <https://w3id.org/waterframe/case/ghent/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+# Test 1: Find agents that simulate WWTP1
+SELECT ?agent ?agentLabel ?model ?modelLabel WHERE {
+    ?agent a wf:ComputationalAgent ;
+           wf:simulates ghent:WWTP1 ;
+           wf:implements ?model .
+    OPTIONAL { ?agent rdfs:label ?agentLabel }
+    OPTIONAL { ?model rdfs:label ?modelLabel }
+}
+
+# Test 2: Find all agents and the entities they simulate
+SELECT ?agent ?agentLabel ?entity ?entityLabel WHERE {
+    ?agent a wf:ComputationalAgent ;
+           wf:simulates ?entity .
+    OPTIONAL { ?agent rdfs:label ?agentLabel }
+    OPTIONAL { ?entity rdfs:label ?entityLabel }
+}
+ORDER BY ?agent
+
+# ========== CQ-AG2: Capability-Based Discovery ==========
+# Question: "Which agents provide capability Y?"
+
+PREFIX cap: <https://w3id.org/waterframe/capability/>
+
+# Test 3: Find agents with water quality prediction capability
+SELECT ?agent ?agentLabel ?endpoint WHERE {
+    ?agent a wf:ComputationalAgent ;
+           wf:hasCapability cap:WaterQualityPrediction ;
+           wf:runsOn ?software .
+    ?software wf:apiEndpoint ?endpoint .
+    OPTIONAL { ?agent rdfs:label ?agentLabel }
+}
+
+# Test 4: Find agents with dynamic simulation capability
+SELECT ?agent ?agentLabel ?capability WHERE {
+    ?agent a wf:ComputationalAgent ;
+           wf:hasCapability ?capability .
+    FILTER(?capability = cap:DynamicSimulation)
+    OPTIONAL { ?agent rdfs:label ?agentLabel }
+}
+
+# Test 5: List all capabilities and agents that have them
+SELECT ?capability ?capLabel ?agent ?agentLabel WHERE {
+    ?agent a wf:ComputationalAgent ;
+           wf:hasCapability ?capability .
+    OPTIONAL { ?agent rdfs:label ?agentLabel }
+    OPTIONAL { ?capability rdfs:label ?capLabel }
+}
+ORDER BY ?capability ?agent
+
+# ========== CQ-AG3: Compositional Data Flow ==========
+# Question: "Given available data {α, β}, which operations can execute?"
+
+# Test 6: Find operations that require only influent_flow and influent_BOD
+SELECT ?operation ?opLabel ?agent ?agentLabel WHERE {
+    VALUES ?availableInput { "influent_flow" "influent_BOD" }
+
+    ?agent wf:offersOperation ?operation .
+    ?operation wf:requiresInput ?requiredInput .
+    ?requiredInput wf:parameterName ?availableInput .
+
+    # Check that NO required inputs are missing
+    FILTER NOT EXISTS {
+        ?operation wf:requiresInput ?missingInput .
+        ?missingInput wf:parameterName ?missingName .
+        FILTER(?missingName NOT IN ("influent_flow", "influent_BOD"))
+    }
+
+    OPTIONAL { ?operation rdfs:label ?opLabel }
+    OPTIONAL { ?agent rdfs:label ?agentLabel }
+}
+
+# Test 7: Find operations executable with raw_water_flow input only
+SELECT ?operation ?opLabel ?inputCount WHERE {
+    ?operation a wf:Operation ;
+               wf:requiresInput ?input .
+    ?input wf:parameterName "raw_water_flow" .
+
+    # Count total required inputs
+    {
+        SELECT ?operation (COUNT(?inp) AS ?inputCount) WHERE {
+            ?operation wf:requiresInput ?inp .
+        }
+        GROUP BY ?operation
+    }
+
+    # Filter to single-input operations
+    FILTER(?inputCount = 1)
+
+    OPTIONAL { ?operation rdfs:label ?opLabel }
+}
+
+# ========== CQ-AG4: Operation Sequencing ==========
+# Question: "What sequence of operations transforms data α into information β?"
+
+# Test 8: Find two-step operation chains (using dataFlowsTo property)
+SELECT ?op1 ?op1Label ?op2 ?op2Label ?intermediate ?intermediateName WHERE {
+    # Op1 produces intermediate output
+    ?op1 a wf:Operation ;
+         wf:producesOutput ?intermediate .
+    ?intermediate wf:parameterName ?intermediateName .
+
+    # Op2 requires that same intermediate as input
+    ?op2 a wf:Operation ;
+         wf:requiresInput ?intermediate .
+
+    # Verify data flow relationship (inferred via property chain)
+    ?op1 wf:dataFlowsTo ?op2 .
+
+    # Don't return self-loops
+    FILTER(?op1 != ?op2)
+
+    OPTIONAL { ?op1 rdfs:label ?op1Label }
+    OPTIONAL { ?op2 rdfs:label ?op2Label }
+}
+LIMIT 20
+
+# Test 9: Find paths from raw_water_flow to treated_water_flow
+SELECT ?op1 ?op2 ?intermediate WHERE {
+    ?op1 wf:requiresInput ?startInput ;
+         wf:producesOutput ?intermediate .
+    ?startInput wf:parameterName "raw_water_flow" .
+
+    ?op2 wf:requiresInput ?intermediate ;
+         wf:producesOutput ?endOutput .
+    ?endOutput wf:parameterName "treated_water_flow" .
+
+    ?op1 wf:dataFlowsTo ?op2 .
+}
+
+# Test 10: Find all composable operation pairs
+SELECT ?op1 ?op2 (COUNT(?sharedParam) AS ?sharedCount) WHERE {
+    ?op1 wf:producesOutput ?param .
+    ?op2 wf:requiresInput ?param .
+    ?op1 wf:dataFlowsTo ?op2 .
+    BIND(?param AS ?sharedParam)
+}
+GROUP BY ?op1 ?op2
+ORDER BY DESC(?sharedCount)
+
+# ========== CQ-AG5: HTTP Invocation Discovery ==========
+# Question: "How do I invoke operation O?"
+
+# Test 11: Get HTTP invocation details for a specific operation
+SELECT ?endpoint ?method ?path ?requestFormat ?responseFormat ?authRequired WHERE {
+    ghent:WWTP1_SimulateOp wf:hasHTTPGrounding ?grounding .
+    ?grounding wf:httpMethod ?method ;
+               wf:operationPath ?path ;
+               wf:requestFormat ?requestFormat ;
+               wf:responseFormat ?responseFormat ;
+               wf:requiresAuthentication ?authRequired .
+
+    # Get the endpoint from the agent's software system
+    ?agent wf:offersOperation ghent:WWTP1_SimulateOp ;
+           wf:runsOn ?software .
+    ?software wf:apiEndpoint ?endpoint .
+}
+
+# Test 12: List all operations with their HTTP invocation details
+SELECT ?operation ?opLabel ?endpoint ?method ?path WHERE {
+    ?operation a wf:Operation ;
+               wf:hasHTTPGrounding ?grounding .
+    ?grounding wf:httpMethod ?method ;
+               wf:operationPath ?path .
+
+    ?agent wf:offersOperation ?operation ;
+           wf:runsOn ?software .
+    ?software wf:apiEndpoint ?endpoint .
+
+    OPTIONAL { ?operation rdfs:label ?opLabel }
+}
+ORDER BY ?endpoint ?path
+
+# Test 13: Find all POST operations
+SELECT ?operation ?opLabel ?endpoint ?path ?requestFormat WHERE {
+    ?operation wf:hasHTTPGrounding ?grounding .
+    ?grounding wf:httpMethod "POST" ;
+               wf:operationPath ?path ;
+               wf:requestFormat ?requestFormat .
+
+    ?agent wf:offersOperation ?operation ;
+           wf:runsOn ?software .
+    ?software wf:apiEndpoint ?endpoint .
+
+    OPTIONAL { ?operation rdfs:label ?opLabel }
+}
+
+# ========== CQ-AG6: Precondition Discovery ==========
+# Question: "What are the preconditions for operation O?"
+
+# Test 14: Get all preconditions for an operation
+SELECT ?operation ?opLabel ?precondition ?expression ?constrainedParam WHERE {
+    ?operation a wf:Operation ;
+               wf:hasPrecondition ?precondition .
+    ?precondition a wf:Precondition ;
+                  wf:constraintExpression ?expression .
+    OPTIONAL { ?precondition wf:constrainsParameter ?constrainedParam }
+    OPTIONAL { ?operation rdfs:label ?opLabel }
+}
+
+# Test 15: Find operations with numeric constraints
+SELECT ?operation ?opLabel ?expression WHERE {
+    ?operation wf:hasPrecondition ?precondition .
+    ?precondition wf:constraintExpression ?expression .
+    FILTER(CONTAINS(?expression, ">=") || CONTAINS(?expression, ">") ||
+           CONTAINS(?expression, "<=") || CONTAINS(?expression, "<"))
+    OPTIONAL { ?operation rdfs:label ?opLabel }
+}
+
+# ========== CQ-AG7: Performance Discovery ==========
+# Question: "What is the estimated execution time for operations?"
+
+# Test 16: List operations by estimated execution time
+SELECT ?operation ?opLabel ?execTime ?complexity WHERE {
+    ?operation a wf:Operation .
+    OPTIONAL { ?operation wf:estimatedExecutionTime ?execTime }
+    OPTIONAL { ?operation wf:computationalComplexity ?complexity }
+    OPTIONAL { ?operation rdfs:label ?opLabel }
+}
+ORDER BY ?execTime
+
+# Test 17: Find fast operations (< 5 seconds)
+SELECT ?operation ?opLabel ?agent ?execTime WHERE {
+    ?operation a wf:Operation ;
+               wf:estimatedExecutionTime ?execTime .
+    FILTER(?execTime < 5.0)
+
+    ?agent wf:offersOperation ?operation .
+    OPTIONAL { ?operation rdfs:label ?opLabel }
+    OPTIONAL { ?agent rdfs:label ?agentLabel }
+}
+ORDER BY ?execTime
+
+# ========== CQ-AG8: Agent Type Discovery ==========
+# Question: "Find agents by type (simulation, optimization, etc.)"
+
+# Test 18: List all simulation agents
+SELECT ?agent ?agentLabel ?model ?endpoint WHERE {
+    ?agent a wf:SimulationAgent ;
+           wf:implements ?model ;
+           wf:runsOn ?software .
+    ?software wf:apiEndpoint ?endpoint .
+    OPTIONAL { ?agent rdfs:label ?agentLabel }
+}
+
+# Test 19: Count agents by type
+SELECT ?agentType (COUNT(?agent) AS ?count) WHERE {
+    ?agent a ?agentType .
+    FILTER(?agentType IN (wf:SimulationAgent, wf:OptimizationAgent,
+                          wf:DataTransformAgent, wf:ReasoningAgent))
+}
+GROUP BY ?agentType
+
+# ========== CQ-AG9: Input/Output Compatibility ==========
+# Question: "Which operations produce outputs compatible with my required inputs?"
+
+# Test 20: Find all producer-consumer operation pairs
+SELECT ?producer ?producerLabel ?consumer ?consumerLabel ?sharedParam ?paramName WHERE {
+    ?producer wf:producesOutput ?sharedParam .
+    ?consumer wf:requiresInput ?sharedParam .
+    ?sharedParam wf:parameterName ?paramName .
+    FILTER(?producer != ?consumer)
+    OPTIONAL { ?producer rdfs:label ?producerLabel }
+    OPTIONAL { ?consumer rdfs:label ?consumerLabel }
+}
+ORDER BY ?paramName
+
+# ========== Summary Query ==========
+# Test 21: Get complete agent overview
+SELECT ?agent ?agentLabel ?agentType ?capability ?operation ?entity WHERE {
+    ?agent a ?agentType ;
+           wf:simulates ?entity ;
+           wf:offersOperation ?operation .
+    FILTER(?agentType IN (wf:SimulationAgent, wf:OptimizationAgent,
+                          wf:DataTransformAgent, wf:ReasoningAgent))
+    OPTIONAL { ?agent rdfs:label ?agentLabel }
+    OPTIONAL { ?agent wf:hasCapability ?capability }
+}
+ORDER BY ?agent ?capability
