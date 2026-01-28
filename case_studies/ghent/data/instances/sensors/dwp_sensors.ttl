@@ -1,0 +1,61 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix ssn: <http://www.w3.org/ns/ssn/> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+
+# ==============================================================================
+# DWP-1 Water Quality Sensors
+# ==============================================================================
+
+# DWP-1 Outlet Water Quality Sensor
+ghent:DWP1_Outlet_WaterQuality_Sensor a wf:WaterQualitySensor, sosa:Sensor ;
+    rdfs:label "DWP-1 Outlet Water Quality Sensor"@en ;
+    rdfs:comment "Multi-parameter water quality sensor monitoring DWP-1 potable water outlet"@en ;
+    sosa:observes wf:Turbidity, wf:Chlorine, wf:pH ;
+    wf:monitorsPort ghent:DWP1_PotableWater_Out ;
+    wf:attachedTo ghent:DWP1 ;
+    wf:hasSamplingRate "1.0"^^xsd:double ;
+    geo:lat "51.064"^^xsd:double ;
+    geo:long "3.695"^^xsd:double .
+
+# DWP-1 Inlet Water Quality Sensor
+ghent:DWP1_Inlet_WaterQuality_Sensor a wf:WaterQualitySensor, sosa:Sensor ;
+    rdfs:label "DWP-1 Inlet Water Quality Sensor"@en ;
+    rdfs:comment "Multi-parameter water quality sensor monitoring DWP-1 raw water inlet"@en ;
+    sosa:observes wf:Turbidity, wf:BOD, wf:pH ;
+    wf:monitorsPort ghent:DWP1_RawWater_In ;
+    wf:attachedTo ghent:DWP1 ;
+    wf:hasSamplingRate "1.0"^^xsd:double ;
+    geo:lat "51.064"^^xsd:double ;
+    geo:long "3.693"^^xsd:double .
+
+# ==============================================================================
+# DWP-2 Water Quality Sensors
+# ==============================================================================
+
+# DWP-2 Outlet Water Quality Sensor
+ghent:DWP2_Outlet_WaterQuality_Sensor a wf:WaterQualitySensor, sosa:Sensor ;
+    rdfs:label "DWP-2 Outlet Water Quality Sensor"@en ;
+    rdfs:comment "Multi-parameter water quality sensor monitoring DWP-2 potable water outlet"@en ;
+    sosa:observes wf:Turbidity, wf:Chlorine, wf:pH ;
+    wf:monitorsPort ghent:DWP2_PotableWater_Out ;
+    wf:attachedTo ghent:DWP2 ;
+    wf:hasSamplingRate "1.0"^^xsd:double ;
+    geo:lat "51.049"^^xsd:double ;
+    geo:long "3.725"^^xsd:double .
+
+# DWP-2 Inlet Water Quality Sensor
+ghent:DWP2_Inlet_WaterQuality_Sensor a wf:WaterQualitySensor, sosa:Sensor ;
+    rdfs:label "DWP-2 Inlet Water Quality Sensor"@en ;
+    rdfs:comment "Multi-parameter water quality sensor monitoring DWP-2 raw water inlet"@en ;
+    sosa:observes wf:Turbidity, wf:BOD, wf:pH ;
+    wf:monitorsPort ghent:DWP2_RawWater_In ;
+    wf:attachedTo ghent:DWP2 ;
+    wf:hasSamplingRate "1.0"^^xsd:double ;
+    geo:lat "51.049"^^xsd:double ;
+    geo:long "3.723"^^xsd:double .

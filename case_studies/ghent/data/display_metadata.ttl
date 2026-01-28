@@ -1,0 +1,128 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+
+# ==============================================================================
+# Display Metadata for Entity Types
+# ==============================================================================
+# This file defines visual representation metadata for waterFRAME entity types.
+# It includes display labels, colors, and icons for frontend visualization.
+# ==============================================================================
+
+# Core Water Infrastructure Types
+wf:DrinkingWaterPlant wf:displayLabel "DWP" ;
+    wf:displayColor "#15aabf" ;
+    wf:displayIcon "droplet-filled" ;
+    rdfs:comment "Drinking Water Plant - treats source water to potable standards" .
+
+wf:WastewaterTreatmentPlant wf:displayLabel "WWTP" ;
+    wf:displayColor "#f59e0b" ;
+    wf:displayIcon "building-factory" ;
+    rdfs:comment "Wastewater Treatment Plant - treats wastewater before discharge" .
+
+wf:River wf:displayLabel "River" ;
+    wf:displayColor "#06b6d4" ;
+    wf:displayIcon "wave" ;
+    rdfs:comment "River or natural water body" .
+
+wf:WaterSensor wf:displayLabel "Sensor" ;
+    wf:displayColor "#8b5cf6" ;
+    wf:displayIcon "radar" ;
+    rdfs:comment "Water quality or flow sensor" .
+
+# Industrial Facilities
+wf:IndustrialFacility wf:displayLabel "Industry" ;
+    wf:displayColor "#ef4444" ;
+    wf:displayIcon "factory" ;
+    rdfs:comment "Industrial facility with water requirements" .
+
+# Residential Areas
+wf:ResidentialArea wf:displayLabel "Residential" ;
+    wf:displayColor "#22c55e" ;
+    wf:displayIcon "home" ;
+    rdfs:comment "Residential area or district" .
+
+# System Components
+wf:WaterSystem wf:displayLabel "System" ;
+    wf:displayColor "#64748b" ;
+    wf:displayIcon "network" ;
+    rdfs:comment "Complete water system boundary" .
+
+# Generic Entity Types (fallbacks)
+wf:Entity wf:displayLabel "Entity" ;
+    wf:displayColor "#94a3b8" ;
+    wf:displayIcon "cube" ;
+    rdfs:comment "Generic entity type" .
+
+wf:Component wf:displayLabel "Component" ;
+    wf:displayColor "#cbd5e1" ;
+    wf:displayIcon "gear" ;
+    rdfs:comment "System component" .
+
+# Port Types
+wf:Port wf:displayLabel "Port" ;
+    wf:displayColor "#fbbf24" ;
+    wf:displayIcon "connection" ;
+    rdfs:comment "Connection point for water flow" .
+
+# Zone Types
+wf:Zone wf:displayLabel "Zone" ;
+    wf:displayColor "#a78bfa" ;
+    wf:displayIcon "map" ;
+    rdfs:comment "Geographic or administrative zone" .
+
+# Model Types
+wf:Model wf:displayLabel "Model" ;
+    wf:displayColor "#f97316" ;
+    wf:displayIcon "cpu" ;
+    rdfs:comment "Computational model" .
+
+# Monitoring Equipment
+wf:MonitoringStation wf:displayLabel "Station" ;
+    wf:displayColor "#0ea5e9" ;
+    wf:displayIcon "radio-tower" ;
+    rdfs:comment "Environmental monitoring station" .
+
+# Specialized Infrastructure
+wf:PumpingStation wf:displayLabel "Pump" ;
+    wf:displayColor "#84cc16" ;
+    wf:displayIcon "pump" ;
+    rdfs:comment "Water pumping station" .
+
+wf:Reservoir wf:displayLabel "Reservoir" ;
+    wf:displayColor "#0891b2" ;
+    wf:displayIcon "database" ;
+    rdfs:comment "Water storage reservoir" .
+
+wf:Pipeline wf:displayLabel "Pipeline" ;
+    wf:displayColor "#6b7280" ;
+    wf:displayIcon "pipe" ;
+    rdfs:comment "Water transport pipeline" .
+
+# Data and Information
+wf:DataSource wf:displayLabel "Data Source" ;
+    wf:displayColor "#be185d" ;
+    wf:displayIcon "database" ;
+    rdfs:comment "Data source or information system" .
+
+# ==============================================================================
+# Display Metadata Properties Definition
+# ==============================================================================
+# Define the properties used for display metadata (if not already defined elsewhere)
+
+wf:displayLabel rdfs:label "Display Label" ;
+    rdfs:comment "Short label for display in UI components (typically 2-4 characters)" ;
+    rdfs:domain rdfs:Class ;
+    rdfs:range xsd:string .
+
+wf:displayColor rdfs:label "Display Color" ;
+    rdfs:comment "Hex color code for visual representation (e.g., '#15aabf')" ;
+    rdfs:domain rdfs:Class ;
+    rdfs:range xsd:string .
+
+wf:displayIcon rdfs:label "Display Icon" ;
+    rdfs:comment "Icon identifier for UI display (e.g., 'droplet-filled', 'building-factory')" ;
+    rdfs:domain rdfs:Class ;
+    rdfs:range xsd:string .

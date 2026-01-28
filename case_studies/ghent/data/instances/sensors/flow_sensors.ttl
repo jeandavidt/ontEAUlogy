@@ -1,0 +1,57 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix ssn: <http://www.w3.org/ns/ssn/> .
+@prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+
+# ==============================================================================
+# Flow Sensors
+# ==============================================================================
+
+# DWP-1 Inlet Flow Sensor
+ghent:DWP1_Inlet_Flow_Sensor a wf:FlowSensor, sosa:Sensor ;
+    rdfs:label "DWP-1 Inlet Flow Sensor"@en ;
+    rdfs:comment "Flow rate sensor monitoring raw water intake at DWP-1"@en ;
+    sosa:observes wf:FlowRate ;
+    wf:monitorsPort ghent:DWP1_RawWater_In ;
+    wf:attachedTo ghent:DWP1 ;
+    wf:hasSamplingRate "1.0"^^xsd:double ;
+    geo:lat "51.064"^^xsd:double ;
+    geo:long "3.693"^^xsd:double .
+
+# DWP-2 Inlet Flow Sensor
+ghent:DWP2_Inlet_Flow_Sensor a wf:FlowSensor, sosa:Sensor ;
+    rdfs:label "DWP-2 Inlet Flow Sensor"@en ;
+    rdfs:comment "Flow rate sensor monitoring raw water intake at DWP-2"@en ;
+    sosa:observes wf:FlowRate ;
+    wf:monitorsPort ghent:DWP2_RawWater_In ;
+    wf:attachedTo ghent:DWP2 ;
+    wf:hasSamplingRate "1.0"^^xsd:double ;
+    geo:lat "51.049"^^xsd:double ;
+    geo:long "3.723"^^xsd:double .
+
+# WWTP-1 Inlet Flow Sensor
+ghent:WWTP1_Inlet_Flow_Sensor a wf:FlowSensor, sosa:Sensor ;
+    rdfs:label "WWTP-1 Inlet Flow Sensor"@en ;
+    rdfs:comment "Flow rate sensor monitoring influent at WWTP-1"@en ;
+    sosa:observes wf:FlowRate ;
+    wf:monitorsPort ghent:WWTP1_Influent_In ;
+    wf:attachedTo ghent:WWTP1 ;
+    wf:hasSamplingRate "1.0"^^xsd:double ;
+    geo:lat "51.061"^^xsd:double ;
+    geo:long "3.699"^^xsd:double .
+
+# WWTP-2 Inlet Flow Sensor
+ghent:WWTP2_Inlet_Flow_Sensor a wf:FlowSensor, sosa:Sensor ;
+    rdfs:label "WWTP-2 Inlet Flow Sensor"@en ;
+    rdfs:comment "Flow rate sensor monitoring influent at WWTP-2"@en ;
+    sosa:observes wf:FlowRate ;
+    wf:monitorsPort ghent:WWTP2_Influent_In ;
+    wf:attachedTo ghent:WWTP2 ;
+    wf:hasSamplingRate "1.0"^^xsd:double ;
+    geo:lat "51.046"^^xsd:double ;
+    geo:long "3.729"^^xsd:double .
