@@ -1,0 +1,25 @@
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy project files
+COPY pyproject.toml ./
+COPY src/ghent_water/orchestrator/ ./src/ghent_water/orchestrator/
+COPY src/ghent_water/models/ ./src/ghent_water/models/
+COPY data/ ./data/
+COPY scripts/run_orchestrator.py ./scripts/
+
+# Install dependencies with faster resolver
+RUN pip install --no-cache-dir --use-deprecated=legacy-resolver -e .[dev]
+
+# Expose port
+EXPOSE 8080
+
+# Command to run
+CMD ["python", "scripts/run_orchestrator.py", "--host", "0.0.0.0", "--port", "8080"]

@@ -1,0 +1,15 @@
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy project files
+COPY pyproject.toml ./
+COPY src/ghent_water/models/ ./src/ghent_water/models/
+COPY data/ ./data/
+
+# Install dependencies
+RUN pip install --no-cache-dir -e .[dev]
+
+# Command to run (will be overridden in docker-compose)
+CMD ["python", "-m", "ghent_water.models.runners.model_runner", "--model", "dwp1", "--port", "8001"]

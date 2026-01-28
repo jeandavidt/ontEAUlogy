@@ -1,0 +1,55 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'ghent-water'
+    environment: 'development'
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # cAdvisor - Container metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'ghent-water-node'
+
+  # Orchestrator service
+  - job_name: 'orchestrator'
+    static_configs:
+      - targets: ['orchestrator:8080']
+    metrics_path: '/metrics'
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'orchestrator'
+
+  # Model services
+  - job_name: 'models'
+    static_configs:
+      - targets:
+          - 'dwp1:8001'
+          - 'dwp2:8002'
+          - 'wwtp1:8003'
+          - 'wwtp2:8004'
+          - 'texfin:8005'
+          - 'foodpro:8006'
+          - 'chiptech:8007'
+          - 'pharmagen:8008'
+          - 'brewco:8009'
+          - 'lieve_river:8010'
+          - 'dampoort:8011'
+          - 'muide:8012'
+        labels:
+          service_type: 'model'
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '([^:]+):(.*)'
+        target_label: model
+        replacement: '$1'
