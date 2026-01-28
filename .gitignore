@@ -34,3 +34,13 @@ webnotebook/*
 __marimo__/*
 *DS_Store
 *uv.lock
+
+.env
+
+# Research materials (no redistribution permission)
+research/ontologies/WaWO/WaWO+ V1.3.0/
+research/ontologies/envo-*/
+
+# Planning files (session-specific)
+.planning/
+**/.planning/
