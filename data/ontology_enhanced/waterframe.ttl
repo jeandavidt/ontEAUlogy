@@ -16,6 +16,7 @@
 
     # Import core modules (currently available)
     owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/material_entities> ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/processes> ;
     owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/properties> ;
 
     # Information module - Model metadata (CQ18-20)
@@ -44,7 +45,6 @@
     owl:imports <http://www.w3.org/ns/prov#> ;  # PROV-O for provenance tracking
 
     # Future module imports (placeholder for when modules are created)
-    # owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/processes> ;
     # owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/roles> ;
 
     # Bridge module imports
@@ -54,7 +54,7 @@
     # owl:imports <https://ugentbiomath.github.io/waterframe/bridges/qudt_alignment> .
 
     # Module organization annotations
-    rdfs:comment "Core modules available: material_entities, properties" ;
+    rdfs:comment "Core modules available: material_entities, processes, properties" ;
     rdfs:comment "Information modules: information, capabilities, qualities, agents, scenarios" ;
     rdfs:comment "Regulatory modules: sampling, compliance" ;
     rdfs:comment "Bridge modules: SOSA (observations), ENVO (environmental context), QUDT (units)" ;

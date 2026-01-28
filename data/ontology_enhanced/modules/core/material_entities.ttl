@@ -132,82 +132,137 @@ wf:WastewaterTreatmentPlant rdfs:subClassOf bfo:BFO_0000040 ;
     rdfs:label "Wastewater treatment plant" ;
     rdfs:comment "A facility that treats wastewater to produce effluent meeting discharge standards." .
 
-# WWTP process units (adapted from OntoCAPE process_units/)
-wf:WWTPTreatmentProcess rdfs:subClassOf wf:WaterSystemComponent ;
-    rdfs:label "WWTP treatment process" ;
-    rdfs:comment "A treatment process within a wastewater treatment plant." .
+# ==============================================================================
+# WWTP Physical Treatment Units (BFO:0000040 - Material Entities)
+# ==============================================================================
+# NOTE: These are PHYSICAL INFRASTRUCTURE (material entities/continuants).
+# For the PROCESSES that occur in these units, see modules/core/processes.ttl
+# The wf:performsProcess property links these physical units to their processes.
 
-wf:PrimaryTreatment rdfs:subClassOf wf:WWTPTreatmentProcess ;
-    rdfs:label "Primary treatment" ;
-    rdfs:comment "Physical treatment process for removing settleable solids." .
-
-wf:SecondaryTreatment rdfs:subClassOf wf:WWTPTreatmentProcess ;
-    rdfs:label "Secondary treatment" ;
-    rdfs:comment "Biological treatment process for removing organic matter." .
-
-wf:TertiaryTreatment rdfs:subClassOf wf:WWTPTreatmentProcess ;
-    rdfs:label "Tertiary treatment" ;
-    rdfs:comment "Advanced treatment process for nutrient removal and polishing." .
-
-wf:Screening rdfs:subClassOf wf:PrimaryTreatment ;
-    rdfs:label "Screening" ;
-    rdfs:comment "Removal of large solids through screens." ;
+# Screening Infrastructure
+wf:ScreeningUnit rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Screening unit"@en ;
+    rdfs:comment "Physical equipment with screens or bars for removing large debris from water. A material entity (BFO:0000040) that enables the screening process."@en ;
     rdfs:seeAlso <http://www.semanticweb.org/wawo/Screening> ;
-    rdfs:comment "Physical unit for WaWO+ Screening process concept" .
+    rdfs:comment "Physical infrastructure for WaWO+ Screening process concept"@en .
 
-wf:GritRemoval rdfs:subClassOf wf:PrimaryTreatment ;
-    rdfs:label "Grit removal" ;
-    rdfs:comment "Removal of heavy inorganic solids." ;
+# Alternative name for backward compatibility with case studies
+wf:Screening rdfs:subClassOf wf:ScreeningUnit ;
+    rdfs:label "Screening"@en ;
+    rdfs:comment "Synonym for ScreeningUnit. Physical equipment for large solids removal."@en ;
+    rdfs:seeAlso <http://www.semanticweb.org/wawo/Screening> .
+
+# Grit Removal Infrastructure
+wf:GritChamber rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Grit chamber"@en ;
+    rdfs:comment "Physical chamber designed for settling heavy inorganic solids (sand, grit). A material entity (BFO:0000040) that enables the grit removal process."@en ;
     rdfs:seeAlso <http://www.semanticweb.org/wawo/GritRemoval> ;
-    rdfs:comment "Physical unit for WaWO+ GritRemoval process" .
+    rdfs:comment "Physical infrastructure for WaWO+ GritRemoval process"@en .
 
-wf:PrimarySettler rdfs:subClassOf wf:PrimaryTreatment ;
-    rdfs:label "Primary settler" ;
-    rdfs:comment "Settling tank for primary sludge removal." ;
+# Alternative name for backward compatibility
+wf:GritRemoval rdfs:subClassOf wf:GritChamber ;
+    rdfs:label "Grit removal"@en ;
+    rdfs:comment "Synonym for GritChamber. Physical chamber for heavy solids removal."@en ;
+    rdfs:seeAlso <http://www.semanticweb.org/wawo/GritRemoval> .
+
+# Primary Clarification Infrastructure
+wf:PrimaryClarifier rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Primary clarifier"@en ;
+    rdfs:comment "Physical settling tank for gravity separation of primary sludge. A material entity (BFO:0000040) that enables the primary clarification process."@en ;
     rdfs:seeAlso <http://www.semanticweb.org/wawo/PrimaryClarification> ;
-    rdfs:comment "Infrastructure for WaWO+ PrimaryClarification process" .
+    rdfs:comment "Physical infrastructure for WaWO+ PrimaryClarification process"@en .
 
-wf:AerationTank rdfs:subClassOf wf:SecondaryTreatment ;
-    rdfs:label "Aeration tank" ;
-    rdfs:comment "Tank where biological oxidation of organic matter occurs." ;
+# Alternative name for backward compatibility
+wf:PrimarySettler rdfs:subClassOf wf:PrimaryClarifier ;
+    rdfs:label "Primary settler"@en ;
+    rdfs:comment "Synonym for PrimaryClarifier. Physical settling tank for primary sludge removal."@en ;
+    rdfs:seeAlso <http://www.semanticweb.org/wawo/PrimaryClarification> .
+
+# Biological Treatment Infrastructure
+wf:AerationBasin rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Aeration basin"@en ;
+    rdfs:comment "Physical tank where aerobic biological treatment occurs. A material entity (BFO:0000040) that enables biological oxidation processes."@en ;
     rdfs:seeAlso <http://www.semanticweb.org/wawo/BiologicalOxidation> ;
-    rdfs:comment "Physical infrastructure for WaWO+ BiologicalOxidation process" .
+    rdfs:comment "Physical infrastructure for WaWO+ BiologicalOxidation process"@en .
 
-wf:SecondarySettler rdfs:subClassOf wf:SecondaryTreatment ;
-    rdfs:label "Secondary settler" ;
-    rdfs:comment "Settling tank for biological sludge separation." ;
+# Alternative name for backward compatibility
+wf:AerationTank rdfs:subClassOf wf:AerationBasin ;
+    rdfs:label "Aeration tank"@en ;
+    rdfs:comment "Synonym for AerationBasin. Physical tank for biological oxidation."@en ;
+    rdfs:seeAlso <http://www.semanticweb.org/wawo/BiologicalOxidation> .
+
+# Secondary Clarification Infrastructure
+wf:SecondaryClarifier rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Secondary clarifier"@en ;
+    rdfs:comment "Physical settling tank for separating biomass from treated water. A material entity (BFO:0000040) that enables the secondary clarification process."@en ;
     rdfs:seeAlso <http://www.semanticweb.org/wawo/Clarification> ;
-    rdfs:comment "Infrastructure for WaWO+ Clarification process" .
+    rdfs:comment "Physical infrastructure for WaWO+ Clarification process"@en .
 
-wf:MembraneBioreactor rdfs:subClassOf wf:SecondaryTreatment ;
-    rdfs:label "Membrane bioreactor" ;
-    rdfs:comment "Combined biological treatment and membrane filtration." ;
+# Alternative name for backward compatibility
+wf:SecondarySettler rdfs:subClassOf wf:SecondaryClarifier ;
+    rdfs:label "Secondary settler"@en ;
+    rdfs:comment "Synonym for SecondaryClarifier. Physical settling tank for biomass separation."@en ;
+    rdfs:seeAlso <http://www.semanticweb.org/wawo/Clarification> .
+
+# Membrane Filtration Infrastructure
+wf:MembraneFilterUnit rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Membrane filter unit"@en ;
+    rdfs:comment "Physical filtration system using semi-permeable membranes. A material entity (BFO:0000040) that enables membrane filtration processes."@en ;
     rdfs:seeAlso <http://www.semanticweb.org/wawo/MembraneFiltration> ;
-    rdfs:comment "Physical unit combining biological treatment with membrane separation" .
+    rdfs:comment "Physical infrastructure for WaWO+ MembraneFiltration process"@en .
 
-wf:NitrificationTank rdfs:subClassOf wf:TertiaryTreatment ;
-    rdfs:label "Nitrification tank" ;
-    rdfs:comment "Tank for biological ammonia oxidation." ;
+# Combined biological + membrane unit
+wf:MembraneBioreactor rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Membrane bioreactor"@en ;
+    rdfs:comment "Physical unit combining biological treatment with integrated membrane filtration. A material entity (BFO:0000040) that enables both biological oxidation and membrane filtration processes."@en ;
+    rdfs:seeAlso <http://www.semanticweb.org/wawo/MembraneFiltration> ;
+    rdfs:comment "Physical unit combining biological treatment with membrane separation"@en .
+
+# Nitrification Infrastructure
+wf:NitrificationReactor rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Nitrification reactor"@en ;
+    rdfs:comment "Physical tank designed for aerobic nitrification process. A material entity (BFO:0000040) that enables ammonia oxidation to nitrate."@en ;
     rdfs:seeAlso <http://www.semanticweb.org/wawo/Nitrification> ;
-    rdfs:comment "Infrastructure for WaWO+ Nitrification process" .
+    rdfs:comment "Physical infrastructure for WaWO+ Nitrification process"@en .
 
-wf:DenitrificationTank rdfs:subClassOf wf:TertiaryTreatment ;
-    rdfs:label "Denitrification tank" ;
-    rdfs:comment "Tank for biological nitrate reduction." ;
+# Alternative name for backward compatibility
+wf:NitrificationTank rdfs:subClassOf wf:NitrificationReactor ;
+    rdfs:label "Nitrification tank"@en ;
+    rdfs:comment "Synonym for NitrificationReactor. Physical tank for ammonia oxidation."@en ;
+    rdfs:seeAlso <http://www.semanticweb.org/wawo/Nitrification> .
+
+# Denitrification Infrastructure
+wf:DenitrificationReactor rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Denitrification reactor"@en ;
+    rdfs:comment "Physical tank designed for anoxic denitrification process. A material entity (BFO:0000040) that enables nitrate reduction to nitrogen gas."@en ;
     rdfs:seeAlso <http://www.semanticweb.org/wawo/Denitrification> ;
-    rdfs:comment "Infrastructure for WaWO+ Denitrification process" .
+    rdfs:comment "Physical infrastructure for WaWO+ Denitrification process"@en .
 
-wf:PhosphorusRemovalTank rdfs:subClassOf wf:TertiaryTreatment ;
-    rdfs:label "Phosphorus removal tank" ;
-    rdfs:comment "Tank for biological or chemical phosphorus removal." ;
+# Alternative name for backward compatibility
+wf:DenitrificationTank rdfs:subClassOf wf:DenitrificationReactor ;
+    rdfs:label "Denitrification tank"@en ;
+    rdfs:comment "Synonym for DenitrificationReactor. Physical tank for nitrate reduction."@en ;
+    rdfs:seeAlso <http://www.semanticweb.org/wawo/Denitrification> .
+
+# Phosphorus Removal Infrastructure
+wf:PhosphorusRemovalTank rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Phosphorus removal tank"@en ;
+    rdfs:comment "Physical tank for biological or chemical phosphorus removal. A material entity (BFO:0000040) that enables phosphorus removal processes."@en ;
     rdfs:seeAlso <http://www.semanticweb.org/wawo/PhosphorusRemoval> ;
-    rdfs:comment "Infrastructure for WaWO+ PhosphorusRemoval process" .
+    rdfs:comment "Physical infrastructure for WaWO+ PhosphorusRemoval process"@en .
 
-wf:DisinfectionUnit rdfs:subClassOf wf:TertiaryTreatment ;
-    rdfs:label "Disinfection unit" ;
-    rdfs:comment "Unit for pathogen inactivation (UV, chlorination, etc.)." ;
+# Disinfection Infrastructure
+wf:DisinfectionChamber rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Disinfection chamber"@en ;
+    rdfs:comment "Physical chamber where disinfection occurs (UV, chlorination, ozonation, etc.). A material entity (BFO:0000040) that enables disinfection processes."@en ;
     rdfs:seeAlso <http://www.semanticweb.org/wawo/Disinfection> ;
-    rdfs:comment "Physical unit for WaWO+ Disinfection process" .
+    rdfs:comment "Physical infrastructure for WaWO+ Disinfection process"@en .
+
+# Alternative name for backward compatibility
+wf:DisinfectionUnit rdfs:subClassOf wf:DisinfectionChamber ;
+    rdfs:label "Disinfection unit"@en ;
+    rdfs:comment "Synonym for DisinfectionChamber. Physical unit for pathogen inactivation."@en ;
+    rdfs:seeAlso <http://www.semanticweb.org/wawo/Disinfection> .
 
 # ========== INDUSTRIAL FACILITIES ==========
 # Section 4.3: Industrial facility types

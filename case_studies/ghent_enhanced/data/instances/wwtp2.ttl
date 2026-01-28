@@ -46,34 +46,44 @@ ghent:WWTP2_Sludge_Out a wf:OutputPort ;
     rdfs:label "WWTP-2 Sludge Outlet"@en ;
     rdfs:comment "Waste sludge for further treatment/disposal"@en .
 
-# Treatment components (enhanced with MBR and GAC for pharmaceutical removal)
-ghent:WWTP2_Screening a wf:Screening ;
+# Treatment components (Physical units - Material Entities)
+# Enhanced with MBR and GAC for pharmaceutical removal
+ghent:WWTP2_Screening a wf:ScreeningUnit ;
     rdfs:label "WWTP-2 Fine Screens"@en ;
-    rdfs:comment "Fine screening for MBR protection"@en .
+    rdfs:comment "Fine screening for MBR protection. Physical equipment (material entity)."@en ;
+    wf:performsProcess wf:ScreeningProcess .
 
-ghent:WWTP2_GritRemoval a wf:GritRemoval ;
+ghent:WWTP2_GritRemoval a wf:GritChamber ;
     rdfs:label "WWTP-2 Grit Chamber"@en ;
-    rdfs:comment "Vortex grit chamber"@en .
+    rdfs:comment "Vortex grit chamber. Physical infrastructure (material entity)."@en ;
+    wf:performsProcess wf:GritRemovalProcess .
 
-ghent:WWTP2_PrimarySettler a wf:PrimarySettler ;
+ghent:WWTP2_PrimarySettler a wf:PrimaryClarifier ;
     rdfs:label "WWTP-2 Primary Clarifier"@en ;
-    rdfs:comment "Primary settling"@en .
+    rdfs:comment "Primary settling. Physical tank (material entity)."@en ;
+    wf:performsProcess wf:PrimaryClarificationProcess .
 
 ghent:WWTP2_MBR a wf:MembraneBioreactor ;
     rdfs:label "WWTP-2 Membrane Bioreactor"@en ;
-    rdfs:comment "MBR for combined biological treatment and ultrafiltration - provides high quality effluent"@en .
+    rdfs:comment "MBR for combined biological treatment and ultrafiltration - provides high quality effluent. Physical unit (material entity) performing multiple processes."@en ;
+    wf:performsProcess wf:BiologicalOxidationProcess ;
+    wf:performsProcess wf:MembraneFiltrationProcess .
 
-ghent:WWTP2_NutrientRemoval a wf:TertiaryTreatment ;
+ghent:WWTP2_NutrientRemoval a wf:TreatmentUnit ;
     rdfs:label "WWTP-2 Nutrient Removal"@en ;
-    rdfs:comment "Integrated BNR in MBR configuration"@en .
+    rdfs:comment "Integrated BNR in MBR configuration. Physical infrastructure (material entity)."@en ;
+    wf:performsProcess wf:NitrificationProcess ;
+    wf:performsProcess wf:DenitrificationProcess ;
+    wf:performsProcess wf:PhosphorusRemovalProcess .
 
 ghent:WWTP2_GAC a wf:TreatmentUnit ;
     rdfs:label "WWTP-2 Granular Activated Carbon"@en ;
-    rdfs:comment "GAC adsorption for pharmaceutical and micropollutant removal"@en .
+    rdfs:comment "GAC adsorption for pharmaceutical and micropollutant removal. Physical adsorption unit (material entity)."@en .
 
-ghent:WWTP2_Disinfection a wf:DisinfectionUnit ;
+ghent:WWTP2_Disinfection a wf:DisinfectionChamber ;
     rdfs:label "WWTP-2 UV Disinfection"@en ;
-    rdfs:comment "UV disinfection (MBR already removes most pathogens)"@en .
+    rdfs:comment "UV disinfection (MBR already removes most pathogens). Physical chamber (material entity)."@en ;
+    wf:performsProcess wf:DisinfectionProcess .
 
 # Operational parameters
 ghent:WWTP2_Capacity a qudt:QuantityValue ;

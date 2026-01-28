@@ -46,34 +46,43 @@ ghent:WWTP1_Sludge_Out a wf:OutputPort ;
     rdfs:label "WWTP-1 Sludge Outlet"@en ;
     rdfs:comment "Waste sludge for further treatment/disposal"@en .
 
-# Treatment components
-ghent:WWTP1_Screening a wf:Screening ;
+# Treatment components (Physical units - Material Entities)
+ghent:WWTP1_Screening a wf:ScreeningUnit ;
     rdfs:label "WWTP-1 Bar Screens"@en ;
-    rdfs:comment "Coarse and fine screening for debris removal"@en .
+    rdfs:comment "Coarse and fine screening for debris removal. Physical equipment (material entity)."@en ;
+    wf:performsProcess wf:ScreeningProcess .
 
-ghent:WWTP1_GritRemoval a wf:GritRemoval ;
+ghent:WWTP1_GritRemoval a wf:GritChamber ;
     rdfs:label "WWTP-1 Grit Chamber"@en ;
-    rdfs:comment "Aerated grit chamber for sand and grit removal"@en .
+    rdfs:comment "Aerated grit chamber for sand and grit removal. Physical infrastructure (material entity)."@en ;
+    wf:performsProcess wf:GritRemovalProcess .
 
-ghent:WWTP1_PrimarySettler a wf:PrimarySettler ;
+ghent:WWTP1_PrimarySettler a wf:PrimaryClarifier ;
     rdfs:label "WWTP-1 Primary Clarifier"@en ;
-    rdfs:comment "Primary settling for suspended solids removal"@en .
+    rdfs:comment "Primary settling for suspended solids removal. Physical tank (material entity)."@en ;
+    wf:performsProcess wf:PrimaryClarificationProcess .
 
-ghent:WWTP1_AerationTank a wf:AerationTank ;
+ghent:WWTP1_AerationTank a wf:AerationBasin ;
     rdfs:label "WWTP-1 Activated Sludge Basin"@en ;
-    rdfs:comment "Conventional activated sludge process for BOD removal"@en .
+    rdfs:comment "Conventional activated sludge process for BOD removal. Physical basin (material entity)."@en ;
+    wf:performsProcess wf:BiologicalOxidationProcess .
 
-ghent:WWTP1_SecondarySettler a wf:SecondarySettler ;
+ghent:WWTP1_SecondarySettler a wf:SecondaryClarifier ;
     rdfs:label "WWTP-1 Secondary Clarifier"@en ;
-    rdfs:comment "Secondary settling for biomass separation"@en .
+    rdfs:comment "Secondary settling for biomass separation. Physical tank (material entity)."@en ;
+    wf:performsProcess wf:SecondaryClarificationProcess .
 
-ghent:WWTP1_NutrientRemoval a wf:TertiaryTreatment ;
+ghent:WWTP1_NutrientRemoval a wf:TreatmentUnit ;
     rdfs:label "WWTP-1 Nutrient Removal"@en ;
-    rdfs:comment "Biological nitrogen and phosphorus removal (BNR)"@en .
+    rdfs:comment "Biological nitrogen and phosphorus removal (BNR). Combined physical infrastructure (material entity) performing multiple processes."@en ;
+    wf:performsProcess wf:NitrificationProcess ;
+    wf:performsProcess wf:DenitrificationProcess ;
+    wf:performsProcess wf:PhosphorusRemovalProcess .
 
-ghent:WWTP1_Disinfection a wf:DisinfectionUnit ;
+ghent:WWTP1_Disinfection a wf:DisinfectionChamber ;
     rdfs:label "WWTP-1 UV Disinfection"@en ;
-    rdfs:comment "UV disinfection before discharge"@en .
+    rdfs:comment "UV disinfection before discharge. Physical chamber (material entity)."@en ;
+    wf:performsProcess wf:DisinfectionProcess .
 
 # Operational parameters
 ghent:WWTP1_Capacity a qudt:QuantityValue ;

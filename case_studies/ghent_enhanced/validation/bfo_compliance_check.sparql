@@ -1,0 +1,29 @@
+# BFO Compliance Check - Phase 2 Validation
+# ==============================================================================
+# This query checks for violations of BFO's continuant/occurrent distinction
+# in the waterFRAME ontology after Phase 2 refactoring.
+#
+# Expected result: ZERO results (no material entities misclassified as processes)
+#
+# What this checks:
+# - Water system components (material entities) should NOT be subclasses of
+#   BFO:0000015 (occurrent/process)
+# - Material entities are BFO:0000040 (continuants)
+# - Processes are BFO:0000015 (occurrents)
+# ==============================================================================
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX bfo: <http://purl.obolibrary.org/obo/>
+
+# Query 1: Check for material entities incorrectly classified as processes
+SELECT ?class ?label WHERE {
+    ?class rdfs:subClassOf* wf:WaterSystemComponent .
+    ?class rdfs:subClassOf* bfo:BFO_0000015 .
+    OPTIONAL { ?class rdfs:label ?label }
+}
+ORDER BY ?label
+
+# Expected: 0 results (no violations)
+# If any results appear, they represent BFO violations that need correction
