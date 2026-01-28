@@ -8,6 +8,7 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix gn: <http://www.geonames.org/ontology#> .
 @prefix ex: <https://ugentbiomath.github.io/waterframe/examples#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
 
 <https://ugentbiomath.github.io/waterframe/modules/qualities>
     a owl:Ontology ;
@@ -311,17 +312,27 @@ wf:GroundwaterRechargeWater a owl:Class ;
 
 # ========== OBSERVED VALUE ==========
 # Following Entity_Feature_Value pattern: observation -> parameter -> value
+# PROV-O Integration: Observations are prov:Entity for provenance tracking
 
 wf:WaterQualityObservation a owl:Class ;
     rdfs:subClassOf bfo:BFO_0000052 ;  # Processual entity (observation event)
+    rdfs:subClassOf prov:Entity ;  # PROV-O: Observation is an entity with provenance
     rdfs:label "Water quality observation" ;
-    rdfs:comment "An observation event where water quality is measured." .
+    rdfs:comment "An observation event where water quality is measured. As a prov:Entity, observations can be traced to their source (who measured, when, using what equipment), enabling full data provenance for regulatory compliance and quality assurance." .
 
 wf:observedParameter a owl:ObjectProperty ;
     rdfs:label "observed parameter" ;
     rdfs:comment "Links an observation to the parameter being measured" ;
     rdfs:domain wf:WaterQualityObservation ;
     rdfs:range wf:WaterQualityParameter .
+
+# PROV-O Integration: Attribution of observations to agents
+wf:observedBy a owl:ObjectProperty ;
+    rdfs:subPropertyOf prov:wasAttributedTo ;  # PROV-O: Attribution to agent
+    rdfs:label "observed by" ;
+    rdfs:comment "Links an observation to the agent (sensor, equipment, or person) responsible for making the measurement. As a subproperty of prov:wasAttributedTo, this enables provenance tracking of data sources for regulatory reporting and quality assurance." ;
+    rdfs:domain wf:WaterQualityObservation ;
+    rdfs:range prov:Agent .
 
 wf:observedValue a owl:DatatypeProperty ;
     rdfs:label "observed value" ;
@@ -399,9 +410,7 @@ wf:DrinkingWaterQuality rdfs:subClassOf wf:WaterComposition ;
     - TP (typically ≤ 0.1-0.5 mg/L)
     - Microbiological parameters (E. coli, coliforms)
 
-    Always check definingFramework to know which specific thresholds apply.""" ;
-    rdfs:seeAlso <http://www.semanticweb.org/wawo/DrinkingWaterComposition> ;
-    rdfs:comment "Concept inspired by WaWO+ DrinkingWaterComposition" .
+    Always check definingFramework to know which specific thresholds apply. Conceptually related to WaWO+ DrinkingWaterComposition (unpublished ontology).""" .
 
 wf:WastewaterQuality rdfs:subClassOf wf:WaterComposition ;
     rdfs:label "Wastewater quality" ;
@@ -412,9 +421,7 @@ wf:WastewaterQuality rdfs:subClassOf wf:WaterComposition ;
     - COD > 400-800 mg/L
     - TSS > 200-400 mg/L
 
-    Discharge limits for treated wastewater are jurisdiction-specific.""" ;
-    rdfs:seeAlso <http://www.semanticweb.org/wawo/WastewaterComposition> ;
-    rdfs:comment "Concept inspired by WaWO+ WastewaterComposition" .
+    Discharge limits for treated wastewater are jurisdiction-specific. Conceptually related to WaWO+ WastewaterComposition (unpublished ontology).""" .
 
 wf:ReclaimedWaterQuality rdfs:subClassOf wf:WaterComposition ;
     rdfs:label "Reclaimed water quality" ;

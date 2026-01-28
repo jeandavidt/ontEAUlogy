@@ -28,21 +28,15 @@ wf:WaterTreatmentProcess rdfs:subClassOf bfo:BFO_0000015 ;
 
 wf:ScreeningProcess rdfs:subClassOf wf:WaterTreatmentProcess ;
     rdfs:label "Screening process"@en ;
-    rdfs:comment "Physical removal of large solids and debris from water through screens or bars. This occurrent process occurs in screening units."@en ;
-    rdfs:seeAlso <http://www.semanticweb.org/wawo/Screening> ;
-    rdfs:comment "Aligns with WaWO+ Screening process concept"@en .
+    rdfs:comment "Physical removal of large solids and debris from water through screens or bars. This occurrent process occurs in screening units. Conceptually related to WaWO+ Screening process (unpublished ontology)."@en .
 
 wf:GritRemovalProcess rdfs:subClassOf wf:WaterTreatmentProcess ;
     rdfs:label "Grit removal process"@en ;
-    rdfs:comment "Physical settling of heavy inorganic solids (sand, grit) from water. This occurrent process occurs in grit chambers."@en ;
-    rdfs:seeAlso <http://www.semanticweb.org/wawo/GritRemoval> ;
-    rdfs:comment "Aligns with WaWO+ GritRemoval process"@en .
+    rdfs:comment "Physical settling of heavy inorganic solids (sand, grit) from water. This occurrent process occurs in grit chambers. Conceptually related to WaWO+ GritRemoval process (unpublished ontology)."@en .
 
 wf:PrimaryClarificationProcess rdfs:subClassOf wf:WaterTreatmentProcess ;
     rdfs:label "Primary clarification process"@en ;
-    rdfs:comment "Gravity-based settling of suspended solids to form primary sludge. This occurrent process occurs in primary clarifiers."@en ;
-    rdfs:seeAlso <http://www.semanticweb.org/wawo/PrimaryClarification> ;
-    rdfs:comment "Aligns with WaWO+ PrimaryClarification process"@en .
+    rdfs:comment "Gravity-based settling of suspended solids to form primary sludge. This occurrent process occurs in primary clarifiers. Conceptually related to WaWO+ PrimaryClarification process (unpublished ontology)."@en .
 
 # ==============================================================================
 # Biological Treatment Processes
@@ -50,21 +44,15 @@ wf:PrimaryClarificationProcess rdfs:subClassOf wf:WaterTreatmentProcess ;
 
 wf:BiologicalOxidationProcess rdfs:subClassOf wf:WaterTreatmentProcess ;
     rdfs:label "Biological oxidation process"@en ;
-    rdfs:comment "Aerobic biological process in which microorganisms oxidize organic matter and ammonia. This occurrent process occurs in aeration basins or tanks."@en ;
-    rdfs:seeAlso <http://www.semanticweb.org/wawo/BiologicalOxidation> ;
-    rdfs:comment "Aligns with WaWO+ BiologicalOxidation process"@en .
+    rdfs:comment "Aerobic biological process in which microorganisms oxidize organic matter and ammonia. This occurrent process occurs in aeration basins or tanks. Conceptually related to WaWO+ BiologicalOxidation process (unpublished ontology)."@en .
 
 wf:SecondaryClarificationProcess rdfs:subClassOf wf:WaterTreatmentProcess ;
     rdfs:label "Secondary clarification process"@en ;
-    rdfs:comment "Gravity-based separation of biological sludge (biomass) from treated water following biological treatment. This occurrent process occurs in secondary clarifiers."@en ;
-    rdfs:seeAlso <http://www.semanticweb.org/wawo/Clarification> ;
-    rdfs:comment "Aligns with WaWO+ Clarification process"@en .
+    rdfs:comment "Gravity-based separation of biological sludge (biomass) from treated water following biological treatment. This occurrent process occurs in secondary clarifiers. Conceptually related to WaWO+ Clarification process (unpublished ontology)."@en .
 
 wf:MembraneFiltrationProcess rdfs:subClassOf wf:WaterTreatmentProcess ;
     rdfs:label "Membrane filtration process"@en ;
-    rdfs:comment "Physical separation of solids and microorganisms through semi-permeable membranes (microfiltration, ultrafiltration, nanofiltration, or reverse osmosis). This occurrent process occurs in membrane filter units or membrane bioreactors."@en ;
-    rdfs:seeAlso <http://www.semanticweb.org/wawo/MembraneFiltration> ;
-    rdfs:comment "Aligns with WaWO+ MembraneFiltration process"@en .
+    rdfs:comment "Physical separation of solids and microorganisms through semi-permeable membranes (microfiltration, ultrafiltration, nanofiltration, or reverse osmosis). This occurrent process occurs in membrane filter units or membrane bioreactors. Conceptually related to WaWO+ MembraneFiltration process (unpublished ontology)."@en .
 
 # ==============================================================================
 # Nutrient Removal Processes
@@ -72,21 +60,15 @@ wf:MembraneFiltrationProcess rdfs:subClassOf wf:WaterTreatmentProcess ;
 
 wf:NitrificationProcess rdfs:subClassOf wf:WaterTreatmentProcess ;
     rdfs:label "Nitrification process"@en ;
-    rdfs:comment "Aerobic biological oxidation of ammonia (NH4+) to nitrite (NO2-) and then to nitrate (NO3-) by autotrophic bacteria. This occurrent process occurs in nitrification reactors or tanks."@en ;
-    rdfs:seeAlso <http://www.semanticweb.org/wawo/Nitrification> ;
-    rdfs:comment "Aligns with WaWO+ Nitrification process"@en .
+    rdfs:comment "Aerobic biological oxidation of ammonia (NH4+) to nitrite (NO2-) and then to nitrate (NO3-) by autotrophic bacteria. This occurrent process occurs in nitrification reactors or tanks. Conceptually related to WaWO+ Nitrification process (unpublished ontology)."@en .
 
 wf:DenitrificationProcess rdfs:subClassOf wf:WaterTreatmentProcess ;
     rdfs:label "Denitrification process"@en ;
-    rdfs:comment "Anaerobic biological reduction of nitrate (NO3-) to nitrogen gas (N2) under anoxic conditions. This occurrent process occurs in denitrification reactors or tanks."@en ;
-    rdfs:seeAlso <http://www.semanticweb.org/wawo/Denitrification> ;
-    rdfs:comment "Aligns with WaWO+ Denitrification process"@en .
+    rdfs:comment "Anaerobic biological reduction of nitrate (NO3-) to nitrogen gas (N2) under anoxic conditions. This occurrent process occurs in denitrification reactors or tanks. Conceptually related to WaWO+ Denitrification process (unpublished ontology)."@en .
 
 wf:PhosphorusRemovalProcess rdfs:subClassOf wf:WaterTreatmentProcess ;
     rdfs:label "Phosphorus removal process"@en ;
-    rdfs:comment "Biological or chemical removal of phosphorus from water. Biological phosphorus removal occurs through luxury uptake by phosphorus-accumulating organisms. Chemical removal uses metal salts for precipitation. This occurrent process occurs in phosphorus removal tanks."@en ;
-    rdfs:seeAlso <http://www.semanticweb.org/wawo/PhosphorusRemoval> ;
-    rdfs:comment "Aligns with WaWO+ PhosphorusRemoval process"@en .
+    rdfs:comment "Biological or chemical removal of phosphorus from water. Biological phosphorus removal occurs through luxury uptake by phosphorus-accumulating organisms. Chemical removal uses metal salts for precipitation. This occurrent process occurs in phosphorus removal tanks. Conceptually related to WaWO+ PhosphorusRemoval process (unpublished ontology)."@en .
 
 # ==============================================================================
 # Disinfection Process
@@ -94,9 +76,7 @@ wf:PhosphorusRemovalProcess rdfs:subClassOf wf:WaterTreatmentProcess ;
 
 wf:DisinfectionProcess rdfs:subClassOf wf:WaterTreatmentProcess ;
     rdfs:label "Disinfection process"@en ;
-    rdfs:comment "Inactivation or destruction of pathogenic microorganisms through physical (UV radiation) or chemical (chlorination, ozonation) means. This occurrent process occurs in disinfection chambers or units."@en ;
-    rdfs:seeAlso <http://www.semanticweb.org/wawo/Disinfection> ;
-    rdfs:comment "Aligns with WaWO+ Disinfection process"@en .
+    rdfs:comment "Inactivation or destruction of pathogenic microorganisms through physical (UV radiation) or chemical (chlorination, ozonation) means. This occurrent process occurs in disinfection chambers or units. Conceptually related to WaWO+ Disinfection process (unpublished ontology)."@en .
 
 # ==============================================================================
 # Linking Property: Material Entity performs Occurrent Process
