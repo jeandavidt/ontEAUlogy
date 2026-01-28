@@ -10,7 +10,7 @@ Supported models:
     - wwtp1, wwtp2: Wastewater Treatment Plants
     - texfin, foodpro, chiptech, pharmagen, brewco: Industries
     - dampoort, muide: Residential Districts
-    - river: River segment
+    - lieve_river: River segment
 """
 
 import argparse
@@ -45,7 +45,7 @@ MODEL_REGISTRY = {
     "dampoort": ("Dampoort", 8011, create_residential_model),
     "muide": ("Muide", 8012, create_residential_model),
     # River
-    "river": ("River", 8010, create_river_model),
+    "lieve_river": ("Lieve River", 8010, create_river_model),
 }
 
 
@@ -69,10 +69,12 @@ def create_model(model_name: str, port: Optional[int] = None):
             f"Valid models: {', '.join(valid_models)}"
         )
 
-    entity_id, default_port, factory = MODEL_REGISTRY[model_name.lower()]
+    display_name, default_port, factory = MODEL_REGISTRY[model_name.lower()]
     actual_port = port or default_port
 
-    return factory(entity_id=entity_id, port=actual_port)
+    # Use the registry key as the entity_id (the programmatic identifier)
+    # The display_name from the registry is for human-readable output only
+    return factory(entity_id=model_name.lower(), port=actual_port)
 
 
 def run_model(model_name: str, port: Optional[int] = None, run_server: bool = True):
@@ -114,7 +116,7 @@ def main():
         "--model", "-m",
         type=str,
         required=True,
-        help="Model to run (e.g., dwp1, wwtp1, texfin, dampoort, river)",
+        help="Model to run (e.g., dwp1, wwtp1, texfin, dampoort, lieve_river)",
     )
 
     parser.add_argument(

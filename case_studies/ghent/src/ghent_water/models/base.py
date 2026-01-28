@@ -10,6 +10,13 @@ import json
 from datetime import datetime
 
 
+class ModelStatus:
+    """Model status constants."""
+    READY = "Ready"
+    RUNNING = "Running"
+    ERROR = "Error"
+
+
 # Ontology namespace constants
 WATERFRAME_BASE = "https://w3id.org/waterframe/"
 WF = WATERFRAME_BASE
@@ -60,6 +67,7 @@ class BaseWaterModel(ABC):
         self.metadata = metadata or {}
         self._state: Dict[str, Any] = {}
         self._last_run: Optional[datetime] = None
+        self._status: str = ModelStatus.READY
 
     @property
     def api_endpoint(self) -> str:
@@ -97,14 +105,19 @@ class BaseWaterModel(ABC):
         """
         pass
 
-    @abstractmethod
     async def get_state(self) -> Dict[str, Any]:
         """Return current model state (last run results).
 
         Returns:
-            Dictionary containing current model state.
+            Dictionary containing current model state including status.
         """
-        pass
+        return {
+            **self._state,
+            "status": self._status,
+            "model": self.entity_id,
+            "type": self.entity_type,
+            "endpoint": self.api_endpoint,
+        }
 
     def generate_ttl_description(self) -> str:
         """Generate Turtle self-description for this model.
@@ -156,6 +169,118 @@ ghent:{self.entity_id}_Model a wf:{self.entity_type} ;
 """
         return ttl
 
+    def generate_agent_ttl(self) -> str:
+        """Generate Turtle description for agent, software system, and operation.
+
+        This extends the base model description with agent-aware semantics,
+        enabling compositional reasoning and service discovery.
+
+        Returns:
+            String containing TTL formatted agent description.
+        """
+        # Generate base model TTL
+        base_ttl = self.generate_ttl_description()
+
+        # Generate software system instance (REUSE existing SoftwareSystem class!)
+        software_ttl = f"""
+# Software System
+ghent:{self.entity_id}_Software a wf:SoftwareSystem ;
+    rdfs:label "{self.entity_name} Software" ;
+    wf:apiEndpoint <{self.api_endpoint}> ;
+    wf:apiVersion "1.0" .
+"""
+
+        # Generate agent instance
+        capabilities_refs = ", ".join(
+            f"cap:{cap}" for cap in self.capabilities
+        ) if self.capabilities else ""
+
+        agent_ttl = f"""
+# Computational Agent
+ghent:{self.entity_id}_Agent a wf:SimulationAgent ;
+    rdfs:label "{self.entity_name} Agent" ;
+    wf:implements ghent:{self.entity_id}_Model ;
+    wf:simulates ghent:{self.entity_id} ;
+    wf:runsOn ghent:{self.entity_id}_Software ;"""
+
+        if capabilities_refs:
+            agent_ttl += f"""
+    wf:hasCapability {capabilities_refs} ;"""
+
+        agent_ttl += f"""
+    wf:offersOperation ghent:{self.entity_id}_SimulateOp ;
+    wf:agentVersion "1.0.0" .
+"""
+
+        # Generate operation instance (REUSE same input/output objects as model!)
+        # Build input/output references
+        input_refs = ", ".join(
+            f"ghent:{inp['name']}_Input" for inp in self.inputs
+        ) if self.inputs else ""
+
+        output_refs = ", ".join(
+            f"ghent:{out['name']}_Output" for out in self.outputs
+        ) if self.outputs else ""
+
+        operation_ttl = f"""
+# Operation
+ghent:{self.entity_id}_SimulateOp a wf:Operation ;
+    rdfs:label "Simulate {self.entity_name}" ;"""
+
+        if input_refs:
+            operation_ttl += f"""
+    wf:requiresInput {input_refs} ;"""
+
+        if output_refs:
+            operation_ttl += f"""
+    wf:producesOutput {output_refs} ;"""
+
+        # Add preconditions for numeric inputs (must be >= 0)
+        preconditions = []
+        for inp in self.inputs:
+            if inp.get("datatype", "float") in ["float", "int", "integer", "number"]:
+                preconditions.append(f"""
+    wf:hasPrecondition [
+        a wf:Precondition ;
+        wf:constrainsParameter ghent:{inp['name']}_Input ;
+        wf:constraintExpression "{inp['name']} >= 0" ;
+        rdfs:comment "{inp['name'].replace('_', ' ').title()} cannot be negative"
+    ] ;""")
+
+        operation_ttl += "".join(preconditions)
+
+        # Add HTTP grounding
+        operation_ttl += f"""
+    wf:hasHTTPGrounding [
+        a wf:HTTPGrounding ;
+        wf:httpMethod "POST" ;
+        wf:operationPath "/simulate" ;
+        wf:requestFormat "application/json" ;
+        wf:responseFormat "application/json" ;
+        wf:requiresAuthentication "false"^^xsd:boolean
+    ] ;
+    wf:estimatedExecutionTime "2.0"^^xsd:float ;
+    wf:computationalComplexity "O(n)" .
+"""
+
+        # Combine all parts
+        return base_ttl + software_ttl + agent_ttl + operation_ttl
+
+    @property
+    def agent_iri(self) -> str:
+        """Return the IRI for this agent."""
+        return f"{CASE_GHENT}{self.entity_id}_Agent"
+
+    @property
+    def operation_iri(self) -> str:
+        """Return the IRI for this agent's main operation."""
+        return f"{CASE_GHENT}{self.entity_id}_SimulateOp"
+
+    @property
+    def software_iri(self) -> str:
+        """Return the IRI for this agent's software system."""
+        return f"{CASE_GHENT}{self.entity_id}_Software"
+
     async def register_with_orchestrator(self, orchestrator_url: str) -> Dict[str, Any]:
         """Register model with orchestrator service.
 
@@ -191,18 +316,21 @@ ghent:{self.entity_id}_Model a wf:{self.entity_type} ;
             "last_run": self._last_run.isoformat() if self._last_run else None,
         }
 
-    def _update_state(self, outputs: Dict[str, Any]) -> None:
+    def _update_state(self, outputs: Dict[str, Any], status: Optional[str] = None) -> None:
         """Update internal state after simulation run.
-
+        
         Args:
             outputs: Simulation output dictionary.
+            status: Optional status to set (defaults to Ready after simulation).
         """
         self._state = {
             "outputs": outputs,
             "timestamp": datetime.utcnow().isoformat(),
             "model_id": self.entity_id,
+            "status": status or ModelStatus.READY,
         }
         self._last_run = datetime.utcnow()
+        self._status = status or ModelStatus.READY
 
     def _get_parameter_value(
         self, inputs: Dict[str, Any], param_name: str, default: Any = None
