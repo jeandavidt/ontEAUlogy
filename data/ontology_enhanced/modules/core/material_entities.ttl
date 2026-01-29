@@ -58,23 +58,74 @@ wf:InfiltrationUnit rdfs:subClassOf wf:TreatmentUnit ;
 # Water usage points (fixtures and appliances)
 wf:WaterUsagePoint rdfs:subClassOf wf:WaterSystemComponent ;
     rdfs:label "Water usage point" ;
-    rdfs:comment "Physical fixture or appliance where water is used" .
+    rdfs:comment """Physical fixture where water is consumed for END-USE purposes that extend beyond
+system operation. Distinguished from infrastructure by purpose: a sink enables washing (end use),
+while a pipe only enables flow (system function). Includes fixtures for human needs, production
+processes, agriculture, but excludes pumps, valves, and conveyance elements.""" .
 
-wf:BathingFixture rdfs:subClassOf wf:WaterUsagePoint ;
+# Human welfare uses
+wf:HumanWelfareUsagePoint rdfs:subClassOf wf:WaterUsagePoint ;
+    rdfs:label "Human welfare usage point" ;
+    rdfs:comment "Fixtures serving human health, hygiene, and basic needs." .
+
+wf:BathingFixture rdfs:subClassOf wf:HumanWelfareUsagePoint ;
     rdfs:label "Bathing fixture" ;
-    rdfs:comment "Fixtures for bathing and showering" .
+    rdfs:comment "Fixtures for bathing and showering (showers, tubs)." .
 
-wf:CleaningFixture rdfs:subClassOf wf:WaterUsagePoint ;
+wf:CleaningFixture rdfs:subClassOf wf:HumanWelfareUsagePoint ;
     rdfs:label "Cleaning fixture" ;
-    rdfs:comment "Fixtures for cleaning activities" .
+    rdfs:comment "Fixtures for washing and cleaning (sinks, faucets)." .
 
+wf:Toilet rdfs:subClassOf wf:HumanWelfareUsagePoint ;
+    rdfs:label "Toilet" ;
+    rdfs:comment "Sanitary fixture for human waste disposal." .
+
+wf:DrinkingWaterPoint rdfs:subClassOf wf:HumanWelfareUsagePoint ;
+    rdfs:label "Drinking water point" ;
+    rdfs:comment "Fixture for potable water consumption (drinking fountains, taps)." .
+
+# Appliances
 wf:Appliance rdfs:subClassOf wf:WaterUsagePoint ;
     rdfs:label "Water-using appliance" ;
-    rdfs:comment "Household appliances that use water" .
+    rdfs:comment "Household or commercial appliances that consume water." .
 
-wf:Toilet rdfs:subClassOf wf:WaterUsagePoint ;
-    rdfs:label "Toilet" ;
-    rdfs:comment "Sanitary fixture for human waste disposal" .
+wf:LaundryAppliance rdfs:subClassOf wf:Appliance ;
+    rdfs:label "Laundry appliance" ;
+    rdfs:comment "Washing machines for clothing and linens." .
+
+wf:DishwashingAppliance rdfs:subClassOf wf:Appliance ;
+    rdfs:label "Dishwashing appliance" ;
+    rdfs:comment "Dishwashers for cleaning dishes and utensils." .
+
+# Industrial uses
+wf:IndustrialUsagePoint rdfs:subClassOf wf:WaterUsagePoint ;
+    rdfs:label "Industrial usage point" ;
+    rdfs:comment "Points where water is consumed in industrial processes." .
+
+wf:ProcessWaterPoint rdfs:subClassOf wf:IndustrialUsagePoint ;
+    rdfs:label "Process water point" ;
+    rdfs:comment "Water incorporated into products (e.g., brewing, food processing)." .
+
+wf:CoolingWaterPoint rdfs:subClassOf wf:IndustrialUsagePoint ;
+    rdfs:label "Cooling water point" ;
+    rdfs:comment "Water used for cooling (not incorporated into product)." .
+
+wf:BoilerFeedPoint rdfs:subClassOf wf:IndustrialUsagePoint ;
+    rdfs:label "Boiler feed point" ;
+    rdfs:comment "Water input to boilers for steam generation." .
+
+# Agricultural uses
+wf:AgriculturalUsagePoint rdfs:subClassOf wf:WaterUsagePoint ;
+    rdfs:label "Agricultural usage point" ;
+    rdfs:comment "Points where water is used in agricultural operations." .
+
+wf:IrrigationPoint rdfs:subClassOf wf:AgriculturalUsagePoint ;
+    rdfs:label "Irrigation point" ;
+    rdfs:comment "Water delivery for crop irrigation." .
+
+wf:LivestockWateringPoint rdfs:subClassOf wf:AgriculturalUsagePoint ;
+    rdfs:label "Livestock watering point" ;
+    rdfs:comment "Water delivery for animal consumption." .
 
 # Water sources (collection infrastructure)
 wf:WaterSource rdfs:subClassOf wf:WaterSystemComponent ;

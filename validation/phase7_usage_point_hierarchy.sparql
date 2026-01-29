@@ -1,0 +1,21 @@
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+# Phase 7: Validate usage point hierarchy refinement
+# Expected result: All usage point classes with their parent classes
+
+SELECT ?class ?label ?parent ?parentLabel WHERE {
+  ?class rdfs:subClassOf* wf:WaterUsagePoint ;
+         rdfs:label ?label ;
+         rdfs:subClassOf ?parent .
+
+  # Get parent label if it exists
+  OPTIONAL {
+    ?parent rdfs:label ?parentLabel .
+  }
+
+  # Filter out owl:Thing to keep results clean
+  FILTER(?parent != owl:Thing)
+}
+ORDER BY ?label

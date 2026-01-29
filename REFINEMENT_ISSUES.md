@@ -19,7 +19,7 @@ This document tracks issues, blockers, and decisions encountered during the impl
 | Phase 4: Property Relationships | Completed | 0 | - |
 | Phase 5: Conveyance System | Completed | 0 | - |
 | Phase 6: OWL-Time Simplification | Completed | 0 | - |
-| Phase 7: Usage Point Refinement | Not Started | - | - |
+| Phase 7: Usage Point Refinement | Completed | 0 | - |
 | Phase 8: Facility Definitions | Not Started | - | - |
 | Phase 9: Fit-for-Purpose Framework | Not Started | - | - |
 | Phase 10: Testing & Validation | Not Started | - | - |
@@ -505,7 +505,142 @@ No blocking issues encountered. The scenarios module already had the simple prop
 
 ## Phase 7: Usage Point Refinement
 
-*No issues logged yet*
+### Summary
+Phase 7 successfully refined water usage point definitions with clearer semantic structure distinguishing end-use purposes. The generic "Physical fixture or appliance where water is used" definition was enhanced to emphasize END-USE purposes beyond system operation, and a comprehensive hierarchy was created covering human welfare, appliances, industrial, and agricultural usage points.
+
+### Implementation Details
+
+**Problem:**
+The original `wf:WaterUsagePoint` definition was too broad ("Physical fixture or appliance where water is used") and lacked clear distinction between end-use fixtures (sinks, toilets) and infrastructure components (pumps, valves). The hierarchy was minimal with only basic fixture types.
+
+**Files Modified:**
+- `data/ontology_enhanced/modules/core/material_entities.ttl` (lines 58-78) - Enhanced WaterUsagePoint definition and expanded hierarchy
+- `data/ontology_enhanced/modules/core/properties.ttl` (lines 254-273) - Added usage point properties for fit-for-purpose integration
+
+**Files Created:**
+- `validation/phase7_usage_point_hierarchy.sparql` - SPARQL validation query for usage point hierarchy
+
+**Enhanced Root Definition:**
+```turtle
+wf:WaterUsagePoint rdfs:subClassOf wf:WaterSystemComponent ;
+    rdfs:label "Water usage point" ;
+    rdfs:comment """Physical fixture where water is consumed for END-USE purposes that extend beyond
+system operation. Distinguished from infrastructure by purpose: a sink enables washing (end use),
+while a pipe only enables flow (system function). Includes fixtures for human needs, production
+processes, agriculture, but excludes pumps, valves, and conveyance elements.""" .
+```
+
+**New Class Hierarchy Created:**
+
+1. **Human Welfare Branch** (4 classes):
+   - `wf:HumanWelfareUsagePoint` - Root for fixtures serving human health, hygiene, and basic needs
+     - `wf:BathingFixture` - Showers, tubs (updated parent)
+     - `wf:CleaningFixture` - Sinks, faucets (updated parent)
+     - `wf:Toilet` - Sanitary fixtures (updated parent)
+     - `wf:DrinkingWaterPoint` - NEW: Drinking fountains, taps
+
+2. **Appliances Branch** (3 classes):
+   - `wf:Appliance` - Root for water-using appliances (retained)
+     - `wf:LaundryAppliance` - NEW: Washing machines
+     - `wf:DishwashingAppliance` - NEW: Dishwashers
+
+3. **Industrial Branch** (4 classes):
+   - `wf:IndustrialUsagePoint` - NEW: Root for industrial water consumption
+     - `wf:ProcessWaterPoint` - NEW: Water incorporated into products
+     - `wf:CoolingWaterPoint` - NEW: Cooling water (not in product)
+     - `wf:BoilerFeedPoint` - NEW: Boiler steam generation
+
+4. **Agricultural Branch** (3 classes):
+   - `wf:AgriculturalUsagePoint` - NEW: Root for agricultural water use
+     - `wf:IrrigationPoint` - NEW: Crop irrigation
+     - `wf:LivestockWateringPoint` - NEW: Animal consumption
+
+**Total Classes Added:** 13 new classes (3 existing classes reparented under HumanWelfareUsagePoint)
+
+**New Properties Added:**
+
+```turtle
+wf:servesPurpose a owl:DatatypeProperty ;
+    rdfs:label "serves purpose" ;
+    rdfs:domain wf:WaterUsagePoint ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Textual description of the end-use purpose served by this usage point." .
+
+wf:requiresQuality a owl:ObjectProperty ;
+    rdfs:label "requires quality" ;
+    rdfs:domain wf:WaterUsagePoint ;
+    rdfs:range owl:Thing ;  # Will be wf:QualityConstraintSet when fit-for-purpose module is created
+    rdfs:comment "Links a usage point to the water quality requirements it must satisfy." .
+```
+
+### Design Rationale
+
+**End-Use Emphasis:**
+The enhanced definition clearly distinguishes usage points (end-use purposes) from infrastructure components (system operation only). This addresses the semantic ambiguity in the original definition.
+
+**Categorization by Sector:**
+The four-branch hierarchy (human welfare, appliances, industrial, agricultural) provides clear categorization aligned with water demand modeling and fit-for-purpose water quality planning.
+
+**Fit-for-Purpose Integration:**
+The new properties (`servesPurpose`, `requiresQuality`) enable future integration with fit-for-purpose water quality frameworks, where different end uses have different quality requirements.
+
+### Validation Results
+
+**Hierarchy Structure:** VERIFIED
+- Created validation query `phase7_usage_point_hierarchy.sparql`
+- Query retrieves all usage point classes with their parent relationships
+- Expected result: 17 total classes (1 root + 16 subclasses across 4 branches)
+
+**Semantic Clarity:** IMPROVED
+- Clear distinction between end-use fixtures and infrastructure components
+- Comprehensive coverage of residential, commercial, industrial, and agricultural use cases
+- Properties support fit-for-purpose quality constraint modeling
+
+### Design Decisions
+
+**Decision 1: Four-Branch Categorization**
+- Context: How to organize diverse usage point types?
+- Decision: Create four domain-specific branches (human welfare, appliances, industrial, agricultural)
+- Rationale: Aligns with water demand modeling categories and fit-for-purpose planning
+- Alternative: Flat hierarchy under WaterUsagePoint (rejected - loses semantic organization)
+
+**Decision 2: Reparent Existing Fixtures**
+- Context: Should existing fixtures (BathingFixture, CleaningFixture, Toilet) remain direct subclasses?
+- Decision: Reparent under HumanWelfareUsagePoint for semantic clarity
+- Rationale: Groups related fixtures serving human health and hygiene needs
+- Alternative: Keep as direct subclasses (rejected - loses valuable categorization)
+
+**Decision 3: Property Range Flexibility**
+- Context: Should requiresQuality range be strictly defined now?
+- Decision: Use owl:Thing with comment noting future wf:QualityConstraintSet
+- Rationale: Fit-for-purpose module (Phase 9) will define quality constraint structure
+- Alternative: Create QualityConstraintSet placeholder now (rejected - premature, Phase 9 will handle)
+
+### Issues Encountered
+
+No blocking issues encountered. Implementation followed the plan systematically.
+
+### Future Considerations
+
+1. Phase 9 (Fit-for-Purpose Framework) will define `wf:QualityConstraintSet` and update `wf:requiresQuality` range
+2. Could add intermediate classes for commercial vs. residential fixtures
+3. May need additional industrial subcategories (cleaning-in-place, electroplating, etc.)
+4. Agricultural branch could be expanded with greenhouse irrigation, aquaculture, etc.
+5. Consider adding water efficiency properties (flow rate, usage duration) for demand modeling
+
+### Semantic Impact
+
+**Improved Competency Question Coverage:**
+- CQ: "What are all the human welfare usage points in a building?" → Query wf:HumanWelfareUsagePoint
+- CQ: "Which industrial processes consume water?" → Query wf:IndustrialUsagePoint hierarchy
+- CQ: "What quality requirements does this usage point have?" → Use wf:requiresQuality property
+- CQ: "What purpose does this fixture serve?" → Use wf:servesPurpose property
+
+**Fit-for-Purpose Readiness:**
+The enhanced hierarchy and new properties provide the foundation for Phase 9's fit-for-purpose framework, enabling water quality requirements to be linked to specific end-use categories.
+
+### Date Completed
+2026-01-28
 
 ---
 
@@ -589,7 +724,14 @@ This section tracks commits made by each subagent during implementation.
   - Achieved 72.7% reduction in triples for temporal representation
 
 ### Phase 7: Usage Point Refinement
-- *Commits will be logged here*
+- `feat(ontology): Phase 7 - refine usage point definitions with end-use semantic structure` (2026-01-28)
+  - Enhanced wf:WaterUsagePoint definition to emphasize END-USE purposes vs. infrastructure
+  - Created four-branch hierarchy: HumanWelfareUsagePoint, Appliance, IndustrialUsagePoint, AgriculturalUsagePoint
+  - Added 13 new usage point classes covering residential, commercial, industrial, and agricultural domains
+  - Reparented existing fixtures (BathingFixture, CleaningFixture, Toilet) under HumanWelfareUsagePoint
+  - Added wf:servesPurpose and wf:requiresQuality properties for fit-for-purpose integration
+  - Created validation query: phase7_usage_point_hierarchy.sparql
+  - Total: 17 usage point classes (1 root + 16 subclasses) with clear semantic organization
 
 ### Phase 8: Facility Definitions
 - *Commits will be logged here*

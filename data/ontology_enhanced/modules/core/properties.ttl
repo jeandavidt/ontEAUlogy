@@ -256,3 +256,18 @@ wf:activationThreshold a owl:ObjectProperty ;
     rdfs:domain wf:OverflowStructure ;
     rdfs:range owl:Thing ;  # Will be wf:QuantityValue when qualities module is integrated
     rdfs:comment "Flow rate or water level that triggers overflow activation. Range should be wf:QuantityValue from qualities module." .
+
+# ========== USAGE POINT PROPERTIES ==========
+# Phase 7: Properties for usage point fit-for-purpose integration
+
+wf:servesPurpose a owl:DatatypeProperty ;
+    rdfs:label "serves purpose" ;
+    rdfs:domain wf:WaterUsagePoint ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Textual description of the end-use purpose served by this usage point." .
+
+wf:requiresQuality a owl:ObjectProperty ;
+    rdfs:label "requires quality" ;
+    rdfs:domain wf:WaterUsagePoint ;
+    rdfs:range owl:Thing ;  # Will be wf:QualityConstraintSet when fit-for-purpose module is created
+    rdfs:comment "Links a usage point to the water quality requirements it must satisfy. Range will be wf:QualityConstraintSet from fit-for-purpose module." .
