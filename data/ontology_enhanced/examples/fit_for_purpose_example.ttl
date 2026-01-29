@@ -1,0 +1,208 @@
+@prefix ex: <https://ugentbiomath.github.io/waterframe/examples#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ========== FIT-FOR-PURPOSE WATER REUSE EXAMPLE ==========
+# Phase 9: Demonstrates how the same water can be evaluated for different purposes
+# Shows quality assessment from sensor/lab measurements to fitness determination
+
+# ========== SCENARIO: WWTP EFFLUENT REUSE ==========
+# A WWTP produces treated effluent that is too low quality for drinking
+# but perfectly suitable for toilet flushing and irrigation
+
+# Water sample from WWTP effluent
+ex:WWTP_Effluent_Sample_2026_01_28 a wf:WaterSample ;
+    rdfs:label "WWTP effluent sample 2026-01-28" ;
+    rdfs:comment "Sample of treated wastewater effluent for quality assessment." ;
+    wf:hasMeasurement ex:WWTP_BOD_Obs, ex:WWTP_TSS_Obs, ex:WWTP_EColi_Obs .
+
+# Measurements from laboratory analysis
+ex:WWTP_BOD_Obs a wf:WaterQualityObservation ;
+    rdfs:label "BOD observation" ;
+    wf:observedParameter wf:BOD ;
+    wf:observedValue "8.0"^^xsd:double ;
+    wf:hasUnit "mg/L" ;
+    rdfs:comment "BOD = 8 mg/L - too high for drinking but acceptable for other uses." .
+
+ex:WWTP_TSS_Obs a wf:WaterQualityObservation ;
+    rdfs:label "TSS observation" ;
+    wf:observedParameter wf:TSS ;
+    wf:observedValue "4.5"^^xsd:double ;
+    wf:hasUnit "mg/L" ;
+    rdfs:comment "TSS = 4.5 mg/L - good clarity." .
+
+ex:WWTP_EColi_Obs a wf:WaterQualityObservation ;
+    rdfs:label "E.coli observation" ;
+    wf:observedParameter wf:EColi ;
+    wf:observedValue "50"^^xsd:double ;
+    wf:hasUnit "CFU/100mL" ;
+    rdfs:comment "E.coli = 50 CFU/100mL - pathogen level too high for drinking." .
+
+# ========== QUALITY CONSTRAINT SETS ==========
+
+# Drinking water constraints (strict)
+ex:DrinkingWaterConstraints a wf:QualityConstraintSet ;
+    rdfs:label "Drinking water constraints" ;
+    wf:definesQualityFor wf:DrinkingWaterQuality ;
+    wf:includesConstraint ex:DrinkingBOD, ex:DrinkingTSS, ex:DrinkingEColi .
+
+ex:DrinkingBOD a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:BOD ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "5.0"^^xsd:double ;
+    wf:hasUnit "mg/L" .
+
+ex:DrinkingTSS a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:TSS ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "1.0"^^xsd:double ;
+    wf:hasUnit "mg/L" .
+
+ex:DrinkingEColi a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:EColi ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "0"^^xsd:double ;
+    wf:hasUnit "CFU/100mL" .
+
+# Toilet flushing constraints (relaxed)
+ex:ToiletFlushingConstraints a wf:QualityConstraintSet ;
+    rdfs:label "Toilet flushing constraints" ;
+    wf:includesConstraint ex:ToiletBOD, ex:ToiletTSS, ex:ToiletEColi .
+
+ex:ToiletBOD a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:BOD ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "25.0"^^xsd:double ;
+    wf:hasUnit "mg/L" .
+
+ex:ToiletTSS a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:TSS ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "10.0"^^xsd:double ;
+    wf:hasUnit "mg/L" .
+
+ex:ToiletEColi a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:EColi ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "100"^^xsd:double ;
+    wf:hasUnit "CFU/100mL" .
+
+# Irrigation constraints (moderate)
+ex:IrrigationConstraints a wf:QualityConstraintSet ;
+    rdfs:label "Irrigation constraints" ;
+    wf:includesConstraint ex:IrrigationBOD, ex:IrrigationTSS, ex:IrrigationEColi .
+
+ex:IrrigationBOD a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:BOD ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "20.0"^^xsd:double ;
+    wf:hasUnit "mg/L" .
+
+ex:IrrigationTSS a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:TSS ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "30.0"^^xsd:double ;
+    wf:hasUnit "mg/L" .
+
+ex:IrrigationEColi a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:EColi ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "1000"^^xsd:double ;
+    wf:hasUnit "CFU/100mL" .
+
+# ========== QUALITY ASSESSMENTS ==========
+# Evaluate the same water sample against different constraint sets
+
+# Assessment 1: Check if suitable for drinking water (FAILS)
+ex:DrinkingWaterAssessment a wf:QualityAssessment ;
+    rdfs:label "Drinking water fitness assessment" ;
+    wf:assessesWater ex:WWTP_Effluent_Sample_2026_01_28 ;
+    wf:againstConstraintSet ex:DrinkingWaterConstraints ;
+    wf:assessmentResult "false"^^xsd:boolean ;
+    wf:violatedConstraint ex:DrinkingBOD, ex:DrinkingTSS, ex:DrinkingEColi ;
+    wf:assessmentDate "2026-01-28T14:30:00"^^xsd:dateTime ;
+    rdfs:comment """FAILED: Water exceeds drinking water limits.
+    - BOD: 8.0 mg/L > 5.0 mg/L limit
+    - TSS: 4.5 mg/L > 1.0 mg/L limit
+    - E.coli: 50 CFU/100mL > 0 CFU/100mL limit
+    This water is NOT suitable for drinking.""" .
+
+# Assessment 2: Check if suitable for toilet flushing (PASSES)
+ex:ToiletFlushingAssessment a wf:QualityAssessment ;
+    rdfs:label "Toilet flushing fitness assessment" ;
+    wf:assessesWater ex:WWTP_Effluent_Sample_2026_01_28 ;
+    wf:againstConstraintSet ex:ToiletFlushingConstraints ;
+    wf:assessmentResult "true"^^xsd:boolean ;
+    wf:assessmentDate "2026-01-28T14:30:00"^^xsd:dateTime ;
+    rdfs:comment """PASSED: Water meets all toilet flushing requirements.
+    - BOD: 8.0 mg/L < 25.0 mg/L limit ✓
+    - TSS: 4.5 mg/L < 10.0 mg/L limit ✓
+    - E.coli: 50 CFU/100mL < 100 CFU/100mL limit ✓
+    This water is SUITABLE for toilet flushing reuse.""" .
+
+# Assessment 3: Check if suitable for irrigation (PASSES)
+ex:IrrigationAssessment a wf:QualityAssessment ;
+    rdfs:label "Irrigation fitness assessment" ;
+    wf:assessesWater ex:WWTP_Effluent_Sample_2026_01_28 ;
+    wf:againstConstraintSet ex:IrrigationConstraints ;
+    wf:assessmentResult "true"^^xsd:boolean ;
+    wf:assessmentDate "2026-01-28T14:30:00"^^xsd:dateTime ;
+    rdfs:comment """PASSED: Water meets all irrigation requirements.
+    - BOD: 8.0 mg/L < 20.0 mg/L limit ✓
+    - TSS: 4.5 mg/L < 30.0 mg/L limit ✓
+    - E.coli: 50 CFU/100mL < 1000 CFU/100mL limit ✓
+    This water is SUITABLE for agricultural irrigation.""" .
+
+# ========== USAGE POINTS AND SOURCE MATCHING ==========
+# Demonstrate "Which sources can serve which usage points?"
+
+# Output port from WWTP
+ex:WWTP_Effluent_Out a wf:OutputPort ;
+    rdfs:label "WWTP effluent output" ;
+    wf:satisfiesConstraints ex:ToiletFlushingConstraints, ex:IrrigationConstraints ;
+    rdfs:comment "This output can supply toilet flushing and irrigation, but NOT drinking water." .
+
+# Residential usage points with different requirements
+ex:KitchenSink a wf:WaterUsagePoint ;
+    rdfs:label "Kitchen sink" ;
+    wf:requiresQualityConstraints ex:DrinkingWaterConstraints ;
+    rdfs:comment "Kitchen requires potable water - CANNOT be served by WWTP effluent." .
+
+ex:ToiletFlush a wf:WaterUsagePoint ;
+    rdfs:label "Toilet flush" ;
+    wf:requiresQualityConstraints ex:ToiletFlushingConstraints ;
+    rdfs:comment "Toilet can accept reclaimed water - CAN be served by WWTP effluent." .
+
+ex:GardenIrrigation a wf:WaterUsagePoint ;
+    rdfs:label "Garden irrigation" ;
+    wf:requiresQualityConstraints ex:IrrigationConstraints ;
+    rdfs:comment "Garden irrigation has moderate requirements - CAN be served by WWTP effluent." .
+
+# ========== KEY INSIGHTS ==========
+# This example demonstrates:
+#
+# 1. FIT-FOR-PURPOSE CONCEPT:
+#    - Same water (BOD=8, TSS=4.5, E.coli=50) has different fitness for different purposes
+#    - Not suitable for drinking (fails strict limits)
+#    - Perfectly suitable for toilet flushing (passes relaxed limits)
+#    - Perfectly suitable for irrigation (passes moderate limits)
+#
+# 2. RATIONAL REUSE PLANNING:
+#    - Don't over-treat water beyond what the use requires
+#    - WWTP effluent → toilet flushing saves drinking water for drinking
+#    - Enables dual-pipe systems with different quality levels
+#
+# 3. QUALITY ASSESSMENT FROM MEASUREMENTS:
+#    - Laboratory observations → Quality assessments → Fitness determination
+#    - Automated compliance checking against multiple constraint sets
+#
+# 4. SOURCE-TO-USAGE MATCHING:
+#    - Query "Which sources can serve which usage points?"
+#    - Match wf:satisfiesConstraints to wf:requiresQualityConstraints
+#    - Enables intelligent water distribution planning
+#
+# 5. AGENT-LEVEL QUALITY DECLARATIONS:
+#    - Facilities declare what quality they need (requiresQualityConstraints)
+#    - Facilities declare what quality they produce (satisfiesConstraints)
+#    - Supports decentralized agent-based optimization

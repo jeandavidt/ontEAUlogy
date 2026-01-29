@@ -21,7 +21,7 @@ This document tracks issues, blockers, and decisions encountered during the impl
 | Phase 6: OWL-Time Simplification | Completed | 0 | - |
 | Phase 7: Usage Point Refinement | Completed | 0 | - |
 | Phase 8: Facility Definitions | Completed | 0 | - |
-| Phase 9: Fit-for-Purpose Framework | Not Started | - | - |
+| Phase 9: Fit-for-Purpose Framework | Completed | 0 | - |
 | Phase 10: Testing & Validation | Not Started | - | - |
 
 ---
@@ -817,9 +817,214 @@ The facility hierarchy and properties provide essential infrastructure for:
 
 ---
 
-## Phase 9: Fit-for-Purpose Framework
+## Phase 9: Fit-for-Purpose Water Quality Framework
 
-*No issues logged yet*
+### Summary
+Phase 9 successfully implemented a comprehensive fit-for-purpose water quality framework enabling rational water reuse planning based on fitness for intended use. The framework links water quality requirements to usage purposes, allowing the same water to be evaluated against different quality standards for different uses (e.g., WWTP effluent suitable for toilet flushing but not drinking).
+
+### Implementation Details
+
+**Problem:**
+The existing ontology had quality classes (DrinkingWaterQuality, WastewaterQuality) but no framework for:
+- Defining quality constraint sets with specific parameter limits
+- Linking quality requirements to usage purposes
+- Assessing water fitness from sensor/lab measurements
+- Answering "Which sources can serve which usage points based on quality compatibility?"
+
+**Files Modified:**
+- `data/ontology_enhanced/modules/qualities.ttl` (added 158 lines after line 480) - Added fit-for-purpose quality framework classes and properties
+
+**Files Created:**
+- `case_studies/ghent_enhanced/data/instances/quality_constraints.ttl` - Example constraint sets for different purposes (potable, toilet flushing, irrigation, laundry, industrial cooling)
+- `data/ontology_enhanced/examples/fit_for_purpose_example.ttl` - Comprehensive example showing same water evaluated for multiple purposes
+- `validation/phase9_fit_for_purpose_queries.sparql` - 10 SPARQL validation queries for framework verification
+
+**New Framework Classes:**
+
+1. **Quality Constraint Framework:**
+   - `wf:QualityConstraintSet` - Collection of requirements defining fitness for a purpose
+   - `wf:WaterQualityRequirement` - Single parameter constraint (e.g., BOD ≤ 5 mg/L)
+   - `wf:LimitType` - Type of constraint (maximum, minimum, range)
+   - Individuals: `wf:MaximumLimit`, `wf:MinimumLimit`, `wf:RangeLimit`
+
+2. **Usage Purpose Classification:**
+   - `wf:FitForPurpose` - Classification of water fitness for specific use
+
+3. **Quality Assessment:**
+   - `wf:QualityAssessment` - Evaluation of water against constraint set with pass/fail result
+
+**New Properties:**
+
+1. **Constraint Set Properties:**
+   - `wf:includesConstraint` - Links constraint set to individual requirements
+   - `wf:definesQualityFor` - Links constraint set to purpose/classification
+
+2. **Requirement Properties:**
+   - `wf:hasLimitType` - Type of limit (maximum/minimum/range)
+   - `wf:hasWaterQualityParameter` - Parameter being constrained (BOD, TSS, E.coli, etc.)
+   - `wf:hasLimitValue` - Numeric threshold value
+   - `wf:hasMinimumValue` - Minimum value for range limits
+   - `wf:hasMaximumValue` - Maximum value for range limits
+   - `wf:hasUnit` - Unit of measurement (mg/L, CFU/100mL, etc.)
+
+3. **Usage Point Integration:**
+   - `wf:requiresQualityConstraints` - Usage point/agent declares quality needs
+   - `wf:satisfiesConstraints` - Output port/sample declares quality provided
+
+4. **Assessment Properties:**
+   - `wf:assessesWater` - Water being evaluated
+   - `wf:againstConstraintSet` - Constraints being checked
+   - `wf:assessmentResult` - Boolean pass/fail result
+   - `wf:violatedConstraint` - Constraints that failed
+   - `wf:assessmentDate` - When assessment was performed
+
+**Example Constraint Sets Created:**
+
+1. **Potable Water** (strict):
+   - BOD ≤ 5 mg/L
+   - TSS ≤ 1 mg/L
+   - E.coli = 0 CFU/100mL
+
+2. **Toilet Flushing** (relaxed):
+   - BOD ≤ 25 mg/L
+   - TSS ≤ 10 mg/L
+   - E.coli ≤ 100 CFU/100mL
+
+3. **Irrigation** (moderate):
+   - BOD ≤ 20 mg/L
+   - TSS ≤ 30 mg/L
+   - E.coli ≤ 1000 CFU/100mL
+
+4. **Laundry** (intermediate):
+   - BOD ≤ 15 mg/L
+   - TSS ≤ 5 mg/L
+   - E.coli ≤ 10 CFU/100mL
+
+5. **Industrial Cooling** (minimal):
+   - TSS ≤ 50 mg/L
+   - pH 6.5-8.5
+
+### Validation Results
+
+**SPARQL Query Suite Created:** 10 validation queries
+
+1. **Source-to-Usage Matching** - Critical query answering "Which sources can serve which usage points?"
+2. **Constraint Set Details** - Lists all constraint sets with their requirements
+3. **Quality Assessment Results** - Shows all assessments with pass/fail outcomes
+4. **Fit-for-Purpose Analysis** - Summarizes which purposes each water sample is fit for
+5. **Usage Point Requirements** - Lists quality requirements for each usage point
+6. **Over-Treatment Detection** - Identifies where higher quality water is used unnecessarily
+7. **Quality Requirement Comparison** - Compares limits across different constraint sets
+8. **Reuse Opportunity Identification** - Finds potential reuse connections based on quality matching
+9. **Violated Constraints Analysis** - Shows why assessments failed
+10. **Constraint Set Hierarchy** - Shows which constraint sets are stricter than others
+
+**Example Validation Results (from fit_for_purpose_example.ttl):**
+
+Water sample: BOD=8 mg/L, TSS=4.5 mg/L, E.coli=50 CFU/100mL
+
+- **Drinking Water Assessment:** FAILED (exceeds all three limits)
+- **Toilet Flushing Assessment:** PASSED (meets all relaxed limits)
+- **Irrigation Assessment:** PASSED (meets moderate limits)
+
+Demonstrates core concept: Same water has different fitness for different purposes.
+
+### Design Rationale
+
+**Fit-for-Purpose Concept:**
+The framework embodies the "fit-for-purpose" principle of water reuse: don't over-treat water beyond what the end use requires. WWTP effluent unsuitable for drinking may be perfectly suitable for toilet flushing or irrigation, enabling rational dual-pipe systems with different quality levels.
+
+**Agent-Level Quality Declarations:**
+Both water producers and consumers can declare quality:
+- Producers: "This output satisfies toilet flushing constraints" (`wf:satisfiesConstraints`)
+- Consumers: "This usage point requires potable water constraints" (`wf:requiresQualityConstraints`)
+
+This enables decentralized agent-based optimization where facilities negotiate water exchanges based on quality compatibility.
+
+**Quality Assessment from Measurements:**
+The framework connects laboratory/sensor observations to fitness determination:
+1. Lab measures: BOD=8, TSS=4.5, E.coli=50
+2. Assessment evaluates against constraint set
+3. Result: Pass/fail with violated constraints identified
+
+This enables automated compliance checking and rational reuse planning from measurement data.
+
+### Design Decisions
+
+**Decision 1: Location of Framework**
+- Context: Should this be in compliance.ttl or qualities.ttl?
+- Decision: Add to qualities.ttl (qualities module focuses on parameters and classifications)
+- Rationale: Fits naturally with water quality parameters and composition classes
+- Alternative: Create new fit-for-purpose module (rejected - adds module complexity)
+- Note: compliance.ttl focuses on regulatory compliance checking and violation tracking
+
+**Decision 2: Constraint Set Granularity**
+- Context: How detailed should constraint sets be?
+- Decision: Define at parameter level (BOD, TSS, E.coli) with flexible limit types
+- Rationale: Enables precise specification and flexible constraint combinations
+- Alternative: Predefined quality classes only (rejected - not flexible enough for diverse jurisdictions)
+
+**Decision 3: Usage Point Integration**
+- Context: How to link quality framework to Phase 7 usage points?
+- Decision: Use `wf:requiresQualityConstraints` property with domain union (WaterUsagePoint, InputPort, Agent)
+- Rationale: Supports both physical fixtures and computational agents declaring quality needs
+- Alternative: Separate properties for each entity type (rejected - unnecessary duplication)
+
+**Decision 4: Assessment as Separate Class**
+- Context: Should assessments be explicit entities or just properties?
+- Decision: Create `wf:QualityAssessment` as explicit class
+- Rationale: Enables tracking assessment date, violated constraints, and provenance
+- Alternative: Just use boolean property on sample (rejected - loses temporal and diagnostic information)
+
+### Issues Encountered
+
+No blocking issues encountered. Implementation followed the plan with enhancements to examples and validation queries.
+
+### Future Considerations
+
+1. **Multi-Jurisdiction Support:** Add regulatory framework links to constraint sets (EU, USEPA, WHO, etc.)
+2. **Temporal Constraints:** Some requirements vary seasonally (e.g., temperature limits in summer)
+3. **Composite Constraints:** AND/OR logic for complex requirements (e.g., "BOD≤10 OR TSS≤5")
+4. **Risk-Based Classification:** Link constraint sets to health risk levels (high-risk, medium-risk, low-risk)
+5. **Treatment Cost Integration:** Link constraint sets to treatment process costs for optimization
+6. **Automated Assessment:** Implement reasoning rules to compute assessments from observations
+
+### Semantic Impact
+
+**Improved Competency Question Coverage:**
+
+1. **CQ: "Which sources can serve which usage points?"**
+   - Query: Match `wf:satisfiesConstraints` to `wf:requiresQualityConstraints`
+   - Result: WWTP effluent → toilet flushing (both use ToiletFlushingConstraints)
+
+2. **CQ: "Is this water suitable for drinking?"**
+   - Query: Find assessments against DrinkingWaterConstraints with result=true
+   - Result: Assessment shows pass/fail with violated constraints if failed
+
+3. **CQ: "What quality requirements does irrigation require?"**
+   - Query: Find IrrigationConstraints and list included requirements
+   - Result: BOD≤20, TSS≤30, E.coli≤1000
+
+4. **CQ: "What purposes is this water sample fit for?"**
+   - Query: Find all assessments for sample, group by pass/fail
+   - Result: Fit for toilet flushing and irrigation, not fit for drinking
+
+5. **CQ: "Where is potable water being over-used?"**
+   - Query: Find usage points requiring lower quality but receiving potable supply
+   - Result: Toilets connected to potable water (opportunity for reclaimed water reuse)
+
+**Rational Reuse Planning:**
+The framework enables evidence-based water reuse decisions:
+- Match treatment level to end-use requirements
+- Identify over-treatment opportunities (cost savings)
+- Support dual-pipe system design (potable + reclaimed)
+- Optimize treatment process selection based on target uses
+
+**Integration with Phase 7:**
+The framework completes the usage point refinement from Phase 7 by linking usage purposes to quality requirements. Usage points can now declare what quality they need, enabling intelligent source-to-use matching.
+
+### Date Completed
+2026-01-28
 
 ---
 
@@ -911,7 +1116,16 @@ This section tracks commits made by each subagent during implementation.
   - Supports urban water modeling: distribution systems, sewer systems, water quality monitoring
 
 ### Phase 9: Fit-for-Purpose Framework
-- *Commits will be logged here*
+- `feat(ontology): Phase 9 - implement fit-for-purpose water quality framework` (2026-01-28)
+  - Added comprehensive fit-for-purpose quality framework to qualities.ttl (158 lines)
+  - Created QualityConstraintSet, WaterQualityRequirement, LimitType, QualityAssessment classes
+  - Added 15 new properties for constraints, assessments, and usage point integration
+  - Created quality_constraints.ttl with 5 example constraint sets (potable, toilet, irrigation, laundry, cooling)
+  - Created fit_for_purpose_example.ttl demonstrating same water evaluated for multiple purposes
+  - Created phase9_fit_for_purpose_queries.sparql with 10 validation queries
+  - Enables rational water reuse planning: match treatment level to end-use requirements
+  - Supports source-to-usage matching query: "Which sources can serve which usage points?"
+  - Completes Phase 7 usage point integration with quality requirement linkage
 
 ### Phase 10: Testing & Validation
 - *Commits will be logged here*

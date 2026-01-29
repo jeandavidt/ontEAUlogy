@@ -1,0 +1,190 @@
+@prefix ghent: <https://ugentbiomath.github.io/waterframe/examples/ghent#> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ========== FIT-FOR-PURPOSE QUALITY CONSTRAINT SETS ==========
+# Phase 9: Example constraint sets demonstrating different quality requirements for different purposes
+# Enables rational water reuse planning where treatment level matches intended use
+
+# ========== POTABLE WATER CONSTRAINTS ==========
+# Strictest quality requirements for human consumption
+
+ghent:PotableWaterConstraints a wf:QualityConstraintSet ;
+    rdfs:label "Potable water quality constraints (EU DWD)" ;
+    rdfs:comment "Strict quality requirements for drinking water based on EU Drinking Water Directive." ;
+    wf:definesQualityFor wf:DrinkingWaterQuality ;
+    wf:includesConstraint ghent:PotableBOD, ghent:PotableTSS, ghent:PotableEColi .
+
+ghent:PotableBOD a wf:WaterQualityRequirement ;
+    rdfs:label "Potable water BOD limit" ;
+    wf:hasWaterQualityParameter wf:BOD ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "5.0"^^xsd:double ;
+    wf:hasUnit "mg/L" ;
+    rdfs:comment "BOD must not exceed 5 mg/L for drinking water." .
+
+ghent:PotableTSS a wf:WaterQualityRequirement ;
+    rdfs:label "Potable water TSS limit" ;
+    wf:hasWaterQualityParameter wf:TSS ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "1.0"^^xsd:double ;
+    wf:hasUnit "mg/L" ;
+    rdfs:comment "Total suspended solids must not exceed 1 mg/L for clarity." .
+
+ghent:PotableEColi a wf:WaterQualityRequirement ;
+    rdfs:label "Potable water E.coli limit" ;
+    wf:hasWaterQualityParameter wf:EColi ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "0"^^xsd:double ;
+    wf:hasUnit "CFU/100mL" ;
+    rdfs:comment "E.coli must be absent (0 CFU/100mL) in drinking water for health protection." .
+
+# ========== TOILET FLUSHING CONSTRAINTS ==========
+# Relaxed requirements for non-potable indoor use
+
+ghent:ToiletFlushingConstraints a wf:QualityConstraintSet ;
+    rdfs:label "Toilet flushing quality constraints" ;
+    rdfs:comment "Relaxed quality requirements for toilet flushing - demonstrates fit-for-purpose concept." ;
+    wf:includesConstraint ghent:ToiletBOD, ghent:ToiletTSS, ghent:ToiletEColi .
+
+ghent:ToiletBOD a wf:WaterQualityRequirement ;
+    rdfs:label "Toilet flushing BOD limit" ;
+    wf:hasWaterQualityParameter wf:BOD ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "25.0"^^xsd:double ;
+    wf:hasUnit "mg/L" ;
+    rdfs:comment "More relaxed BOD limit - no human contact or consumption." .
+
+ghent:ToiletTSS a wf:WaterQualityRequirement ;
+    rdfs:label "Toilet flushing TSS limit" ;
+    wf:hasWaterQualityParameter wf:TSS ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "10.0"^^xsd:double ;
+    wf:hasUnit "mg/L" ;
+    rdfs:comment "More relaxed TSS limit - aesthetic concerns less critical." .
+
+ghent:ToiletEColi a wf:WaterQualityRequirement ;
+    rdfs:label "Toilet flushing E.coli limit" ;
+    wf:hasWaterQualityParameter wf:EColi ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "100"^^xsd:double ;
+    wf:hasUnit "CFU/100mL" ;
+    rdfs:comment "More relaxed pathogen limit - minimal human exposure risk." .
+
+# ========== IRRIGATION CONSTRAINTS ==========
+# Moderate requirements for agricultural use
+
+ghent:IrrigationConstraints a wf:QualityConstraintSet ;
+    rdfs:label "Agricultural irrigation constraints" ;
+    rdfs:comment "Moderate quality requirements for crop irrigation (non-root vegetables)." ;
+    wf:includesConstraint ghent:IrrigationBOD, ghent:IrrigationTSS, ghent:IrrigationEColi .
+
+ghent:IrrigationBOD a wf:WaterQualityRequirement ;
+    rdfs:label "Irrigation BOD limit" ;
+    wf:hasWaterQualityParameter wf:BOD ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "20.0"^^xsd:double ;
+    wf:hasUnit "mg/L" ;
+    rdfs:comment "Moderate BOD limit appropriate for agricultural reuse." .
+
+ghent:IrrigationTSS a wf:WaterQualityRequirement ;
+    rdfs:label "Irrigation TSS limit" ;
+    wf:hasWaterQualityParameter wf:TSS ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "30.0"^^xsd:double ;
+    wf:hasUnit "mg/L" ;
+    rdfs:comment "Higher TSS acceptable for irrigation - prevents clogging." .
+
+ghent:IrrigationEColi a wf:WaterQualityRequirement ;
+    rdfs:label "Irrigation E.coli limit" ;
+    wf:hasWaterQualityParameter wf:EColi ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "1000"^^xsd:double ;
+    wf:hasUnit "CFU/100mL" ;
+    rdfs:comment "Based on WHO guidelines for restricted irrigation." .
+
+# ========== LAUNDRY CONSTRAINTS ==========
+# Quality for washing clothes - intermediate requirements
+
+ghent:LaundryConstraints a wf:QualityConstraintSet ;
+    rdfs:label "Laundry water quality constraints" ;
+    rdfs:comment "Quality requirements for clothes washing - some contact risk but not consumption." ;
+    wf:includesConstraint ghent:LaundryBOD, ghent:LaundryTSS, ghent:LaundryEColi .
+
+ghent:LaundryBOD a wf:WaterQualityRequirement ;
+    rdfs:label "Laundry BOD limit" ;
+    wf:hasWaterQualityParameter wf:BOD ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "15.0"^^xsd:double ;
+    wf:hasUnit "mg/L" ;
+    rdfs:comment "BOD limit for washing - cleaner than toilet flushing, less than potable." .
+
+ghent:LaundryTSS a wf:WaterQualityRequirement ;
+    rdfs:label "Laundry TSS limit" ;
+    wf:hasWaterQualityParameter wf:TSS ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "5.0"^^xsd:double ;
+    wf:hasUnit "mg/L" ;
+    rdfs:comment "TSS limit to prevent fabric soiling." .
+
+ghent:LaundryEColi a wf:WaterQualityRequirement ;
+    rdfs:label "Laundry E.coli limit" ;
+    wf:hasWaterQualityParameter wf:EColi ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "10"^^xsd:double ;
+    wf:hasUnit "CFU/100mL" ;
+    rdfs:comment "Low pathogen level for indirect human contact." .
+
+# ========== INDUSTRIAL COOLING CONSTRAINTS ==========
+# Minimal quality requirements for non-contact industrial use
+
+ghent:IndustrialCoolingConstraints a wf:QualityConstraintSet ;
+    rdfs:label "Industrial cooling water constraints" ;
+    rdfs:comment "Minimal quality requirements for industrial cooling - mainly technical concerns." ;
+    wf:includesConstraint ghent:CoolingTSS, ghent:CoolingpH .
+
+ghent:CoolingTSS a wf:WaterQualityRequirement ;
+    rdfs:label "Cooling water TSS limit" ;
+    wf:hasWaterQualityParameter wf:TSS ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "50.0"^^xsd:double ;
+    wf:hasUnit "mg/L" ;
+    rdfs:comment "Prevent equipment fouling and scaling." .
+
+ghent:CoolingpH a wf:WaterQualityRequirement ;
+    rdfs:label "Cooling water pH range" ;
+    wf:hasWaterQualityParameter wf:pH ;
+    wf:hasLimitType wf:RangeLimit ;
+    wf:hasMinimumValue "6.5"^^xsd:double ;
+    wf:hasMaximumValue "8.5"^^xsd:double ;
+    rdfs:comment "pH range to prevent corrosion of cooling equipment." .
+
+# ========== USAGE POINT ASSIGNMENTS ==========
+# Link usage points to their quality requirements
+# This demonstrates agent-level quality declarations
+
+# WWTP2 effluent can satisfy toilet flushing requirements
+ghent:WWTP2_Effluent_Out wf:satisfiesConstraints ghent:ToiletFlushingConstraints ;
+    rdfs:comment "WWTP-2 effluent quality suitable for toilet flushing reuse." .
+
+# DWP1 output satisfies drinking water requirements
+ghent:DWP1_CleanWater_Out wf:satisfiesConstraints ghent:PotableWaterConstraints ;
+    rdfs:comment "Drinking water plant produces potable quality water." .
+
+# Residential usage points require different quality levels
+ghent:ToiletFlush_Muide wf:requiresQualityConstraints ghent:ToiletFlushingConstraints ;
+    rdfs:comment "Toilet flushing can accept lower quality reclaimed water." .
+
+ghent:KitchenSink_Muide wf:requiresQualityConstraints ghent:PotableWaterConstraints ;
+    rdfs:comment "Kitchen sink requires potable water for food preparation and consumption." .
+
+ghent:Shower_Muide wf:requiresQualityConstraints ghent:PotableWaterConstraints ;
+    rdfs:comment "Shower requires potable quality due to ingestion risk." .
+
+ghent:WashingMachine_Muide wf:requiresQualityConstraints ghent:LaundryConstraints ;
+    rdfs:comment "Laundry can accept intermediate quality water." .
+
+# Industrial usage points with relaxed requirements
+ghent:CoolingTower_BrewCo wf:requiresQualityConstraints ghent:IndustrialCoolingConstraints ;
+    rdfs:comment "Brewery cooling tower has minimal quality requirements." .

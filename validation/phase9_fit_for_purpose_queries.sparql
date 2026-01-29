@@ -1,0 +1,274 @@
+# ========== PHASE 9: FIT-FOR-PURPOSE WATER QUALITY VALIDATION QUERIES ==========
+# Validation queries for the fit-for-purpose water quality framework
+# Demonstrates rational water reuse planning based on quality requirements
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# ========== QUERY 1: SOURCE-TO-USAGE MATCHING ==========
+# Critical query: "Which sources can serve which usage points?"
+# Matches water sources to usage points based on quality constraint compatibility
+
+SELECT ?source ?sourceLabel ?usagePoint ?usageLabel ?constraintSet
+WHERE {
+    ?source wf:satisfiesConstraints ?constraintSet .
+    ?usagePoint wf:requiresQualityConstraints ?constraintSet .
+
+    OPTIONAL { ?source rdfs:label ?sourceLabel }
+    OPTIONAL { ?usagePoint rdfs:label ?usageLabel }
+}
+ORDER BY ?sourceLabel ?usageLabel
+;
+
+# Expected results:
+# - WWTP effluent → toilet flushing (both use ToiletFlushingConstraints)
+# - DWP output → kitchen sinks (both use PotableWaterConstraints)
+# - Shows which reuse connections are quality-compatible
+
+
+# ========== QUERY 2: QUALITY CONSTRAINT SET DETAILS ==========
+# List all constraint sets with their individual requirements
+
+SELECT ?constraintSet ?constraintLabel ?requirement ?parameter ?parameterLabel ?limitType ?limitValue ?unit
+WHERE {
+    ?constraintSet a wf:QualityConstraintSet ;
+                   rdfs:label ?constraintLabel ;
+                   wf:includesConstraint ?requirement .
+
+    ?requirement wf:hasWaterQualityParameter ?parameter ;
+                 wf:hasLimitType ?limitType ;
+                 wf:hasLimitValue ?limitValue .
+
+    OPTIONAL { ?parameter rdfs:label ?parameterLabel }
+    OPTIONAL { ?requirement wf:hasUnit ?unit }
+}
+ORDER BY ?constraintLabel ?parameterLabel
+;
+
+# Shows the complete definition of each constraint set
+# Example: PotableWaterConstraints has BOD≤5, TSS≤1, E.coli=0
+
+
+# ========== QUERY 3: QUALITY ASSESSMENT RESULTS ==========
+# Show all quality assessments with their pass/fail results
+
+SELECT ?assessment ?assessmentLabel ?water ?constraintSet ?result ?violatedParam
+WHERE {
+    ?assessment a wf:QualityAssessment ;
+                wf:assessesWater ?water ;
+                wf:againstConstraintSet ?constraintSet ;
+                wf:assessmentResult ?result .
+
+    OPTIONAL { ?assessment rdfs:label ?assessmentLabel }
+
+    # Include violated constraints if assessment failed
+    OPTIONAL {
+        ?assessment wf:violatedConstraint ?violatedConstraint .
+        ?violatedConstraint wf:hasWaterQualityParameter ?violatedParam
+    }
+}
+ORDER BY ?water ?constraintSet
+;
+
+# Shows which water samples pass/fail which constraint sets
+# Example: WWTP effluent passes ToiletFlushingConstraints but fails DrinkingWaterConstraints
+
+
+# ========== QUERY 4: FIT-FOR-PURPOSE ANALYSIS ==========
+# For each water sample, show which purposes it is fit for
+
+SELECT ?sample ?sampleLabel
+       (GROUP_CONCAT(DISTINCT ?passedPurpose; separator=", ") AS ?fitForPurposes)
+       (GROUP_CONCAT(DISTINCT ?failedPurpose; separator=", ") AS ?notFitForPurposes)
+WHERE {
+    ?sample a wf:WaterSample .
+    OPTIONAL { ?sample rdfs:label ?sampleLabel }
+
+    # Purposes it passes
+    OPTIONAL {
+        ?passedAssessment wf:assessesWater ?sample ;
+                         wf:againstConstraintSet ?passedConstraintSet ;
+                         wf:assessmentResult "true"^^xsd:boolean .
+        ?passedConstraintSet rdfs:label ?passedPurpose
+    }
+
+    # Purposes it fails
+    OPTIONAL {
+        ?failedAssessment wf:assessesWater ?sample ;
+                         wf:againstConstraintSet ?failedConstraintSet ;
+                         wf:assessmentResult "false"^^xsd:boolean .
+        ?failedConstraintSet rdfs:label ?failedPurpose
+    }
+}
+GROUP BY ?sample ?sampleLabel
+;
+
+# Summarizes fitness of each water sample across all purposes
+# Example: "WWTP effluent is fit for toilet flushing and irrigation, but not drinking"
+
+
+# ========== QUERY 5: USAGE POINT REQUIREMENTS ==========
+# List all usage points with their quality requirements
+
+SELECT ?usagePoint ?usageLabel ?constraintSet ?constraintLabel ?requirement ?parameter ?limit
+WHERE {
+    ?usagePoint wf:requiresQualityConstraints ?constraintSet .
+
+    OPTIONAL { ?usagePoint rdfs:label ?usageLabel }
+    OPTIONAL { ?constraintSet rdfs:label ?constraintLabel }
+
+    OPTIONAL {
+        ?constraintSet wf:includesConstraint ?requirement .
+        ?requirement wf:hasWaterQualityParameter ?parameter ;
+                    wf:hasLimitValue ?limit
+    }
+}
+ORDER BY ?usageLabel ?parameter
+;
+
+# Shows what quality each usage point requires
+# Useful for planning: "What quality does toilet flushing need vs. drinking?"
+
+
+# ========== QUERY 6: OVER-TREATMENT DETECTION ==========
+# Find cases where water quality exceeds what the usage requires
+# (Opportunity for fit-for-purpose optimization)
+
+SELECT ?usagePoint ?usageLabel ?actualSource ?sourceQuality ?requiredQuality
+WHERE {
+    # Usage point connected to a source
+    ?connection wf:hasOutputPort ?sourcePort ;
+               wf:hasInputPort ?usagePoint .
+
+    # What quality does usage require?
+    ?usagePoint wf:requiresQualityConstraints ?requiredQuality .
+
+    # What quality does source provide?
+    ?sourcePort wf:satisfiesConstraints ?sourceQuality .
+
+    OPTIONAL { ?usagePoint rdfs:label ?usageLabel }
+
+    # Filter for cases where source quality is stricter than required
+    # (This would need additional reasoning or constraints to fully implement)
+}
+;
+
+# Identifies over-treatment: potable water used for toilet flushing
+# Suggests where lower-quality (cheaper) sources could be substituted
+
+
+# ========== QUERY 7: QUALITY REQUIREMENT COMPARISON ==========
+# Compare limit values across different constraint sets for same parameter
+
+SELECT ?parameter ?parameterLabel ?constraintSet ?constraintLabel ?limitType ?limitValue
+WHERE {
+    ?requirement wf:hasWaterQualityParameter ?parameter ;
+                 wf:hasLimitType ?limitType ;
+                 wf:hasLimitValue ?limitValue .
+
+    ?constraintSet wf:includesConstraint ?requirement .
+
+    OPTIONAL { ?parameter rdfs:label ?parameterLabel }
+    OPTIONAL { ?constraintSet rdfs:label ?constraintLabel }
+}
+ORDER BY ?parameterLabel ?limitValue
+;
+
+# Shows how requirements vary by purpose
+# Example: BOD limit = 5 (drinking), 25 (toilet), 20 (irrigation)
+# Demonstrates the fit-for-purpose quality spectrum
+
+
+# ========== QUERY 8: REUSE OPPORTUNITY IDENTIFICATION ==========
+# Find potential water reuse connections based on quality matching
+
+SELECT ?source ?sourceLabel ?targetUsage ?targetLabel ?matchingConstraintSet
+WHERE {
+    # Find sources that satisfy certain constraints
+    ?source wf:satisfiesConstraints ?matchingConstraintSet .
+
+    # Find usage points that require those same constraints
+    ?targetUsage wf:requiresQualityConstraints ?matchingConstraintSet .
+
+    OPTIONAL { ?source rdfs:label ?sourceLabel }
+    OPTIONAL { ?targetUsage rdfs:label ?targetLabel }
+
+    # Exclude existing connections (to find NEW opportunities)
+    FILTER NOT EXISTS {
+        ?existingConnection wf:hasOutputPort ?source ;
+                           wf:hasInputPort ?targetUsage
+    }
+}
+ORDER BY ?sourceLabel ?targetLabel
+;
+
+# Identifies new reuse opportunities
+# Example: "WWTP effluent could supply this toilet (currently using potable water)"
+
+
+# ========== QUERY 9: VIOLATED CONSTRAINTS ANALYSIS ==========
+# For failed assessments, show which specific constraints were violated
+
+SELECT ?assessment ?water ?constraintSet ?violatedParam ?observedValue ?limitValue
+WHERE {
+    ?assessment a wf:QualityAssessment ;
+                wf:assessesWater ?water ;
+                wf:againstConstraintSet ?constraintSet ;
+                wf:assessmentResult "false"^^xsd:boolean ;
+                wf:violatedConstraint ?violatedConstraint .
+
+    ?violatedConstraint wf:hasWaterQualityParameter ?violatedParam ;
+                       wf:hasLimitValue ?limitValue .
+
+    # Get the actual observed value
+    ?water wf:hasMeasurement ?observation .
+    ?observation wf:observedParameter ?violatedParam ;
+                wf:observedValue ?observedValue .
+}
+ORDER BY ?water ?violatedParam
+;
+
+# Shows exactly why an assessment failed
+# Example: "E.coli observed = 50, limit = 0 → drinking water assessment failed"
+
+
+# ========== QUERY 10: CONSTRAINT SET HIERARCHY ==========
+# Show which constraint sets are stricter than others for the same parameters
+
+SELECT ?strictConstraintSet ?relaxedConstraintSet ?parameter ?strictLimit ?relaxedLimit
+WHERE {
+    ?strictConstraintSet wf:includesConstraint ?strictReq .
+    ?relaxedConstraintSet wf:includesConstraint ?relaxedReq .
+
+    ?strictReq wf:hasWaterQualityParameter ?parameter ;
+              wf:hasLimitType wf:MaximumLimit ;
+              wf:hasLimitValue ?strictLimit .
+
+    ?relaxedReq wf:hasWaterQualityParameter ?parameter ;
+               wf:hasLimitType wf:MaximumLimit ;
+               wf:hasLimitValue ?relaxedLimit .
+
+    FILTER(?strictLimit < ?relaxedLimit)
+    FILTER(?strictConstraintSet != ?relaxedConstraintSet)
+}
+ORDER BY ?parameter ?strictLimit
+;
+
+# Shows quality hierarchy
+# Example: Drinking (BOD≤5) is stricter than Toilet Flushing (BOD≤25)
+# Helps understand quality tiers in fit-for-purpose framework
+
+
+# ========== VALIDATION CHECKLIST ==========
+# Run these queries to validate Phase 9 implementation:
+#
+# ✓ Query 1: Verify source-to-usage matching works
+# ✓ Query 2: Confirm all constraint sets are properly defined
+# ✓ Query 3: Check that quality assessments compute correctly
+# ✓ Query 4: Validate fit-for-purpose analysis
+# ✓ Query 5: Ensure usage points declare their requirements
+# ✓ Query 7: Verify requirement comparison shows quality spectrum
+# ✓ Query 8: Confirm reuse opportunity identification
+# ✓ Query 9: Validate violated constraint tracking
+# ✓ Query 10: Verify constraint hierarchy reasoning
