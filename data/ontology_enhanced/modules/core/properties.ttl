@@ -271,3 +271,39 @@ wf:requiresQuality a owl:ObjectProperty ;
     rdfs:domain wf:WaterUsagePoint ;
     rdfs:range owl:Thing ;  # Will be wf:QualityConstraintSet when fit-for-purpose module is created
     rdfs:comment "Links a usage point to the water quality requirements it must satisfy. Range will be wf:QualityConstraintSet from fit-for-purpose module." .
+
+# ========== FACILITY PROPERTIES ==========
+# Phase 8: Properties for storage, pumping, and monitoring facilities
+
+# Storage facility properties
+wf:hasStorageCapacity a owl:DatatypeProperty ;
+    rdfs:label "has storage capacity" ;
+    rdfs:domain wf:StorageFacility ;
+    rdfs:range xsd:double ;
+    rdfs:comment "Storage capacity in cubic meters (m³)." .
+
+wf:hasMaximumVolume a owl:DatatypeProperty ;
+    rdfs:label "has maximum volume" ;
+    rdfs:domain wf:StorageFacility ;
+    rdfs:range xsd:double ;
+    rdfs:comment "Maximum design volume in cubic meters (m³)." .
+
+wf:hasMinimumOperatingLevel a owl:DatatypeProperty ;
+    rdfs:label "has minimum operating level" ;
+    rdfs:domain wf:StorageFacility ;
+    rdfs:range xsd:double ;
+    rdfs:comment "Minimum water level for normal operation in meters." .
+
+# Pumping facility properties
+wf:hasPumpingCapacity a owl:DatatypeProperty ;
+    rdfs:label "has pumping capacity" ;
+    rdfs:domain wf:PumpingFacility ;
+    rdfs:range xsd:double ;
+    rdfs:comment "Design pumping capacity in cubic meters per day (m³/day)." .
+
+# General facility properties
+wf:hasElevation a owl:DatatypeProperty ;
+    rdfs:label "has elevation" ;
+    rdfs:domain wf:Facility ;
+    rdfs:range xsd:double ;
+    rdfs:comment "Elevation above sea level in meters." .

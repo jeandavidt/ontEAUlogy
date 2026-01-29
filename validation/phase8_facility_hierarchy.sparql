@@ -1,0 +1,20 @@
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+# Phase 8 Validation: Facility Hierarchy
+# Retrieves all facility classes and their parent classes
+# Verifies the storage, pumping, monitoring, and treatment facility structure
+
+SELECT ?class ?label ?parent ?parentLabel WHERE {
+  ?class rdfs:subClassOf* wf:Facility ;
+         rdfs:label ?label ;
+         rdfs:subClassOf ?parent .
+
+  OPTIONAL {
+    ?parent rdfs:label ?parentLabel .
+  }
+
+  FILTER(?parent != owl:Thing)
+}
+ORDER BY ?label

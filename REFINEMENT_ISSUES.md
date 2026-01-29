@@ -20,7 +20,7 @@ This document tracks issues, blockers, and decisions encountered during the impl
 | Phase 5: Conveyance System | Completed | 0 | - |
 | Phase 6: OWL-Time Simplification | Completed | 0 | - |
 | Phase 7: Usage Point Refinement | Completed | 0 | - |
-| Phase 8: Facility Definitions | Not Started | - | - |
+| Phase 8: Facility Definitions | Completed | 0 | - |
 | Phase 9: Fit-for-Purpose Framework | Not Started | - | - |
 | Phase 10: Testing & Validation | Not Started | - | - |
 
@@ -644,9 +644,176 @@ The enhanced hierarchy and new properties provide the foundation for Phase 9's f
 
 ---
 
-## Phase 8: Facility Definitions
+## Phase 8: Facility Definitions Enhancement
 
-*No issues logged yet*
+### Summary
+Phase 8 successfully enhanced facility definitions by creating a comprehensive facility hierarchy with specialized classes for storage, pumping, monitoring, and treatment infrastructure. The generic `wf:Facility` root class was established with four major facility type branches, and facility-specific properties were added for capacity and operational characteristics needed for urban water modeling.
+
+### Implementation Details
+
+**Problem:**
+The existing ontology had treatment facilities (WWTP, DrinkingWaterPlant) but lacked:
+- A formal Facility hierarchy
+- Storage facility types (tanks, reservoirs, balancing storage)
+- Pumping facility types (pump stations, lift stations) properly classified as facilities
+- Monitoring infrastructure (sampling points)
+- Facility-specific properties for capacity, elevation, and operational characteristics
+
+**Files Modified:**
+- `data/ontology_enhanced/modules/core/material_entities.ttl` (lines 250-326) - Created Facility hierarchy with storage, pumping, and monitoring branches; reorganized storage tanks; removed redundant pumping definitions from conveyance section
+- `data/ontology_enhanced/modules/core/properties.ttl` (lines 274-316) - Added facility-specific properties for storage capacity, pumping capacity, and elevation
+
+**Files Created:**
+- `validation/phase8_facility_hierarchy.sparql` - SPARQL validation query for facility hierarchy
+
+**New Facility Hierarchy Created:**
+
+```
+wf:Facility (root class - BFO:0000040)
+├── wf:WaterTreatmentFacility
+│   ├── wf:DrinkingWaterPlant (updated parent)
+│   └── wf:WastewaterTreatmentPlant (updated parent)
+├── wf:StorageFacility
+│   ├── wf:StorageTank
+│   │   ├── wf:RainwaterStorageTank (updated parent)
+│   │   ├── wf:PotableWaterStorageTank (updated parent)
+│   │   ├── wf:PurifiedGreywaterStorageTank (updated parent)
+│   │   └── wf:BlackwaterStorageTank (updated parent)
+│   └── wf:Reservoir
+│       ├── wf:BalancingReservoir (NEW)
+│       └── wf:ServiceReservoir (NEW)
+├── wf:PumpingFacility
+│   ├── wf:PumpStation (moved from Conveyance)
+│   └── wf:LiftStation (moved from Conveyance)
+└── wf:MonitoringFacility
+    └── wf:SamplingPoint (NEW)
+```
+
+**Total Facility Classes:** 14 classes
+- Root: 1 (wf:Facility)
+- Treatment branch: 3 (WaterTreatmentFacility, DrinkingWaterPlant, WastewaterTreatmentPlant)
+- Storage branch: 7 (StorageFacility, StorageTank + 4 specialized tanks, Reservoir + 2 specialized reservoirs)
+- Pumping branch: 3 (PumpingFacility, PumpStation, LiftStation)
+- Monitoring branch: 2 (MonitoringFacility, SamplingPoint)
+
+**New Properties Added:**
+
+1. **Storage Facility Properties:**
+   - `wf:hasStorageCapacity` - Storage capacity in cubic meters (m³)
+   - `wf:hasMaximumVolume` - Maximum design volume in cubic meters (m³)
+   - `wf:hasMinimumOperatingLevel` - Minimum water level for normal operation in meters
+
+2. **Pumping Facility Properties:**
+   - `wf:hasPumpingCapacity` - Design pumping capacity in cubic meters per day (m³/day)
+
+3. **General Facility Properties:**
+   - `wf:hasElevation` - Elevation above sea level in meters (applicable to all facilities)
+
+**Total Properties Added:** 5 properties
+
+### Design Rationale
+
+**Facility as Infrastructure Entity:**
+The `wf:Facility` root class represents built infrastructure entities for water system operations, distinguishing them from:
+- Treatment units (physical equipment within facilities)
+- Conveyance components (pipes, pumps as flow elements)
+- Water system components (generic infrastructure)
+
+**Integration with Existing Classes:**
+- **Storage Tanks:** Previously direct subclasses of `wf:WaterSystemComponent`, now properly organized under `wf:StorageFacility` hierarchy
+- **Pumping Infrastructure:** PumpStation and LiftStation were originally under `wf:Conveyance` (Phase 5), now also classified as facilities to reflect their dual nature as both conveyance points and operational facilities
+- **Treatment Facilities:** Existing WWTP and DrinkingWaterPlant properly organized under `wf:WaterTreatmentFacility`
+
+**Urban Water Modeling Support:**
+The facility hierarchy and properties enable:
+- Distribution system modeling (storage tanks, service reservoirs, balancing reservoirs)
+- Sewer system modeling (lift stations for elevation changes)
+- Water quality monitoring (sampling points for compliance)
+- Hydraulic modeling (elevation, capacity, pumping rates)
+
+### Validation Results
+
+**Hierarchy Structure:** VERIFIED
+- Created validation query `phase8_facility_hierarchy.sparql`
+- Query retrieves all facility classes with parent relationships
+- Expected result: 14 total facility classes across 4 branches
+
+**Integration Verification:**
+- Storage tanks properly reorganized under StorageFacility
+- Pumping infrastructure accessible as both facilities and conveyance components
+- All facility classes properly subclass BFO:0000040 (material entity)
+
+**Property Coverage:**
+- Storage facilities have capacity and volume properties
+- Pumping facilities have pumping capacity properties
+- All facilities can have elevation properties
+- Units clearly documented (m³, m³/day, meters)
+
+### Design Decisions
+
+**Decision 1: Pumping Infrastructure Classification**
+- Context: PumpStation and LiftStation exist in Conveyance (Phase 5). Should they also be Facilities?
+- Decision: Define them as subclasses of wf:PumpingFacility (under Facility hierarchy), remove from Conveyance, add comment explaining they function as both
+- Rationale: Pumps are operational facilities with capacity, elevation, and maintenance needs, not just flow elements
+- Alternative: Keep only in Conveyance (rejected - loses facility-level modeling capabilities)
+
+**Decision 2: Storage Hierarchy Organization**
+- Context: How to organize different types of storage?
+- Decision: Create two branches - StorageTank (enclosed) and Reservoir (large basins) with specialized types under each
+- Rationale: Reflects engineering distinction between enclosed tanks and open/covered reservoirs
+- Alternative: Flat storage hierarchy (rejected - loses important engineering distinctions)
+
+**Decision 3: Monitoring Infrastructure Scope**
+- Context: How broad should monitoring facilities be?
+- Decision: Start with SamplingPoint, allow future expansion
+- Rationale: Sampling points are well-defined and immediately useful for water quality modeling
+- Alternative: Add weather stations, flow meters, sensors now (rejected - premature, can add in future phases)
+
+**Decision 4: Property Units**
+- Context: Which units should be used for facility properties?
+- Decision: Use metric SI units consistently (m³, m³/day, meters)
+- Rationale: International standard, aligns with scientific modeling and ENVO conventions
+- Alternative: Support multiple unit systems (rejected - adds complexity, can use conversion later)
+
+### Issues Encountered
+
+**Issue 1: Pumping Infrastructure Dual Nature**
+- Problem: PumpStation/LiftStation exist in Conveyance section from Phase 5
+- Resolution: Redefined under Facility hierarchy, added comment to Conveyance section noting the facilities-based definition
+- Impact: Pumping infrastructure now properly modeled as operational facilities with capacity properties
+
+**Issue 2: Storage Tank Reorganization**
+- Problem: Specialized storage tanks (rainwater, potable, greywater, blackwater) were direct subclasses of WaterSystemComponent
+- Resolution: Removed base StorageTank definition from component section, kept specialized tanks as subclasses of facility-based StorageTank
+- Impact: Cleaner hierarchy with proper facility-level organization
+
+### Future Considerations
+
+1. **User Facilities:** Phase 8 in the plan also includes residential, commercial, and industrial facility types - these could be added in a future phase
+2. **Additional Monitoring:** Could expand MonitoringFacility with weather stations, flow meters, automated sensors
+3. **Facility Containment:** Could add properties linking treatment units to containing facilities (e.g., which clarifier is in which WWTP)
+4. **Operational Properties:** Could add operational status, maintenance schedule, commissioning date properties
+5. **Spatial Properties:** Could add geographic coordinates, service area polygons for facilities
+6. **Multiple Classification:** Consider allowing facilities to have multiple types (e.g., facility with both storage and pumping)
+
+### Semantic Impact
+
+**Improved Competency Question Coverage:**
+- CQ: "What storage facilities exist in the distribution system?" → Query wf:StorageFacility hierarchy
+- CQ: "What is the total storage capacity in the system?" → Sum wf:hasStorageCapacity across all storage facilities
+- CQ: "Where are the pump stations and what is their capacity?" → Query wf:PumpingFacility with wf:hasPumpingCapacity
+- CQ: "What is the elevation of this reservoir?" → Query wf:hasElevation property
+- CQ: "Where are water quality sampling points located?" → Query wf:SamplingPoint instances
+
+**Urban Water Modeling Readiness:**
+The facility hierarchy and properties provide essential infrastructure for:
+- Distribution system hydraulic modeling (storage, pumping, elevation)
+- Sewer system modeling (lift stations for gravity sewer segments)
+- Water quality compliance (sampling point network)
+- Infrastructure asset management (facility inventory with capacities)
+
+### Date Completed
+2026-01-28
 
 ---
 
@@ -734,7 +901,14 @@ This section tracks commits made by each subagent during implementation.
   - Total: 17 usage point classes (1 root + 16 subclasses) with clear semantic organization
 
 ### Phase 8: Facility Definitions
-- *Commits will be logged here*
+- `feat(ontology): Phase 8 - enhance facility definitions with storage, pumping, and monitoring infrastructure` (2026-01-28)
+  - Created comprehensive Facility hierarchy with 14 classes across 4 branches (treatment, storage, pumping, monitoring)
+  - Reorganized storage tanks under StorageFacility hierarchy (StorageTank, Reservoir with specialized types)
+  - Moved PumpStation and LiftStation from Conveyance to PumpingFacility (dual nature as facilities and flow elements)
+  - Added MonitoringFacility with SamplingPoint for water quality monitoring
+  - Added 5 facility-specific properties: hasStorageCapacity, hasMaximumVolume, hasMinimumOperatingLevel, hasPumpingCapacity, hasElevation
+  - Created validation query: phase8_facility_hierarchy.sparql
+  - Supports urban water modeling: distribution systems, sewer systems, water quality monitoring
 
 ### Phase 9: Fit-for-Purpose Framework
 - *Commits will be logged here*

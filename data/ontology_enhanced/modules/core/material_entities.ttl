@@ -17,10 +17,9 @@ wf:WaterSystemComponent rdfs:subClassOf bfo:BFO_0000040 ;
     rdfs:label "Water system component" ;
     rdfs:comment "Any physical object that is part of a water system" .
 
-# Storage tanks
-wf:StorageTank rdfs:subClassOf wf:WaterSystemComponent ;
-    rdfs:label "Storage tank" ;
-    rdfs:comment "Vessel for storing water of various types" .
+# Storage tanks (specialized by water type)
+# NOTE: StorageTank base class defined in FACILITIES section
+# These are specific types of storage tanks based on water type stored
 
 wf:RainwaterStorageTank rdfs:subClassOf wf:StorageTank ;
     rdfs:label "Rainwater storage tank" ;
@@ -217,13 +216,8 @@ wf:Junction rdfs:subClassOf wf:FlowMerger ;
     rdfs:comment "Meeting point of multiple pipes or channels (e.g., manhole, confluence)." .
 
 # === PUMPING ===
-wf:PumpStation rdfs:subClassOf wf:Conveyance ;
-    rdfs:label "Pump station" ;
-    rdfs:comment "Facility with pumps to move water against gravity or increase pressure." .
-
-wf:LiftStation rdfs:subClassOf wf:PumpStation ;
-    rdfs:label "Lift station" ;
-    rdfs:comment "Pump station in wastewater collection systems to lift sewage from low to high elevation." .
+# NOTE: PumpStation and LiftStation are now defined as Facilities (see FACILITIES section)
+# Pumps are infrastructure for moving water, functioning as both conveyance and facility
 
 # ========== PORTS (Connection Points) ==========
 # Following OntoCAPE pattern: ports are physical interfaces for material flow
@@ -247,16 +241,79 @@ wf:OutputPort a owl:Class ;
     rdfs:comment "Port through which material exits a component" ;
     rdfs:seeAlso <http://www.theworldavatar.com/ontology/ontocape/chemical_process_system/CPS_realization/plant.owl#Terminal> .
 
-# ========== WATER TREATMENT FACILITIES ==========
-# Section 4.3: Extensions for process models and facilities
+# ========== FACILITIES ==========
+# Section 8: Facility hierarchy for urban water infrastructure
 
-wf:DrinkingWaterPlant rdfs:subClassOf bfo:BFO_0000040 ;
+# Root facility class
+wf:Facility rdfs:subClassOf bfo:BFO_0000040 ;
+    rdfs:label "Facility" ;
+    rdfs:comment "Built infrastructure entity for water system operations, including treatment, storage, pumping, and monitoring." .
+
+# === TREATMENT FACILITIES ===
+wf:WaterTreatmentFacility rdfs:subClassOf wf:Facility ;
+    rdfs:label "Water treatment facility" ;
+    rdfs:comment "Facility dedicated to water or wastewater treatment operations." .
+
+wf:DrinkingWaterPlant rdfs:subClassOf wf:WaterTreatmentFacility ;
     rdfs:label "Drinking water plant" ;
-    rdfs:comment "A facility that treats source water to produce potable water." .
+    rdfs:comment "Facility that treats source water to produce potable water." .
 
-wf:WastewaterTreatmentPlant rdfs:subClassOf bfo:BFO_0000040 ;
+wf:WastewaterTreatmentPlant rdfs:subClassOf wf:WaterTreatmentFacility ;
     rdfs:label "Wastewater treatment plant" ;
-    rdfs:comment "A facility that treats wastewater to produce effluent meeting discharge standards." .
+    rdfs:comment "Facility that treats wastewater to produce effluent meeting discharge standards." .
+
+# === STORAGE FACILITIES ===
+wf:StorageFacility a owl:Class ;
+    rdfs:subClassOf wf:Facility ;
+    rdfs:label "Storage facility" ;
+    rdfs:comment "Facility designed for water storage, including tanks, reservoirs, and balancing storage." .
+
+wf:StorageTank a owl:Class ;
+    rdfs:subClassOf wf:StorageFacility ;
+    rdfs:label "Storage tank" ;
+    rdfs:comment "Enclosed tank for storing treated water in distribution systems." .
+
+wf:Reservoir a owl:Class ;
+    rdfs:subClassOf wf:StorageFacility ;
+    rdfs:label "Reservoir" ;
+    rdfs:comment "Large water storage basin, may be open or covered." .
+
+wf:BalancingReservoir a owl:Class ;
+    rdfs:subClassOf wf:Reservoir ;
+    rdfs:label "Balancing reservoir" ;
+    rdfs:comment "Reservoir for balancing supply and demand fluctuations in distribution systems." .
+
+wf:ServiceReservoir a owl:Class ;
+    rdfs:subClassOf wf:Reservoir ;
+    rdfs:label "Service reservoir" ;
+    rdfs:comment "Reservoir providing gravity-fed water supply to a distribution zone." .
+
+# === PUMPING FACILITIES ===
+wf:PumpingFacility a owl:Class ;
+    rdfs:subClassOf wf:Facility ;
+    rdfs:label "Pumping facility" ;
+    rdfs:comment "Facility housing pumps for water conveyance or pressure boosting." .
+
+wf:PumpStation a owl:Class ;
+    rdfs:subClassOf wf:PumpingFacility ;
+    rdfs:label "Pump station" ;
+    rdfs:comment "Facility with pumps for moving water through distribution systems or into storage." .
+
+wf:LiftStation a owl:Class ;
+    rdfs:subClassOf wf:PumpingFacility ;
+    rdfs:label "Lift station" ;
+    rdfs:comment "Pumping station in sewer systems for lifting wastewater to higher elevations." .
+
+# === MONITORING FACILITIES ===
+wf:MonitoringFacility a owl:Class ;
+    rdfs:subClassOf wf:Facility ;
+    rdfs:label "Monitoring facility" ;
+    rdfs:comment "Facility for water quality monitoring, flow measurement, or system observation." .
+
+wf:SamplingPoint a owl:Class ;
+    rdfs:subClassOf wf:MonitoringFacility ;
+    rdfs:label "Sampling point" ;
+    rdfs:comment "Designated location for water quality sample collection and testing." .
 
 # ==============================================================================
 # WWTP Physical Treatment Units (BFO:0000040 - Material Entities)
