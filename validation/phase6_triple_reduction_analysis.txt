@@ -1,0 +1,94 @@
+Phase 6: OWL-Time Simplification - Triple Count Reduction Analysis
+===================================================================
+
+PROBLEM:
+--------
+Complex OWL-Time pattern used for simple calendar year representation required
+8-10 triples per time period, causing unnecessary complexity and verbosity.
+
+SOLUTION:
+---------
+Replace complex OWL-Time pattern with simple xsd:dateTime properties.
+
+BEFORE (Complex OWL-Time Pattern):
+-----------------------------------
+File: case_studies/ghent_enhanced/data/instances/baseline_scenario.ttl
+
+# Main scenario entity (1 triple for temporal extent):
+ghent:Baseline2026 wf:hasTemporalExtent ghent:Year2026Interval .
+
+# Interval entity (4 triples):
+ghent:Year2026Interval a time:Interval ;
+    rdfs:label "Calendar Year 2026"@en ;
+    rdfs:comment "The 2026 calendar year representing the baseline scenario temporal extent." ;
+    time:hasBeginning ghent:Year2026_Start ;
+    time:hasEnd ghent:Year2026_End .
+
+# Start instant entity (3 triples):
+ghent:Year2026_Start a time:Instant ;
+    rdfs:label "2026 Start"@en ;
+    time:inXSDDateTimeStamp "2026-01-01T00:00:00Z"^^xsd:dateTimeStamp ;
+    rdfs:comment "Beginning of 2026 baseline period (midnight UTC, January 1, 2026)" .
+
+# End instant entity (3 triples):
+ghent:Year2026_End a time:Instant ;
+    rdfs:label "2026 End"@en ;
+    time:inXSDDateTimeStamp "2026-12-31T23:59:59Z"^^xsd:dateTimeStamp ;
+    rdfs:comment "End of 2026 baseline period (one second before midnight UTC, January 1, 2027)" .
+
+TOTAL BEFORE: 11 triples (1 + 4 + 3 + 3)
++ Prefix declaration: @prefix time: <http://www.w3.org/2006/time#>
++ Ontology import: owl:imports <http://www.w3.org/2006/time#>
+
+AFTER (Simple xsd:dateTime Pattern):
+-------------------------------------
+File: case_studies/ghent_enhanced/data/instances/baseline_scenario.ttl
+
+ghent:Baseline2026
+    wf:scenarioStartDate "2026-01-01T00:00:00Z"^^xsd:dateTime ;
+    wf:scenarioEndDate "2026-12-31T23:59:59Z"^^xsd:dateTime ;
+    wf:temporalDescription "Calendar Year 2026" .
+
+TOTAL AFTER: 3 triples
+
+REDUCTION:
+----------
+- Triples removed: 11 - 3 = 8 triples
+- Percentage reduction: (8 / 11) × 100 = 72.7%
+- Entities removed: 3 (Year2026Interval, Year2026_Start, Year2026_End)
+- Prefix declarations removed: 1 (time:)
+
+BENEFITS:
+---------
+1. Clarity: Direct representation of temporal bounds without intermediate entities
+2. Simplicity: 3 triples instead of 11 for the same information
+3. Efficiency: Reduced graph complexity for queries and reasoning
+4. Maintainability: Easier to read and modify temporal bounds
+5. Human-readable: temporalDescription provides clear context
+
+RETAINED CAPABILITY:
+--------------------
+The wf:hasTemporalExtent property remains in scenarios.ttl for advanced use cases
+requiring OWL-Time interval reasoning (e.g., Allen interval relations, temporal
+queries). It is marked as OPTIONAL with clear guidance to prefer simple properties
+for fixed calendar periods.
+
+FILES MODIFIED:
+---------------
+1. case_studies/ghent_enhanced/data/instances/baseline_scenario.ttl
+   - Lines 1-7: Removed time: prefix declaration
+   - Lines 9-17: Updated header comment (Phase 6)
+   - Lines 61-77: Replaced complex temporal pattern with 3 simple properties
+   - Lines 82-96: Removed (OWL-Time entity definitions)
+   - Lines 166-182: Updated query example to use simple properties
+
+2. data/ontology_enhanced/modules/scenarios.ttl
+   - Lines 119-142: Already had simple properties defined (scenarioStartDate,
+     scenarioEndDate, temporalDescription, hasTemporalExtent marked optional)
+
+VALIDATION:
+-----------
+Query: validation/phase6_temporal_simplification.sparql
+Expected result: ghent:Baseline2026 with start/end dates and description
+
+STATUS: ✓ COMPLETE

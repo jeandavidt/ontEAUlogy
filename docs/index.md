@@ -6,11 +6,11 @@ A modular ontology for water reuse systems with BFO alignment and support for ag
 
 ## Statistics
 
-- **Classes:** 149
-- **Object Properties:** 73
-- **Datatype Properties:** 49
+- **Classes:** 155
+- **Object Properties:** 87
+- **Datatype Properties:** 51
 - **Named Individuals:** 0
-- **Total Entities:** 271
+- **Total Entities:** 293
 
 ## Navigation
 

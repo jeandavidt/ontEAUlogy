@@ -1,0 +1,316 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+<https://ugentbiomath.github.io/waterframe/modules/sampling>
+    a owl:Ontology ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/material_entities> ;
+    dc:title "waterFRAME: Sampling Metadata Module" ;
+    dc:creator "Jean-David Therrien" ;
+    rdfs:comment "Classes and properties for water sampling metadata, including samples, sampling points, and sampling methods. Adapted from WHOKG observation patterns for regulatory compliance support." .
+
+# ========== WATER SAMPLE ==========
+# A physical sample of water taken for analysis
+# Adapted from WHOKG WaterSample pattern
+# PROV-O Integration: WaterSample is a prov:Entity for provenance tracking
+
+wf:WaterSample a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000040 ;  # Material entity
+    rdfs:subClassOf prov:Entity ;  # PROV-O: Sample is an entity with provenance
+    rdfs:label "Water sample" ;
+    rdfs:comment "A physical sample of water taken for quality analysis. Links observations to sampling context including location, method, and time. As a prov:Entity, samples can be tracked through their collection, handling, and analysis chain." .
+
+# ========== SAMPLING POINT ==========
+# Physical location where samples are taken
+
+wf:SamplingPoint a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000040 ;  # Material entity
+    rdfs:label "Sampling point" ;
+    rdfs:comment "A designated physical location where water samples are collected. May be part of infrastructure (e.g., tap, outfall) or a location in a water body." .
+
+wf:InfluentSamplingPoint a owl:Class ;
+    rdfs:subClassOf wf:SamplingPoint ;
+    rdfs:label "Influent sampling point" ;
+    rdfs:comment "Sampling point for incoming water (e.g., plant influent, raw water intake)." .
+
+wf:EffluentSamplingPoint a owl:Class ;
+    rdfs:subClassOf wf:SamplingPoint ;
+    rdfs:label "Effluent sampling point" ;
+    rdfs:comment "Sampling point for outgoing/treated water (e.g., plant effluent, discharge point)." .
+
+wf:ProcessSamplingPoint a owl:Class ;
+    rdfs:subClassOf wf:SamplingPoint ;
+    rdfs:label "Process sampling point" ;
+    rdfs:comment "Sampling point within a treatment process (e.g., between unit processes)." .
+
+wf:AmbientSamplingPoint a owl:Class ;
+    rdfs:subClassOf wf:SamplingPoint ;
+    rdfs:label "Ambient sampling point" ;
+    rdfs:comment "Sampling point in ambient water body (river, lake, groundwater)." .
+
+# ========== SAMPLING METHOD ==========
+# Classification of how samples are collected
+
+wf:SamplingMethod a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000027 ;  # Rule (method specification)
+    rdfs:label "Sampling method" ;
+    rdfs:comment "The method or protocol used to collect a water sample." .
+
+wf:GrabSampling a owl:Class ;
+    rdfs:subClassOf wf:SamplingMethod ;
+    rdfs:label "Grab sampling" ;
+    rdfs:comment "A discrete sample taken at a specific point in time. Provides a snapshot of water quality." .
+
+wf:CompositeSampling a owl:Class ;
+    rdfs:subClassOf wf:SamplingMethod ;
+    rdfs:label "Composite sampling" ;
+    rdfs:comment "A sample composed of multiple aliquots collected over time or at multiple locations. Provides a time-weighted or flow-weighted average." .
+
+wf:TimeCompositeSampling a owl:Class ;
+    rdfs:subClassOf wf:CompositeSampling ;
+    rdfs:label "Time composite sampling" ;
+    rdfs:comment "Composite sample with aliquots collected at regular time intervals." .
+
+wf:FlowCompositeSampling a owl:Class ;
+    rdfs:subClassOf wf:CompositeSampling ;
+    rdfs:label "Flow composite sampling" ;
+    rdfs:comment "Composite sample with aliquot volume proportional to flow rate." .
+
+wf:AutomatedSampling a owl:Class ;
+    rdfs:subClassOf wf:SamplingMethod ;
+    rdfs:label "Automated sampling" ;
+    rdfs:comment "Sample collected by automated equipment (autosampler)." .
+
+wf:ContinuousSampling a owl:Class ;
+    rdfs:subClassOf wf:SamplingMethod ;
+    rdfs:label "Continuous sampling" ;
+    rdfs:comment "Continuous monitoring with online sensors." .
+
+# ========== SAMPLING ACTIVITY ==========
+# PROV-O Integration: The act of sampling is a prov:Activity
+
+wf:SamplingActivity a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000015 ;  # Process
+    rdfs:subClassOf prov:Activity ;  # PROV-O: Sampling is an activity
+    rdfs:label "Sampling activity" ;
+    rdfs:comment "The act of collecting a water sample. As a prov:Activity, this enables tracking who performed the sampling, when it occurred, what equipment was used, and what samples were generated. Links to prov:Entity (samples) via prov:generated and to prov:Agent (equipment/personnel) via prov:wasAssociatedWith." .
+
+# ========== SAMPLING EQUIPMENT ==========
+# PROV-O Integration: Equipment and sensors are prov:Agent entities
+
+wf:SamplingEquipment a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000040 ;  # Material entity
+    rdfs:subClassOf prov:Agent ;  # PROV-O: Equipment is an agent responsible for sampling
+    rdfs:label "Sampling equipment" ;
+    rdfs:comment "Equipment used to collect water samples. As a prov:Agent, equipment can be attributed responsibility for generating samples and observations, enabling full chain-of-custody tracking." .
+
+wf:Autosampler a owl:Class ;
+    rdfs:subClassOf wf:SamplingEquipment ;
+    rdfs:label "Autosampler" ;
+    rdfs:comment "Automated device for collecting water samples at programmed intervals." .
+
+wf:OnlineSensor a owl:Class ;
+    rdfs:subClassOf wf:SamplingEquipment ;
+    rdfs:label "Online sensor" ;
+    rdfs:comment "Continuous monitoring sensor installed in the process or water body. Inherits prov:Agent status from SamplingEquipment for attribution of continuous observations." .
+
+wf:ManualSampler a owl:Class ;
+    rdfs:subClassOf wf:SamplingEquipment ;
+    rdfs:label "Manual sampler" ;
+    rdfs:comment "Equipment for manual sample collection (bottles, bailers, etc.)." .
+
+# ========== FLOW DIRECTION ==========
+# Classification of water flow direction for regulatory context
+
+wf:FlowDirection a owl:Class ;
+    rdfs:label "Flow direction" ;
+    rdfs:comment "Direction of water flow relative to a treatment system. Critical for regulatory monitoring context." .
+
+wf:InfluentFlow a owl:Class ;
+    rdfs:subClassOf wf:FlowDirection ;
+    rdfs:label "Influent" ;
+    rdfs:comment "Water flowing into a treatment system or unit process." .
+
+wf:EffluentFlow a owl:Class ;
+    rdfs:subClassOf wf:FlowDirection ;
+    rdfs:label "Effluent" ;
+    rdfs:comment "Water flowing out of a treatment system or unit process." .
+
+wf:ProcessFlow a owl:Class ;
+    rdfs:subClassOf wf:FlowDirection ;
+    rdfs:label "Process flow" ;
+    rdfs:comment "Water within a treatment process (intermediate stream)." .
+
+wf:BypassFlow a owl:Class ;
+    rdfs:subClassOf wf:FlowDirection ;
+    rdfs:label "Bypass flow" ;
+    rdfs:comment "Water bypassing normal treatment (e.g., during high flow events)." .
+
+# Make flow directions mutually exclusive
+wf:InfluentFlow owl:disjointWith wf:EffluentFlow, wf:ProcessFlow, wf:BypassFlow .
+wf:EffluentFlow owl:disjointWith wf:ProcessFlow, wf:BypassFlow .
+wf:ProcessFlow owl:disjointWith wf:BypassFlow .
+
+# ========== DISCHARGE POINT ==========
+# Regulatory discharge location
+
+wf:DischargePoint a owl:Class ;
+    rdfs:subClassOf wf:SamplingPoint ;
+    rdfs:label "Discharge point" ;
+    rdfs:comment "A regulatory discharge point (outfall) where treated water is released to receiving waters. Subject to permit monitoring requirements." .
+
+# ========== DISCHARGE MEASUREMENT ==========
+# Flow rate measurement at discharge
+
+wf:DischargeMeasurement a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000015 ;  # Process
+    rdfs:label "Discharge measurement" ;
+    rdfs:comment "A measurement event for water discharge rate. Required for load-based limit calculations." .
+
+# ========== OBJECT PROPERTIES ==========
+
+# Sample to sampling point
+wf:takenAt a owl:ObjectProperty ;
+    rdfs:label "taken at" ;
+    rdfs:comment "Links a sample to the sampling point where it was collected" ;
+    rdfs:domain wf:WaterSample ;
+    rdfs:range wf:SamplingPoint .
+
+# Sample to sampling method
+wf:usedSamplingMethod a owl:ObjectProperty ;
+    rdfs:label "used sampling method" ;
+    rdfs:comment "Links a sample to the method used for collection" ;
+    rdfs:domain wf:WaterSample ;
+    rdfs:range wf:SamplingMethod .
+
+# Sample to equipment
+# PROV-O Integration: collectedBy is a specialization of prov:wasAttributedTo
+wf:collectedBy a owl:ObjectProperty ;
+    rdfs:subPropertyOf prov:wasAttributedTo ;  # PROV-O: Attribution to agent
+    rdfs:label "collected by" ;
+    rdfs:comment "Links a sample to the equipment used for collection. As a subproperty of prov:wasAttributedTo, this enables provenance tracking of which agent (equipment/personnel) was responsible for collecting the sample." ;
+    rdfs:domain wf:WaterSample ;
+    rdfs:range wf:SamplingEquipment .
+
+# Sample from material entity (water body, tank, etc.)
+wf:sampleOf a owl:ObjectProperty ;
+    rdfs:label "sample of" ;
+    rdfs:comment "Links a sample to the material entity (water body, tank, process) it represents" ;
+    rdfs:domain wf:WaterSample ;
+    rdfs:range bfo:BFO_0000040 .
+
+# Observation to sample
+wf:hasSample a owl:ObjectProperty ;
+    rdfs:label "has sample" ;
+    rdfs:comment "Links an observation to the sample it was made on" ;
+    rdfs:domain wf:WaterQualityObservation ;
+    rdfs:range wf:WaterSample .
+
+# Sample/Observation to flow direction
+wf:hasFlowDirection a owl:ObjectProperty ;
+    rdfs:label "has flow direction" ;
+    rdfs:comment "Links a sample or observation to its flow direction context" ;
+    rdfs:domain [ owl:unionOf (wf:WaterSample wf:WaterQualityObservation) ] ;
+    rdfs:range wf:FlowDirection .
+
+# Sampling point to component
+wf:locatedAt a owl:ObjectProperty ;
+    rdfs:label "located at" ;
+    rdfs:comment "Links a sampling point to the component or location it monitors" ;
+    rdfs:domain wf:SamplingPoint ;
+    rdfs:range bfo:BFO_0000040 .
+
+# Sampling point to discharge point
+wf:hasDischargePoint a owl:ObjectProperty ;
+    rdfs:label "has discharge point" ;
+    rdfs:comment "Links a facility to its regulatory discharge points" ;
+    rdfs:domain bfo:BFO_0000040 ;  # Material entity (facility, plant)
+    rdfs:range wf:DischargePoint .
+
+# Discharge measurement relationships
+wf:measuredAt a owl:ObjectProperty ;
+    rdfs:label "measured at" ;
+    rdfs:comment "Links a discharge measurement to the discharge point" ;
+    rdfs:domain wf:DischargeMeasurement ;
+    rdfs:range wf:DischargePoint .
+
+# ========== DATA PROPERTIES ==========
+
+# Sample timestamp
+wf:collectedOn a owl:DatatypeProperty ;
+    rdfs:label "collected on" ;
+    rdfs:comment "Date and time when the sample was collected" ;
+    rdfs:domain wf:WaterSample ;
+    rdfs:range xsd:dateTime .
+
+# PROV-O Integration: Sampling time for activities
+wf:samplingTime a owl:DatatypeProperty ;
+    rdfs:subPropertyOf prov:generatedAtTime ;  # PROV-O: When entity was generated
+    rdfs:label "sampling time" ;
+    rdfs:comment "The date and time when a sampling activity generated a sample. As a subproperty of prov:generatedAtTime, this integrates with PROV-O's temporal provenance model." ;
+    rdfs:domain wf:SamplingActivity ;
+    rdfs:range xsd:dateTime .
+
+# Sample ID (for chain of custody)
+wf:sampleId a owl:DatatypeProperty ;
+    rdfs:label "sample ID" ;
+    rdfs:comment "Unique identifier for the sample (chain of custody tracking)" ;
+    rdfs:domain wf:WaterSample ;
+    rdfs:range xsd:string .
+
+# Composite sample properties
+wf:compositePeriod a owl:DatatypeProperty ;
+    rdfs:label "composite period" ;
+    rdfs:comment "Duration over which composite sample was collected (hours)" ;
+    rdfs:domain wf:WaterSample ;
+    rdfs:range xsd:double .
+
+wf:numberOfAliquots a owl:DatatypeProperty ;
+    rdfs:label "number of aliquots" ;
+    rdfs:comment "Number of aliquots in a composite sample" ;
+    rdfs:domain wf:WaterSample ;
+    rdfs:range xsd:integer .
+
+# Discharge measurement data properties
+wf:flowRate a owl:DatatypeProperty ;
+    rdfs:label "flow rate" ;
+    rdfs:comment "Measured flow rate value" ;
+    rdfs:domain wf:DischargeMeasurement ;
+    rdfs:range xsd:double .
+
+wf:flowRateUnit a owl:ObjectProperty ;
+    rdfs:label "flow rate unit" ;
+    rdfs:comment "Unit of flow rate measurement (e.g., m3/day, MGD)" ;
+    rdfs:domain wf:DischargeMeasurement ;
+    rdfs:range qudt:Unit .
+
+wf:measuredOn a owl:DatatypeProperty ;
+    rdfs:label "measured on" ;
+    rdfs:comment "Date and time of discharge measurement" ;
+    rdfs:domain wf:DischargeMeasurement ;
+    rdfs:range xsd:dateTime .
+
+# Sampling point location
+wf:latitude a owl:DatatypeProperty ;
+    rdfs:label "latitude" ;
+    rdfs:comment "Geographic latitude of sampling point" ;
+    rdfs:domain wf:SamplingPoint ;
+    rdfs:range xsd:double .
+
+wf:longitude a owl:DatatypeProperty ;
+    rdfs:label "longitude" ;
+    rdfs:comment "Geographic longitude of sampling point" ;
+    rdfs:domain wf:SamplingPoint ;
+    rdfs:range xsd:double .
+
+wf:pointName a owl:DatatypeProperty ;
+    rdfs:label "point name" ;
+    rdfs:comment "Regulatory or operational name of the sampling point" ;
+    rdfs:domain wf:SamplingPoint ;
+    rdfs:range xsd:string .

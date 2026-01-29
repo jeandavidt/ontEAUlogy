@@ -1,0 +1,371 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://ugentbiomath.github.io/waterframe/modules/scenarios>
+    a owl:Ontology ;
+    owl:imports <http://www.w3.org/2006/time#> ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/material_entities> ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/properties> ;
+    dc:title "waterFRAME: Scenario Modeling Module" ;
+    dc:creator "Jean-David Therrien" ;
+    dc:version "0.1.0" ;
+    rdfs:comment """Scenario modeling module for waterFRAME with OWL-Time integration.
+
+    Enables representation of:
+    - Baseline scenarios (current system state)
+    - Alternative scenarios (what-if configurations)
+    - Historical scenarios (past states for calibration)
+    - Optimization scenarios (system improvements)
+
+    Inspired by J-Park Simulator (Zhou et al. 2019) and OntoCAPE scenario concepts,
+    adapted for water system modeling. Uses W3C OWL-Time ontology for proper temporal
+    representation of scenario time periods.
+
+    Future expansion hooks included for optimization objectives, constraints, and
+    simulation parameters.""" ;
+    rdfs:seeAlso <http://www.theworldavatar.com/ontology/ontoagent/OntoAgent.owl> ;
+    rdfs:comment "Scenario framework inspired by OntoAgent and J-Park Simulator approach to scenario modeling" .
+
+# ========== SCENARIO FRAMEWORK ==========
+# Inspired by J-Park Simulator (Zhou et al. 2019) and OntoCAPE
+# Adapted for water system modeling
+
+wf:Scenario a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000031 ;  # generically dependent continuant
+    rdfs:label "Scenario" ;
+    rdfs:comment """A defined configuration of a water system representing a specific state,
+    time period, or hypothetical alternative. Scenarios enable comparison of different system designs,
+    operating conditions, or regulatory requirements.
+
+    Scenarios are informational entities (BFO generically dependent continuants) that describe
+    system configurations. They can represent current reality (baseline), alternatives (what-if),
+    or historical states (past configurations).""" .
+
+wf:BaselineScenario a owl:Class ;
+    rdfs:subClassOf wf:Scenario ;
+    rdfs:label "Baseline scenario" ;
+    rdfs:comment """The current or reference state of the water system.
+    All alternative scenarios are compared against the baseline.
+
+    Example: Current configuration of Ghent water system as of 2026, including
+    existing treatment plants, water reuse connections, and operating conditions.""" .
+
+wf:AlternativeScenario a owl:Class ;
+    rdfs:subClassOf wf:Scenario ;
+    rdfs:label "Alternative scenario" ;
+    rdfs:comment """A hypothetical configuration differing from the baseline.
+    Used for comparing design alternatives, operational changes, or regulatory scenarios.
+
+    Examples:
+    - Adding new treatment units (e.g., MBR for greywater reuse)
+    - Changing operating parameters (e.g., increasing flow rates)
+    - Meeting new regulations (e.g., stricter discharge limits)
+    - Infrastructure expansion (e.g., additional storage capacity)""" .
+
+wf:HistoricalScenario a owl:Class ;
+    rdfs:subClassOf wf:Scenario ;
+    rdfs:label "Historical scenario" ;
+    rdfs:comment """A scenario representing a past state of the system.
+    Used for calibration, validation, trend analysis, or comparing historical performance.
+
+    Historical scenarios typically link to actual measurement data from the time period
+    they represent, enabling validation of models and understanding of system evolution.""" .
+
+wf:OptimizationScenario a owl:Class ;
+    rdfs:subClassOf wf:AlternativeScenario ;
+    rdfs:label "Optimization scenario" ;
+    rdfs:comment """A scenario generated through optimization to maximize/minimize objectives.
+
+    Example: Configuration that minimizes energy consumption while meeting all discharge
+    standards and satisfying water demand. Links to OptimizationObjective instances
+    that specify the optimization criteria.
+
+    Note: Full optimization framework (objectives, constraints, methods) will be expanded
+    in future versions. Current version provides basic structure for optimization scenarios.""" .
+
+# ========== SCENARIO PROPERTIES ==========
+
+wf:scenarioName a owl:DatatypeProperty ;
+    rdfs:label "scenario name" ;
+    rdfs:comment "Human-readable name for the scenario (e.g., 'Ghent Baseline 2026', 'MBR Addition Alternative')" ;
+    rdfs:domain wf:Scenario ;
+    rdfs:range xsd:string .
+
+wf:scenarioPurpose a owl:DatatypeProperty ;
+    rdfs:label "scenario purpose" ;
+    rdfs:comment """Describes why this scenario exists and what question it answers.
+
+    Examples:
+    - 'Evaluate impact of MBR addition on water reuse percentage'
+    - 'Assess compliance with new EU water reuse regulation'
+    - 'Compare energy consumption of different treatment configurations'
+    - 'Historical baseline for trend analysis'""" ;
+    rdfs:domain wf:Scenario ;
+    rdfs:range xsd:string .
+
+wf:scenarioDescription a owl:DatatypeProperty ;
+    rdfs:label "scenario description" ;
+    rdfs:comment "Detailed textual description of the scenario, including key assumptions and differences from baseline" ;
+    rdfs:domain wf:Scenario ;
+    rdfs:range xsd:string .
+
+# Simple timestamp properties (primary approach for fixed periods)
+wf:scenarioStartDate a owl:DatatypeProperty ;
+    rdfs:label "scenario start date" ;
+    rdfs:comment "The date and time when this scenario begins (inclusive)." ;
+    rdfs:domain wf:Scenario ;
+    rdfs:range xsd:dateTime .
+
+wf:scenarioEndDate a owl:DatatypeProperty ;
+    rdfs:label "scenario end date" ;
+    rdfs:comment "The date and time when this scenario ends (inclusive)." ;
+    rdfs:domain wf:Scenario ;
+    rdfs:range xsd:dateTime .
+
+wf:temporalDescription a owl:DatatypeProperty ;
+    rdfs:label "temporal description" ;
+    rdfs:comment "Human-readable description of the time period (e.g., 'Calendar Year 2026', 'Q1 2025', 'Summer 2024')." ;
+    rdfs:domain wf:Scenario ;
+    rdfs:range xsd:string .
+
+# Keep hasTemporalExtent optional for advanced temporal reasoning
+wf:hasTemporalExtent a owl:ObjectProperty ;
+    rdfs:label "has temporal extent" ;
+    rdfs:comment "OPTIONAL: Links scenario to OWL-Time TemporalEntity for advanced interval reasoning. For simple fixed periods, use scenarioStartDate/scenarioEndDate instead." ;
+    rdfs:domain wf:Scenario ;
+    rdfs:range time:TemporalEntity .
+
+wf:scenarioCreationDate a owl:DatatypeProperty ;
+    rdfs:label "scenario creation date" ;
+    rdfs:comment "Date and time when this scenario definition was created (metadata for scenario provenance)" ;
+    rdfs:domain wf:Scenario ;
+    rdfs:range xsd:dateTime .
+
+# ========== SCENARIO RELATIONSHIPS ==========
+
+wf:baselineFor a owl:ObjectProperty ;
+    rdfs:label "baseline for" ;
+    rdfs:comment """Links a baseline scenario to alternative scenarios compared against it.
+
+    This property establishes the comparison relationship, indicating which alternatives
+    are defined relative to which baseline.""" ;
+    rdfs:domain wf:BaselineScenario ;
+    rdfs:range wf:AlternativeScenario .
+
+wf:alternativeTo a owl:ObjectProperty ;
+    rdfs:label "alternative to" ;
+    rdfs:comment """Links an alternative scenario to its baseline.
+
+    Inverse of baselineFor. Every alternative scenario should reference its baseline
+    to enable proper comparison and understanding of differences.""" ;
+    rdfs:domain wf:AlternativeScenario ;
+    rdfs:range wf:BaselineScenario ;
+    owl:inverseOf wf:baselineFor .
+
+# ========== SCENARIO MEMBERSHIP ==========
+
+wf:inScenario a owl:ObjectProperty ;
+    rdfs:label "in scenario" ;
+    rdfs:comment """Indicates that an entity exists or is active in a particular scenario.
+
+    Used to associate system components, parameters, observations, or any other entity
+    with a specific scenario. Components may exist in multiple scenarios or be unique
+    to a single scenario.
+
+    Example: NewMBRUnit inScenario MBRAlternativeScenario
+    indicates that NewMBRUnit only exists in the alternative scenario, not in baseline.""" ;
+    rdfs:range wf:Scenario .
+
+wf:scenarioComponent a owl:ObjectProperty ;
+    rdfs:label "scenario component" ;
+    rdfs:comment """Links a scenario to the water system components that exist in it.
+
+    This is the inverse direction of inScenario, allowing queries like:
+    'What components are in Scenario X?' or 'List all treatment units in baseline scenario'.
+
+    Components can be physical units (tanks, pipes), operational parameters (flow rates),
+    or any other modeled entity that varies between scenarios.""" ;
+    rdfs:domain wf:Scenario ;
+    rdfs:range wf:WaterSystemComponent .
+
+wf:scenarioParameter a owl:ObjectProperty ;
+    rdfs:label "scenario parameter" ;
+    rdfs:comment """Links a scenario to specific parameter values (flow rates, quality limits, etc.).
+
+    Parameters include:
+    - Operating parameters (flow rates, retention times)
+    - Design parameters (tank volumes, pipe diameters)
+    - Quality parameters (discharge limits, reuse standards)
+    - Economic parameters (costs, tariffs)
+
+    Note: This is a general hook for parameter association. Specific parameter types
+    may define more specialized properties as subproperties.""" ;
+    rdfs:domain wf:Scenario .
+
+# ========== SCENARIO COMPARISON ==========
+
+wf:ScenarioComparison a owl:Class ;
+    rdfs:label "Scenario comparison" ;
+    rdfs:comment """Represents a comparison between two or more scenarios.
+
+    Scenario comparisons aggregate the results of comparing scenarios on various criteria
+    (cost, performance, compliance, sustainability). Each comparison can have multiple
+    criteria and may include quantitative metrics or qualitative assessments.
+
+    Example: Comparing baseline vs. MBR alternative on:
+    - Capital cost (€500k vs €800k)
+    - Operating cost (€200k/yr vs €180k/yr)
+    - Water reuse percentage (30% vs 50%)
+    - Regulatory compliance (meets current vs. meets future standards)""" .
+
+wf:comparesScenarios a owl:ObjectProperty ;
+    rdfs:label "compares scenarios" ;
+    rdfs:comment """Links a scenario comparison to the scenarios being compared.
+
+    Typically links to 2+ scenarios (baseline + alternatives), but can compare
+    any number of scenarios.""" ;
+    rdfs:domain wf:ScenarioComparison ;
+    rdfs:range wf:Scenario .
+
+wf:comparisonCriterion a owl:DatatypeProperty ;
+    rdfs:label "comparison criterion" ;
+    rdfs:comment """The metric or criterion used to compare scenarios.
+
+    Common criteria include:
+    - Cost metrics: Capital cost, operating cost, lifecycle cost
+    - Performance metrics: Water reuse percentage, energy efficiency, treatment efficiency
+    - Compliance metrics: Regulatory compliance, discharge standard satisfaction
+    - Sustainability metrics: Carbon footprint, resource recovery, circularity
+    - Operational metrics: Reliability, maintenance requirements, complexity
+
+    Note: For structured comparison metrics with units, consider using QUDT-aligned
+    properties linking to specific quality observations.""" ;
+    rdfs:domain wf:ScenarioComparison ;
+    rdfs:range xsd:string .
+
+# ========== FUTURE EXPANSION HOOKS ==========
+# These classes are defined but not fully implemented in current version
+# They indicate future capabilities that will be needed
+
+wf:OptimizationObjective a owl:Class ;
+    rdfs:label "Optimization objective" ;
+    rdfs:comment """Objective function for scenario optimization.
+
+    FUTURE: Will be expanded to include:
+    - Target parameters (which quality/performance metric to optimize)
+    - Optimization direction (minimize/maximize)
+    - Weights (for multi-objective optimization)
+    - Priority levels
+
+    Inspired by OntoAgent optimization framework. Current version provides placeholder
+    for future development of multi-objective optimization capabilities.""" ;
+    rdfs:seeAlso <http://www.theworldavatar.com/ontology/ontoagent/OntoAgent.owl#OptimizationObjective> ;
+    rdfs:comment "Framework inspired by OntoAgent OptimizationObjective concept" .
+
+wf:ScenarioConstraint a owl:Class ;
+    rdfs:label "Scenario constraint" ;
+    rdfs:comment """Constraint on scenario variables (regulatory, physical, economic).
+
+    FUTURE: Will include:
+    - Constraint types (equality, inequality, logical)
+    - Constraint bounds (min/max values)
+    - Constraint relationships (linking parameters)
+    - Constraint sources (regulatory requirements, physical limitations, economic boundaries)
+
+    Examples of future constraints:
+    - Regulatory: 'effluent_BOD ≤ 25 mg/L' (discharge limit)
+    - Physical: 'flow_rate ≤ max_pipe_capacity' (infrastructure limit)
+    - Economic: 'total_cost ≤ budget' (financial constraint)
+    - Operational: 'retention_time ≥ min_treatment_time' (process requirement)""" .
+
+wf:SimulationParameter a owl:Class ;
+    rdfs:label "Simulation parameter" ;
+    rdfs:comment """Parameters for scenario simulation (solver config, time steps, etc.).
+
+    FUTURE: Will support:
+    - Numerical solver configuration (tolerance, max iterations, solver type)
+    - Temporal discretization (time steps, simulation duration)
+    - Computational resources (max memory, parallel execution)
+    - Output configuration (reporting frequency, output variables)
+
+    These parameters control HOW a scenario is simulated, distinct from the scenario
+    definition itself (which describes WHAT is simulated).""" .
+
+# Placeholder properties for future development
+wf:hasObjective a owl:ObjectProperty ;
+    rdfs:label "has objective" ;
+    rdfs:comment """FUTURE: Links optimization scenario to objectives.
+
+    In future versions, will link OptimizationScenario instances to one or more
+    OptimizationObjective instances, enabling multi-objective optimization with
+    weights and priorities.""" ;
+    rdfs:domain wf:OptimizationScenario ;
+    rdfs:range wf:OptimizationObjective .
+
+wf:hasConstraint a owl:ObjectProperty ;
+    rdfs:label "has constraint" ;
+    rdfs:comment """FUTURE: Links scenario to constraints.
+
+    In future versions, will link any Scenario to ScenarioConstraint instances
+    that bound the scenario space. Enables modeling of:
+    - Regulatory constraints (discharge limits)
+    - Physical constraints (equipment capacities)
+    - Economic constraints (budget limits)
+    - Operational constraints (process requirements)""" ;
+    rdfs:domain wf:Scenario ;
+    rdfs:range wf:ScenarioConstraint .
+
+# ========== DOCUMENTATION AND EXAMPLES ==========
+
+# Example usage patterns documented in comments
+# For actual usage examples, see case studies (e.g., case_studies/ghent/)
+
+# Example 1: Baseline scenario with OWL-Time
+# ex:GhentBaseline2026 a wf:BaselineScenario ;
+#     wf:scenarioName "Ghent Baseline 2026" ;
+#     wf:scenarioPurpose "Current state of Ghent water infrastructure" ;
+#     wf:hasTemporalExtent [
+#         a time:Interval ;
+#         time:hasBeginning [ a time:Instant ; time:inXSDDateTimeStamp "2026-01-01T00:00:00Z"^^xsd:dateTimeStamp ] ;
+#         time:hasEnd [ a time:Instant ; time:inXSDDateTimeStamp "2026-12-31T23:59:59Z"^^xsd:dateTimeStamp ]
+#     ] ;
+#     wf:scenarioComponent ex:AquaFin_WWTP ;
+#     wf:scenarioComponent ex:BrewCo_Facility .
+
+# Example 2: Alternative scenario with new component
+# ex:MBRAlternative a wf:AlternativeScenario ;
+#     wf:scenarioName "BrewCo MBR Addition" ;
+#     wf:scenarioPurpose "Evaluate impact of adding MBR for greywater reuse" ;
+#     wf:alternativeTo ex:GhentBaseline2026 ;
+#     wf:scenarioComponent ex:AquaFin_WWTP ;
+#     wf:scenarioComponent ex:BrewCo_Facility ;
+#     wf:scenarioComponent ex:BrewCo_New_MBR .  # New component only in this scenario
+#
+# ex:BrewCo_New_MBR a wf:MembraneBioreactorUnit ;
+#     wf:inScenario ex:MBRAlternative ;
+#     rdfs:comment "This MBR only exists in the alternative scenario" .
+
+# Example 3: Scenario comparison
+# ex:BaselineVsMBR a wf:ScenarioComparison ;
+#     wf:comparesScenarios ex:GhentBaseline2026 ;
+#     wf:comparesScenarios ex:MBRAlternative ;
+#     wf:comparisonCriterion "Capital cost" ;
+#     wf:comparisonCriterion "Operating cost" ;
+#     wf:comparisonCriterion "Water reuse percentage" ;
+#     wf:comparisonCriterion "Regulatory compliance" .
+
+# Example 4: Historical scenario for calibration
+# ex:GhentHistorical2020 a wf:HistoricalScenario ;
+#     wf:scenarioName "Ghent System 2020" ;
+#     wf:scenarioPurpose "Historical baseline for trend analysis and model calibration" ;
+#     wf:hasTemporalExtent [
+#         a time:Interval ;
+#         time:hasBeginning [ a time:Instant ; time:inXSDDateTimeStamp "2020-01-01T00:00:00Z"^^xsd:dateTimeStamp ] ;
+#         time:hasEnd [ a time:Instant ; time:inXSDDateTimeStamp "2020-12-31T23:59:59Z"^^xsd:dateTimeStamp ]
+#     ] .

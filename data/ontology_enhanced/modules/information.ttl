@@ -1,0 +1,264 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://ugentbiomath.github.io/waterframe/modules/information>
+    a owl:Ontology ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/material_entities> ;
+    dc:title "waterFRAME: Model Information Module" ;
+    dc:creator "Jean-David Therrien" ;
+    rdfs:comment "Classes and properties for computational model metadata. Adapted from OntoCAPE model/mathematical_model and model/process_model patterns without importing due to OWL DL violations in original." .
+
+# ========== MODEL CLASSES ==========
+# Based on OntoCAPE patterns: MathematicalModel, ProcessModel, ModelVariable
+# Adapted to avoid OWL DL violations from transitive 'contains' property
+
+# ProcessModel - represents a computational model for a process
+# Pattern from OntoCAPE model/process_model.owl
+wf:ProcessModel a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000031 ;  # Information content entity
+    rdfs:label "Process model" ;
+    rdfs:comment "A computational model that represents the behavior of a process system. Adapted from OntoCAPE ProcessModel pattern." .
+
+# MathematicalModel - abstract mathematical representation
+wf:MathematicalModel a owl:Class ;
+    rdfs:subClassOf wf:ProcessModel ;
+    rdfs:label "Mathematical model" ;
+    rdfs:comment "A mathematical representation of a system using equations and parameters." .
+
+# Subclass for simulation models (ASM, ADM, BSM, etc.)
+wf:SimulationModel a owl:Class ;
+    rdfs:subClassOf wf:MathematicalModel ;
+    rdfs:label "Simulation model" ;
+    rdfs:comment "A dynamic simulation model of a water treatment process." .
+
+# ========== MODEL VARIABLE CLASSES ==========
+# Based on OntoCAPE model/mathematical_model.owl patterns
+
+# ModelVariable - any variable in a model
+wf:ModelVariable a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000019 ;  # Quality
+    rdfs:label "Model variable" ;
+    rdfs:comment "A variable in a mathematical model (state, input, or output)." .
+
+# StateVariable - dependent variable that changes over time
+wf:StateVariable a owl:Class ;
+    rdfs:subClassOf wf:ModelVariable ;
+    rdfs:label "State variable" ;
+    rdfs:comment "A dependent variable in a model whose value changes over time based on system dynamics." .
+
+# InputVariable - independent input to the model
+wf:InputVariable a owl:Class ;
+    rdfs:subClassOf wf:ModelVariable ;
+    rdfs:label "Input variable" ;
+    rdfs:comment "An independent input variable to a model (boundary condition, driver)." .
+
+# OutputVariable - computed output from the model
+wf:OutputVariable a owl:Class ;
+    rdfs:subClassOf wf:ModelVariable ;
+    rdfs:label "Output variable" ;
+    rdfs:comment "A computed output variable from a model." .
+
+# Parameter - constant value in the model
+wf:Parameter a owl:Class ;
+    rdfs:subClassOf wf:ModelVariable ;
+    rdfs:label "Parameter" ;
+    rdfs:comment "A constant parameter in a model (kinetic coefficient, yield coefficient, etc.)." .
+
+# ========== MODEL INPUT/OUTPUT CLASSES ==========
+# Following Entity_Feature_Value pattern from Manchester ODPs
+
+# ModelInput - represents an input to a process model with metadata
+wf:ModelInput a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000023 ;  # Specifically dependent continuant
+    rdfs:label "Model input" ;
+    rdfs:comment "An input parameter to a computational model with associated metadata (name, unit, constraints)." .
+
+# ModelOutput - represents an output from a process model with metadata
+wf:ModelOutput a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000023 ;
+    rdfs:label "Model output" ;
+    rdfs:comment "An output parameter from a computational model with associated metadata." .
+
+# ========== MODEL-RELATED OBJECT PROPERTIES ==========
+
+# Link model to what it represents
+wf:representsEntity a owl:ObjectProperty ;
+    rdfs:label "represents entity" ;
+    rdfs:comment "Links a model to the entity (system, process, or component) it represents" ;
+    rdfs:domain wf:ProcessModel ;
+    rdfs:range bfo:BFO_0000040 .  # Material entity
+
+# Model has input
+wf:hasInput a owl:ObjectProperty ;
+    rdfs:label "has input" ;
+    rdfs:comment "Links a model to its input parameters" ;
+    rdfs:domain wf:ProcessModel ;
+    rdfs:range wf:ModelInput .
+
+# Model has output
+wf:hasOutput a owl:ObjectProperty ;
+    rdfs:label "has output" ;
+    rdfs:comment "Links a model to its output parameters" ;
+    rdfs:domain wf:ProcessModel ;
+    rdfs:range wf:ModelOutput .
+
+# Variable relationships
+wf:hasModelVariable a owl:ObjectProperty ;
+    rdfs:label "has model variable" ;
+    rdfs:comment "Links a model to its variables (state, input, output)" ;
+    rdfs:domain wf:MathematicalModel ;
+    rdfs:range wf:ModelVariable .
+
+wf:hasParameter a owl:ObjectProperty ;
+    rdfs:label "has parameter" ;
+    rdfs:comment "Links a model to its parameters" ;
+    rdfs:domain wf:MathematicalModel ;
+    rdfs:range wf:Parameter .
+
+wf:hasStateVariable a owl:ObjectProperty ;
+    rdfs:label "has state variable" ;
+    rdfs:comment "Links a model to its state variables" ;
+    rdfs:domain wf:SimulationModel ;
+    rdfs:range wf:StateVariable .
+
+wf:hasInputVariable a owl:ObjectProperty ;
+    rdfs:label "has input variable" ;
+    rdfs:comment "Links a model to its input variables" ;
+    rdfs:domain wf:SimulationModel ;
+    rdfs:range wf:InputVariable .
+
+wf:hasOutputVariable a owl:ObjectProperty ;
+    rdfs:label "has output variable" ;
+    rdfs:comment "Links a model to its output variables" ;
+    rdfs:domain wf:SimulationModel ;
+    rdfs:range wf:OutputVariable .
+
+# Model input/output linked to model variable
+wf:correspondsToVariable a owl:ObjectProperty ;
+    rdfs:label "corresponds to variable" ;
+    rdfs:comment "Links a ModelInput or ModelOutput to the underlying ModelVariable" ;
+    rdfs:domain [ owl:unionOf (wf:ModelInput wf:ModelOutput) ] ;
+    rdfs:range wf:ModelVariable .
+
+# ========== DATA PROPERTIES FOR MODEL METADATA ==========
+
+# Parameter name (string identifier)
+wf:parameterName a owl:DatatypeProperty ;
+    rdfs:label "parameter name" ;
+    rdfs:comment "The name/identifier of a model parameter" ;
+    rdfs:domain wf:ModelVariable ;
+    rdfs:range xsd:string .
+
+# Unit (using QUDT vocabulary where possible)
+wf:hasUnit a owl:ObjectProperty ;
+    rdfs:label "has unit" ;
+    rdfs:comment "Links a quantity to its unit of measurement (QUDT compatible)" ;
+    rdfs:domain wf:ModelVariable ;
+    rdfs:range qudt:Unit .
+
+# Numeric value (for parameters with fixed values)
+wf:numericalValue a owl:DatatypeProperty ;
+    rdfs:label "numerical value" ;
+    rdfs:comment "The numeric value of a parameter" ;
+    rdfs:domain wf:Parameter ;
+    rdfs:range xsd:double .
+
+# Minimum allowed value
+wf:minValue a owl:DatatypeProperty ;
+    rdfs:label "minimum value" ;
+    rdfs:comment "The minimum allowed value for a parameter or input" ;
+    rdfs:domain [ owl:unionOf (wf:Parameter wf:ModelInput) ] ;
+    rdfs:range xsd:double .
+
+# Maximum allowed value
+wf:maxValue a owl:DatatypeProperty ;
+    rdfs:label "maximum value" ;
+    rdfs:comment "The maximum allowed value for a parameter or input" ;
+    rdfs:domain [ owl:unionOf (wf:Parameter wf:ModelInput) ] ;
+    rdfs:range xsd:double .
+
+# Default value
+wf:defaultValue a owl:DatatypeProperty ;
+    rdfs:label "default value" ;
+    rdfs:comment "The default value for a parameter or input" ;
+    rdfs:domain [ owl:unionOf (wf:Parameter wf:ModelInput) ] ;
+    rdfs:range xsd:double .
+
+# ========== DECISION VARIABLE MARKER ==========
+# For optimization - marks variables that can be adjusted
+
+wf:isDecisionVariable a owl:DatatypeProperty ;
+    rdfs:label "is decision variable" ;
+    rdfs:comment "Boolean indicating if this parameter/variable can be used as a decision variable in optimization (true/false)" ;
+    rdfs:domain wf:ModelVariable ;
+    rdfs:range xsd:boolean .
+
+wf:DecisionVariable a owl:Class ;
+    rdfs:subClassOf wf:ModelVariable ;
+    rdfs:label "Decision variable" ;
+    rdfs:comment "A model variable that can be adjusted during optimization." .
+
+# ========== IMPLEMENTATION METADATA ==========
+# For linking models to their computational implementation
+
+wf:implementedBy a owl:ObjectProperty ;
+    rdfs:label "implemented by" ;
+    rdfs:comment "Links a model to the software or code that implements it" ;
+    rdfs:domain wf:ProcessModel ;
+    rdfs:range wf:SoftwareSystem .
+
+wf:SoftwareSystem a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000031 ;
+    rdfs:label "Software system" ;
+    rdfs:comment "A software system that implements one or more process models." .
+
+wf:apiEndpoint a owl:DatatypeProperty ;
+    rdfs:label "API endpoint" ;
+    rdfs:comment "The API endpoint URL for invoking the model" ;
+    rdfs:domain wf:SoftwareSystem ;
+    rdfs:range xsd:anyURI .
+
+wf:apiVersion a owl:DatatypeProperty ;
+    rdfs:label "API version" ;
+    rdfs:comment "The version of the API or software" ;
+    rdfs:domain wf:SoftwareSystem ;
+    rdfs:range xsd:string .
+
+# ========== SUBMODEL RELATIONSHIPS ==========
+# For composite models (e.g., WWTP model with ASM + ADM + Settler submodels)
+
+wf:hasSubmodel a owl:ObjectProperty ;
+    rdfs:label "has submodel" ;
+    rdfs:comment "Links a composite model to its constituent submodels" ;
+    rdfs:domain wf:ProcessModel ;
+    rdfs:range wf:ProcessModel .
+
+wf:isSubmodelOf a owl:ObjectProperty ;
+    rdfs:label "is submodel of" ;
+    rdfs:comment "Inverse of hasSubmodel" ;
+    rdfs:domain wf:ProcessModel ;
+    rdfs:range wf:ProcessModel ;
+    owl:inverseOf wf:hasSubmodel .
+
+# ========== EXAMPLE INSTANCES (for documentation) ==========
+# Example: ASM1 model
+# wf:ASM1_Model a wf:SimulationModel ;
+#     rdfs:label "Activated Sludge Model No. 1" ;
+#     wf:representsEntity wf:AerationTank ;
+#     wf:hasParameter wf:mu_max ;
+#     wf:hasParameter wf:K_s ;
+#     wf:hasStateVariable wf:S_S ;
+#     wf:hasStateVariable wf:X_BH .
+
+# Example: Parameter
+# wf:mu_max a wf:Parameter ;
+#     rdfs:label "Maximum specific growth rate" ;
+#     wf:numericalValue "0.4"^^xsd:double ;
+#     wf:hasUnit qudt:perDay ;
+#     wf:isDecisionVariable "false"^^xsd:boolean .

@@ -1,0 +1,395 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix cap: <https://ugentbiomath.github.io/waterframe/capability#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://ugentbiomath.github.io/waterframe/modules/agents>
+    a owl:Ontology ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/information> ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/capabilities> ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/properties> ;
+    dc:title "waterFRAME: Computational Agents Module" ;
+    dc:creator "Jean-David Therrien" ;
+    dc:version "0.1.0" ;
+    rdfs:comment """Computational agent ontology module for waterFRAME. Enables semantic
+    discovery of computational services, operation specification with preconditions/postconditions,
+    and automatic compositional reasoning for workflow construction.
+
+    Key Innovation: Extends existing waterFRAME patterns by adding an agent abstraction layer
+    on top of ProcessModel, enabling service-oriented discovery and compositional queries like
+    'Given data {α, β, γ} and agents {A, B, C}, can I compute information X?'""" .
+
+# ========== CORE CLASSES ==========
+
+# Computational Agent - the main abstraction for a computational service
+wf:ComputationalAgent a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000031 ;  # Information content entity
+    rdfs:label "Computational agent" ;
+    rdfs:comment """A software system providing computational services for water system
+    simulation, analysis, or optimization. Distinct from physical actors (humans, organizations).
+
+    Key distinction: ComputationalAgent is an informational entity (software/service) while
+    wawo:Actor represents physical/institutional entities. These are disjoint categories.
+
+    An agent implements one or more ProcessModels and offers Operations with defined
+    inputs/outputs and execution conditions.""" .
+
+# Operation - a specific computational service offered by an agent
+wf:Operation a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000015 ;  # Process
+    rdfs:label "Computational operation" ;
+    rdfs:comment """A specific computation with defined inputs, outputs, preconditions, and
+    postconditions. Operations are process types that can be instantiated during execution.
+
+    Operations reuse ModelInput/ModelOutput objects from the information module, ensuring
+    consistency between model specifications and agent operations.""" .
+
+# Execution Condition - base class for preconditions and postconditions
+wf:ExecutionCondition a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000023 ;  # Specifically dependent continuant
+    rdfs:label "Execution condition" ;
+    rdfs:comment """A logical condition that constrains operation execution. Conditions can
+    reference input parameters, output parameters, or state variables.
+
+    Conditions are expressed as constraint expressions (strings) for flexibility, with optional
+    structured links to the constrained parameters for queryability.""" .
+
+# Precondition - must hold before operation executes
+wf:Precondition a owl:Class ;
+    rdfs:subClassOf wf:ExecutionCondition ;
+    rdfs:label "Precondition" ;
+    rdfs:comment """A condition that must hold before an operation can execute. Preconditions
+    typically constrain input values (e.g., 'flow_rate > 0', 'timestep < maxTimestep').""" .
+
+# Postcondition - guaranteed after successful execution
+wf:Postcondition a owl:Class ;
+    rdfs:subClassOf wf:ExecutionCondition ;
+    rdfs:label "Postcondition" ;
+    rdfs:comment """A condition guaranteed to hold after successful operation execution.
+    Postconditions typically assert invariants (e.g., 'mass_balance_satisfied(COD)').""" .
+
+# HTTP Grounding - technical specification for HTTP invocation
+wf:HTTPGrounding a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000023 ;  # Specifically dependent continuant
+    rdfs:label "HTTP grounding" ;
+    rdfs:comment """Technical specification for invoking an operation via HTTP. Includes
+    method (GET/POST/PUT/DELETE), path, content types, and authentication requirements.
+
+    Separating grounding from operation semantics allows multiple invocation protocols
+    (HTTP, gRPC, WebSocket) for the same operation.""" .
+
+# ========== AGENT TYPE SPECIALIZATIONS ==========
+# For improved discoverability and classification
+
+wf:SimulationAgent a owl:Class ;
+    rdfs:subClassOf wf:ComputationalAgent ;
+    rdfs:label "Simulation agent" ;
+    rdfs:comment "An agent that performs dynamic or steady-state simulation of water systems." .
+
+wf:OptimizationAgent a owl:Class ;
+    rdfs:subClassOf wf:ComputationalAgent ;
+    rdfs:label "Optimization agent" ;
+    rdfs:comment "An agent that performs optimization to find optimal operating conditions or design parameters." .
+
+wf:DataTransformAgent a owl:Class ;
+    rdfs:subClassOf wf:ComputationalAgent ;
+    rdfs:label "Data transformation agent" ;
+    rdfs:comment "An agent that transforms data between formats or coordinate systems." .
+
+wf:ReasoningAgent a owl:Class ;
+    rdfs:subClassOf wf:ComputationalAgent ;
+    rdfs:label "Reasoning agent" ;
+    rdfs:comment "An agent that performs logical reasoning or knowledge-based inference." .
+
+# ========== OBJECT PROPERTIES ==========
+
+# ===== Agent-Model Relationships =====
+
+# Agent implements computational model
+wf:implements a owl:ObjectProperty ;
+    rdfs:label "implements" ;
+    rdfs:comment "Links an agent to the ProcessModel it implements" ;
+    rdfs:domain wf:ComputationalAgent ;
+    rdfs:range wf:ProcessModel .
+
+# Agent simulates physical entity
+wf:simulates a owl:ObjectProperty ;
+    rdfs:label "simulates" ;
+    rdfs:comment "Links an agent to the physical entity (tank, treatment plant, pipe) it simulates" ;
+    rdfs:domain wf:ComputationalAgent ;
+    rdfs:range bfo:BFO_0000040 .  # Material entity
+
+# Agent runs on software system (REUSE existing class!)
+wf:runsOn a owl:ObjectProperty ;
+    rdfs:label "runs on" ;
+    rdfs:comment "Links an agent to the SoftwareSystem it executes on (deployment relationship)" ;
+    rdfs:domain wf:ComputationalAgent ;
+    rdfs:range wf:SoftwareSystem .
+
+# ===== Operation Specifications =====
+
+# Agent offers operations
+wf:offersOperation a owl:ObjectProperty ;
+    rdfs:label "offers operation" ;
+    rdfs:comment "Links an agent to the operations it provides as services" ;
+    rdfs:domain wf:ComputationalAgent ;
+    rdfs:range wf:Operation .
+
+# Operation I/O (REUSE existing ModelInput/ModelOutput!)
+wf:requiresInput a owl:ObjectProperty ;
+    rdfs:label "requires input" ;
+    rdfs:comment "Links an operation to a required input parameter. All required inputs must be provided for execution." ;
+    rdfs:domain wf:Operation ;
+    rdfs:range wf:ModelInput .
+
+wf:producesOutput a owl:ObjectProperty ;
+    rdfs:label "produces output" ;
+    rdfs:comment "Links an operation to an output it produces upon successful execution" ;
+    rdfs:domain wf:Operation ;
+    rdfs:range wf:ModelOutput .
+
+wf:acceptsOptionalInput a owl:ObjectProperty ;
+    rdfs:label "accepts optional input" ;
+    rdfs:comment "Links an operation to an optional input parameter that can be provided but is not required" ;
+    rdfs:domain wf:Operation ;
+    rdfs:range wf:ModelInput .
+
+# ===== Execution Conditions =====
+
+# Link operations to conditions
+wf:hasPrecondition a owl:ObjectProperty ;
+    rdfs:label "has precondition" ;
+    rdfs:comment "Links an operation to a precondition that must hold before execution" ;
+    rdfs:domain wf:Operation ;
+    rdfs:range wf:Precondition .
+
+wf:hasPostcondition a owl:ObjectProperty ;
+    rdfs:label "has postcondition" ;
+    rdfs:comment "Links an operation to a postcondition guaranteed after successful execution" ;
+    rdfs:domain wf:Operation ;
+    rdfs:range wf:Postcondition .
+
+# Link conditions to constrained parameters
+wf:constrainsParameter a owl:ObjectProperty ;
+    rdfs:label "constrains parameter" ;
+    rdfs:comment "Links a condition to the parameter(s) it constrains" ;
+    rdfs:domain wf:ExecutionCondition ;
+    rdfs:range [ owl:unionOf (wf:ModelInput wf:ModelOutput wf:ModelVariable) ] .
+
+# ===== HTTP Grounding =====
+
+# Link operation to HTTP specification
+wf:hasHTTPGrounding a owl:ObjectProperty ;
+    rdfs:label "has HTTP grounding" ;
+    rdfs:comment "Links an operation to its HTTP invocation specification" ;
+    rdfs:domain wf:Operation ;
+    rdfs:range wf:HTTPGrounding .
+
+# ===== Compositional Reasoning =====
+
+# Enable workflow composition queries
+wf:dataFlowsTo a owl:ObjectProperty ;
+    rdfs:label "data flows to" ;
+    rdfs:comment """Indicates that output from this operation can serve as input to the target operation.
+
+    This property is inferred via property chain axiom: if operation A produces output X AND
+    operation B requires input X, THEN A dataFlowsTo B. This enables automatic discovery of
+    composable operation sequences.""" ;
+    rdfs:domain wf:Operation ;
+    rdfs:range wf:Operation .
+
+# Property chain axiom for automatic inference
+wf:dataFlowsTo owl:propertyChainAxiom (
+    wf:producesOutput
+    [ owl:inverseOf wf:requiresInput ]
+) .
+
+# ========== DATATYPE PROPERTIES ==========
+
+# ===== HTTP Grounding Details =====
+
+# HTTP method
+wf:httpMethod a owl:DatatypeProperty ;
+    rdfs:label "HTTP method" ;
+    rdfs:comment "The HTTP method for operation invocation (GET, POST, PUT, DELETE, PATCH)" ;
+    rdfs:domain wf:HTTPGrounding ;
+    rdfs:range xsd:string .
+
+# Operation path (relative to API endpoint)
+wf:operationPath a owl:DatatypeProperty ;
+    rdfs:label "operation path" ;
+    rdfs:comment "The relative path for the operation (e.g., '/simulate', '/optimize')" ;
+    rdfs:domain wf:HTTPGrounding ;
+    rdfs:range xsd:string .
+
+# Request content type
+wf:requestFormat a owl:DatatypeProperty ;
+    rdfs:label "request format" ;
+    rdfs:comment "The content type for request body (e.g., 'application/json', 'application/xml')" ;
+    rdfs:domain wf:HTTPGrounding ;
+    rdfs:range xsd:string .
+
+# Response content type
+wf:responseFormat a owl:DatatypeProperty ;
+    rdfs:label "response format" ;
+    rdfs:comment "The content type for response body (e.g., 'application/json')" ;
+    rdfs:domain wf:HTTPGrounding ;
+    rdfs:range xsd:string .
+
+# Authentication requirement
+wf:requiresAuthentication a owl:DatatypeProperty ;
+    rdfs:label "requires authentication" ;
+    rdfs:comment "Whether the operation requires authentication" ;
+    rdfs:domain wf:HTTPGrounding ;
+    rdfs:range xsd:boolean .
+
+# ===== Execution Conditions =====
+
+# Constraint expression (string representation)
+wf:constraintExpression a owl:DatatypeProperty ;
+    rdfs:label "constraint expression" ;
+    rdfs:comment """A constraint expression as a string (e.g., 'BOD > 0', 'timestep < maxTimestep').
+
+    Balance between simplicity and structure: queryable via SPARQL, human-readable,
+    extensible for future constraint types.""" ;
+    rdfs:domain wf:ExecutionCondition ;
+    rdfs:range xsd:string .
+
+# ===== Performance Metadata =====
+
+# Estimated execution time
+wf:estimatedExecutionTime a owl:DatatypeProperty ;
+    rdfs:label "estimated execution time" ;
+    rdfs:comment "Estimated execution time in seconds" ;
+    rdfs:domain wf:Operation ;
+    rdfs:range xsd:float .
+
+# Computational complexity
+wf:computationalComplexity a owl:DatatypeProperty ;
+    rdfs:label "computational complexity" ;
+    rdfs:comment "Computational complexity in Big-O notation (e.g., 'O(n²)', 'O(n*m)')" ;
+    rdfs:domain wf:Operation ;
+    rdfs:range xsd:string .
+
+# ===== Agent Metadata =====
+
+# Agent version
+wf:agentVersion a owl:DatatypeProperty ;
+    rdfs:label "agent version" ;
+    rdfs:comment "Version identifier for the agent implementation" ;
+    rdfs:domain wf:ComputationalAgent ;
+    rdfs:range xsd:string .
+
+# ========== EXAMPLE INSTANCES ==========
+# Comprehensive example showing all patterns
+
+# Note: These examples use a hypothetical 'ghent' namespace
+# In actual use, these would be in instance files, not in the module itself
+# Included here for documentation and validation purposes
+
+# Example physical entity (from material_entities module)
+# ghent:WWTP1 a wf:WastewaterTreatmentPlant ;
+#     rdfs:label "Wastewater Treatment Plant 1" .
+
+# Example process model (from information module)
+# ghent:WWTP1_Model a wf:SimulationModel ;
+#     rdfs:label "WWTP1 ASM1 Model" ;
+#     wf:representsEntity ghent:WWTP1 ;
+#     wf:hasInput ghent:InflowRate_Input, ghent:InfluentCOD_Input ;
+#     wf:hasOutput ghent:EffluentCOD_Output, ghent:SludgeProduction_Output .
+
+# Example model I/O (REUSED from information module)
+# ghent:InflowRate_Input a wf:ModelInput ;
+#     wf:parameterName "inflow_rate" ;
+#     wf:hasUnit "m³/d" ;
+#     wf:minValue "0.0"^^xsd:float .
+
+# Example software system (EXTENDED from information module)
+# ghent:WWTP1_Software a wf:SoftwareSystem ;
+#     wf:apiEndpoint "http://localhost:8003"^^xsd:anyURI ;
+#     wf:apiVersion "1.0" .
+
+# Example computational agent (NEW!)
+# ghent:WWTP1_Agent a wf:SimulationAgent ;
+#     rdfs:label "WWTP1 Agent" ;
+#     wf:implements ghent:WWTP1_Model ;
+#     wf:simulates ghent:WWTP1 ;
+#     wf:runsOn ghent:WWTP1_Software ;
+#     wf:hasCapability cap:DynamicSimulation, cap:MassBalance, cap:WaterQualityPrediction ;
+#     wf:offersOperation ghent:WWTP1_SimulateOp ;
+#     wf:agentVersion "1.0.0" .
+
+# Example operation (NEW!)
+# ghent:WWTP1_SimulateOp a wf:Operation ;
+#     rdfs:label "Simulate WWTP1" ;
+#     # REUSE same input/output objects as model!
+#     wf:requiresInput ghent:InflowRate_Input, ghent:InfluentCOD_Input ;
+#     wf:producesOutput ghent:EffluentCOD_Output, ghent:SludgeProduction_Output ;
+#     # Preconditions
+#     wf:hasPrecondition [
+#         a wf:Precondition ;
+#         wf:constrainsParameter ghent:InflowRate_Input ;
+#         wf:constraintExpression "inflow_rate > 0" ;
+#         rdfs:comment "Flow rate must be positive"
+#     ] ;
+#     wf:hasPrecondition [
+#         a wf:Precondition ;
+#         wf:constrainsParameter ghent:InfluentCOD_Input ;
+#         wf:constraintExpression "influent_cod >= 0" ;
+#         rdfs:comment "COD cannot be negative"
+#     ] ;
+#     # Postcondition
+#     wf:hasPostcondition [
+#         a wf:Postcondition ;
+#         wf:constraintExpression "mass_balance_satisfied(COD)" ;
+#         rdfs:comment "Mass balance maintained"
+#     ] ;
+#     # HTTP grounding
+#     wf:hasHTTPGrounding [
+#         a wf:HTTPGrounding ;
+#         wf:httpMethod "POST" ;
+#         wf:operationPath "/simulate" ;
+#         wf:requestFormat "application/json" ;
+#         wf:responseFormat "application/json" ;
+#         wf:requiresAuthentication "false"^^xsd:boolean
+#     ] ;
+#     # Performance
+#     wf:estimatedExecutionTime "2.5"^^xsd:float ;
+#     wf:computationalComplexity "O(n*m)" .
+
+# ========== DESIGN NOTES ==========
+
+# Key Design Pattern: Reuse ModelInput/ModelOutput
+# Operations use the SAME objects as models for inputs/outputs, ensuring:
+# - Single source of truth for parameter specifications
+# - Automatic synchronization between model and agent views
+# - Enables query: "Which agents implement model X?" → inputs match automatically
+
+# Key Design Pattern: SoftwareSystem Reuse
+# Use existing wf:SoftwareSystem class for API endpoints rather than creating
+# redundant ServiceInterface class. Agent 'runsOn' SoftwareSystem establishes
+# deployment relationship.
+
+# Key Design Pattern: HTTPGrounding Separation
+# HTTP details are separate from operation semantics, allowing:
+# - Multiple groundings (HTTP, gRPC, WebSocket) for same operation
+# - Clear separation of concerns
+# - Technology-agnostic operation specifications
+
+# Key Design Pattern: Structured Blank Nodes for Conditions
+# Preconditions as structured blank nodes with constraintExpression string:
+# - Balance between simplicity and structure
+# - Queryable via SPARQL
+# - Extensible (can add constraint type, severity later)
+# - Human-readable fallback via rdfs:comment
+
+# Competency Questions Answered:
+# CQ-AG1: Which agents can simulate entity X?
+# CQ-AG2: Which agents provide capability Y?
+# CQ-AG3: Given available data {α, β}, which operations can execute?
+# CQ-AG4: What sequence of operations transforms data α into information β?
+# CQ-AG5: How do I invoke operation O? (HTTP endpoint + method)

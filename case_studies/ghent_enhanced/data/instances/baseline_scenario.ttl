@@ -3,18 +3,18 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix wf: <https://ugentbiomath.github.io/waterframe#> .
 @prefix ghent: <https://w3id.org/waterframe/case/ghent/> .
-@prefix time: <http://www.w3.org/2006/time#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 
 # ==============================================================================
 # Ghent Water System 2026 Baseline Scenario
 # ==============================================================================
-# PHASE 3 ENHANCEMENT: Scenario Modeling with OWL-Time
+# PHASE 6 ENHANCEMENT: Simplified Temporal Representation
 #
 # This file defines the baseline scenario representing the current state (2026)
-# of the Ghent water system. The scenario uses OWL-Time for temporal extent
-# representation and links all system components as they exist in the current
-# configuration.
+# of the Ghent water system. The scenario uses simple xsd:dateTime properties
+# for temporal extent (scenarioStartDate, scenarioEndDate, temporalDescription)
+# instead of complex OWL-Time patterns, reducing triple count while maintaining
+# clarity.
 #
 # This baseline serves as the reference point for future alternative scenarios
 # such as:
@@ -58,7 +58,10 @@ ghent:Baseline2026 a wf:BaselineScenario ;
     - Baseline period: January 2026
     - All observations and parameters reflect typical mid-winter operating conditions
     """ ;
-    wf:hasTemporalExtent ghent:Year2026Interval ;
+    # Simple temporal extent (replaces complex OWL-Time pattern)
+    wf:scenarioStartDate "2026-01-01T00:00:00Z"^^xsd:dateTime ;
+    wf:scenarioEndDate "2026-12-31T23:59:59Z"^^xsd:dateTime ;
+    wf:temporalDescription "Calendar Year 2026" ;
     wf:scenarioCreationDate "2026-01-28T12:00:00Z"^^xsd:dateTime ;
 
     # Link all system components
@@ -74,26 +77,6 @@ ghent:Baseline2026 a wf:BaselineScenario ;
     wf:scenarioComponent ghent:ChipTech ;
     wf:scenarioComponent ghent:PharmaGen ;
     wf:scenarioComponent ghent:BrewCo .
-
-# ==============================================================================
-# OWL-Time Temporal Extent Definition
-# ==============================================================================
-
-ghent:Year2026Interval a time:Interval ;
-    rdfs:label "Calendar Year 2026"@en ;
-    rdfs:comment "The 2026 calendar year representing the baseline scenario temporal extent." ;
-    time:hasBeginning ghent:Year2026_Start ;
-    time:hasEnd ghent:Year2026_End .
-
-ghent:Year2026_Start a time:Instant ;
-    rdfs:label "2026 Start"@en ;
-    time:inXSDDateTimeStamp "2026-01-01T00:00:00Z"^^xsd:dateTimeStamp ;
-    rdfs:comment "Beginning of 2026 baseline period (midnight UTC, January 1, 2026)" .
-
-ghent:Year2026_End a time:Instant ;
-    rdfs:label "2026 End"@en ;
-    time:inXSDDateTimeStamp "2026-12-31T23:59:59Z"^^xsd:dateTimeStamp ;
-    rdfs:comment "End of 2026 baseline period (one second before midnight UTC, January 1, 2027)" .
 
 # ==============================================================================
 # Scenario Metadata and Context
@@ -175,9 +158,8 @@ ghent:Baseline2026 wf:scenarioParameter ghent:BelgianDischargeLimits ;
 #          wf:observedParameter ?param ;
 #          wf:observedValue ?value ;
 #          prov:generatedAtTime ?time .
-#     ghent:Baseline2026 wf:hasTemporalExtent ?interval .
-#     ?interval time:hasBeginning/time:inXSDDateTimeStamp ?start ;
-#               time:hasEnd/time:inXSDDateTimeStamp ?end .
+#     ghent:Baseline2026 wf:scenarioStartDate ?start ;
+#                         wf:scenarioEndDate ?end .
 #     FILTER(?time >= ?start && ?time <= ?end)
 #   }
 #

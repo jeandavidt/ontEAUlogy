@@ -155,9 +155,16 @@ Beer brewing facility.
 
 The area from which precipitation collects to a common outlet.
 
+A catchment area or watershed containing multiple water system components
+
 ### Superclasses
 
 - [BFO_0000040](#https___ugentbiomath.github.io_waterframe_bfo_0000040)
+- [WaterSystemComponent](#https___ugentbiomath.github.io_waterframe_watersystemcomponent)
+
+### Related Entities
+
+- [WaterSystemComponent](#https___ugentbiomath.github.io_waterframe_watersystemcomponent)
 
 
 ---
@@ -1192,9 +1199,16 @@ Physical infrastructure for water treatment processes
 
 A facility that treats wastewater to produce effluent meeting discharge standards.
 
+Aligned with ENVO:00002043 (wastewater treatment plant) for environmental context
+
 ### Superclasses
 
 - [BFO_0000040](#https___ugentbiomath.github.io_waterframe_bfo_0000040)
+- [WaterSystemComponent](#https___ugentbiomath.github.io_waterframe_watersystemcomponent)
+
+### Related Entities
+
+- [WaterSystemComponent](#https___ugentbiomath.github.io_waterframe_watersystemcomponent)
 
 
 ---
@@ -1249,19 +1263,29 @@ Any physical object that is part of a water system
 
 ### Subclasses
 
+- [Catchment](#https___ugentbiomath.github.io_waterframe_catchment)
 - [Conveyance](#https___ugentbiomath.github.io_waterframe_conveyance)
+- [DrinkingWaterTreatmentPlant](#https___ugentbiomath.github.io_waterframe_drinkingwatertreatmentplant)
+- [MonitoringPoint](#https___ugentbiomath.github.io_waterframe_monitoringpoint)
 - [StorageTank](#https___ugentbiomath.github.io_waterframe_storagetank)
 - [TreatmentUnit](#https___ugentbiomath.github.io_waterframe_treatmentunit)
+- [UrbanWaterSystem](#https___ugentbiomath.github.io_waterframe_urbanwatersystem)
 - [WWTPTreatmentProcess](#https___ugentbiomath.github.io_waterframe_wwtptreatmentprocess)
+- [WastewaterTreatmentPlant](#https___ugentbiomath.github.io_waterframe_wastewatertreatmentplant)
 - [WaterSource](#https___ugentbiomath.github.io_waterframe_watersource)
 - [WaterUsagePoint](#https___ugentbiomath.github.io_waterframe_waterusagepoint)
 
 ### Related Entities
 
+- [Catchment](#https___ugentbiomath.github.io_waterframe_catchment)
 - [Conveyance](#https___ugentbiomath.github.io_waterframe_conveyance)
+- [DrinkingWaterTreatmentPlant](#https___ugentbiomath.github.io_waterframe_drinkingwatertreatmentplant)
+- [MonitoringPoint](#https___ugentbiomath.github.io_waterframe_monitoringpoint)
 - [StorageTank](#https___ugentbiomath.github.io_waterframe_storagetank)
 - [TreatmentUnit](#https___ugentbiomath.github.io_waterframe_treatmentunit)
+- [UrbanWaterSystem](#https___ugentbiomath.github.io_waterframe_urbanwatersystem)
 - [WWTPTreatmentProcess](#https___ugentbiomath.github.io_waterframe_wwtptreatmentprocess)
+- [WastewaterTreatmentPlant](#https___ugentbiomath.github.io_waterframe_wastewatertreatmentplant)
 - [WaterSource](#https___ugentbiomath.github.io_waterframe_watersource)
 - [WaterUsagePoint](#https___ugentbiomath.github.io_waterframe_waterusagepoint)
 

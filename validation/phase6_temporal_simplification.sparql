@@ -1,0 +1,28 @@
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# Phase 6 Validation Query: Temporal Simplification
+# ===================================================
+# Validates that all scenarios have simplified temporal representation
+# using scenarioStartDate/scenarioEndDate instead of complex OWL-Time patterns
+
+SELECT ?scenario ?scenarioType ?start ?end ?description WHERE {
+    ?scenario a ?scenarioType .
+    ?scenarioType rdfs:subClassOf* wf:Scenario .
+
+    # All scenarios should have start and end dates
+    ?scenario wf:scenarioStartDate ?start ;
+              wf:scenarioEndDate ?end .
+
+    # Temporal description is optional but recommended
+    OPTIONAL { ?scenario wf:temporalDescription ?description }
+}
+ORDER BY ?scenario
+
+# Expected results for Ghent baseline:
+# - ghent:Baseline2026
+# - scenarioType: wf:BaselineScenario
+# - start: 2026-01-01T00:00:00Z
+# - end: 2026-12-31T23:59:59Z
+# - description: "Calendar Year 2026"

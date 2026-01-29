@@ -1,0 +1,60 @@
+# Phase 5: Conveyance System Hierarchy
+# Visual representation of the class hierarchy
+
+wf:Conveyance (root)
+│
+├── wf:Pipe
+│   ├── wf:PressurizedPipe
+│   └── wf:GravityPipe
+│       └── wf:SewerPipe
+│           ├── wf:CombinedSewer
+│           ├── wf:SanitarySewer
+│           └── wf:StormSewer
+│
+├── wf:Canal
+│
+├── wf:FlowDivider
+│   ├── wf:Splitter
+│   └── wf:OverflowStructure
+│       ├── wf:CombinedSewerOverflow (CSO) ⭐ CRITICAL
+│       ├── wf:StormwaterOutfall
+│       └── wf:EmergencyOverflow
+│
+├── wf:FlowMerger
+│   └── wf:Junction
+│
+└── wf:PumpStation
+    └── wf:LiftStation
+
+# Properties Summary
+
+GEOMETRIC PROPERTIES (for hydraulic modeling):
+- wf:hasDiameter → xsd:double (domain: wf:Pipe)
+- wf:hasLength → xsd:double (domain: wf:Conveyance)
+- wf:hasSlope → xsd:double (domain: wf:Pipe)
+
+OVERFLOW PROPERTIES (for CSO/overflow modeling):
+- wf:overflowsTo → wf:WaterSystemComponent (domain: wf:OverflowStructure)
+- wf:activationThreshold → wf:QuantityValue (domain: wf:OverflowStructure)
+
+# Usage Examples
+
+## Example 1: Combined Sewer with CSO
+CSO_North_Street a wf:CombinedSewerOverflow ;
+    wf:activationThreshold [
+        a wf:QuantityValue ;
+        wf:hasValue 150.0 ;
+        wf:hasUnit "m3/hour"
+    ] ;
+    wf:overflowsTo Scheldt_River .
+
+## Example 2: Gravity Sewer Pipe
+Pipe_Section_42 a wf:CombinedSewer ;
+    wf:hasDiameter 0.8 ;  # 800mm diameter
+    wf:hasLength 85.5 ;   # 85.5 meters long
+    wf:hasSlope 0.002 .   # 0.2% slope
+
+## Example 3: Pipe Junction
+Manhole_MH123 a wf:Junction ;
+    wf:hasInputPort Port_In1, Port_In2, Port_In3 ;
+    wf:hasOutputPort Port_Out1 .

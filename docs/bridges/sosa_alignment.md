@@ -459,6 +459,14 @@ An observation event where water quality is measured, aligned with SOSA Observat
 - [BFO_0000052](#https___ugentbiomath.github.io_waterframe_bfo_0000052)
 - [Observation](#https___ugentbiomath.github.io_waterframe_observation)
 
+### Subclasses
+
+- [EnvironmentalQualityMeasurement](#https___ugentbiomath.github.io_waterframe_environmentalqualitymeasurement)
+
+### Related Entities
+
+- [EnvironmentalQualityMeasurement](#https___ugentbiomath.github.io_waterframe_environmentalqualitymeasurement)
+
 
 ---
 
@@ -475,6 +483,8 @@ An observation event where water quality is measured, aligned with SOSA Observat
 ### Description
 
 A measurable quality or characteristic of water.
+
+waterFRAME provides treatment-specific parameters; ENVO provides environmental quality context
 
 ### Superclasses
 
