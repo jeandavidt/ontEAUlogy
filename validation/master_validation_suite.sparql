@@ -1,0 +1,512 @@
+# ================================================================================
+# waterFRAME Ontology - Master Validation Test Suite
+# ================================================================================
+#
+# Comprehensive SPARQL validation queries for Phases 1-9 of ontology refinement
+# Date: 2026-01-28
+# Related Plan: /Users/jeandavidt/.claude/plans/lucky-doodling-dongarra.md
+#
+# ================================================================================
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX bfo: <http://purl.obolibrary.org/obo/BFO_>
+PREFIX envo: <http://purl.obolibrary.org/obo/ENVO_>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX time: <http://www.w3.org/2006/time#>
+PREFIX sosa: <http://www.w3.org/ns/sosa/>
+
+# ================================================================================
+# PHASE 1: ENVO Concept Verification
+# ================================================================================
+# Expected: All rdfs:seeAlso references to ENVO should be valid IRIs
+# No broken or incorrect ENVO mappings should exist
+# ================================================================================
+
+# Query 1.1: List all ENVO mappings
+# Should return only valid ENVO concept references
+
+SELECT ?wfClass ?envoIRI ?label WHERE {
+  ?wfClass rdfs:seeAlso ?envoIRI .
+  FILTER(STRSTARTS(STR(?envoIRI), "http://purl.obolibrary.org/obo/ENVO_"))
+  OPTIONAL { ?wfClass rdfs:label ?label }
+}
+ORDER BY ?label
+
+# Query 1.2: Verify no deprecated/incorrect ENVO IRIs exist
+# Expected: 0 results (all bad mappings should be fixed)
+
+SELECT ?wfClass ?badIRI ?label WHERE {
+  VALUES ?badIRI {
+    <http://purl.obolibrary.org/obo/ENVO_00002223>  # Was oligotrophic water, not grey water
+    <http://purl.obolibrary.org/obo/ENVO_00003097>  # Was bore hole water, not drinking water
+    <http://purl.obolibrary.org/obo/ENVO_00002044>  # Was sludge, not treated wastewater
+    <http://purl.obolibrary.org/obo/ENVO_00002001>  # Was waste water, not groundwater
+    <http://purl.obolibrary.org/obo/ENVO_01001886>  # Was landform, not DWTP
+  }
+  ?wfClass rdfs:seeAlso ?badIRI .
+  OPTIONAL { ?wfClass rdfs:label ?label }
+}
+
+# Query 1.3: Count ENVO alignments by category
+SELECT (COUNT(?class) as ?count) ?category WHERE {
+  ?class rdfs:seeAlso ?envo .
+  FILTER(STRSTARTS(STR(?envo), "http://purl.obolibrary.org/obo/ENVO_"))
+
+  BIND(
+    IF(EXISTS { ?class rdfs:subClassOf* wf:NaturalWaterBody }, "NaturalWaterBody",
+    IF(EXISTS { ?class rdfs:subClassOf* wf:Facility }, "Facility",
+    IF(EXISTS { ?class rdfs:subClassOf* wf:WaterFlow }, "WaterFlow",
+    "Other")))
+    AS ?category
+  )
+}
+GROUP BY ?category
+ORDER BY DESC(?count)
+
+
+# ================================================================================
+# PHASE 2: BFO Compliance - Material Entities vs Processes
+# ================================================================================
+# Expected: No material entities should inherit from process classes
+# All physical components should be continuants, all processes should be occurrents
+# ================================================================================
+
+# Query 2.1: Verify NO material entities inherit from processes
+# Expected: 0 results - this would be a BFO violation
+
+SELECT ?class ?label WHERE {
+  ?class rdfs:subClassOf* wf:WaterSystemComponent .
+  ?class rdfs:subClassOf* bfo:BFO_0000015 .  # process
+  OPTIONAL { ?class rdfs:label ?label }
+}
+
+# Query 2.2: Verify process classes are properly separated
+# Expected: All treatment processes should inherit from bfo:BFO_0000015 (process)
+
+SELECT ?processClass ?label ?bfoParent WHERE {
+  ?processClass a owl:Class .
+  FILTER(CONTAINS(STR(?processClass), "Process"))
+  ?processClass rdfs:label ?label .
+  OPTIONAL {
+    ?processClass rdfs:subClassOf* ?bfoParent .
+    FILTER(STRSTARTS(STR(?bfoParent), "http://purl.obolibrary.org/obo/BFO_"))
+  }
+}
+ORDER BY ?label
+
+# Query 2.3: Verify performsProcess links physical units to processes correctly
+SELECT ?physicalUnit ?processType WHERE {
+  ?physicalUnit wf:performsProcess ?processType .
+  ?physicalUnit a ?unitClass .
+  ?processType a ?processClass .
+
+  # Verify unit is material entity
+  FILTER EXISTS { ?unitClass rdfs:subClassOf* bfo:BFO_0000040 }
+  # Verify process is occurrent
+  FILTER EXISTS { ?processClass rdfs:subClassOf* bfo:BFO_0000015 }
+}
+LIMIT 10
+
+
+# ================================================================================
+# PHASE 3: WaWO+ URI Cleanup
+# ================================================================================
+# Expected: No WaWO+ URIs should appear in object property values
+# Only textual comments and rdfs:seeAlso references allowed
+# ================================================================================
+
+# Query 3.1: Verify NO WaWO+ URIs in triples
+# Expected: 0 results (all WaWO+ URIs converted to comments)
+
+SELECT ?s ?p ?o WHERE {
+  ?s ?p ?o .
+  FILTER(CONTAINS(STR(?o), "semanticweb.org/wawo"))
+}
+
+# Query 3.2: Verify WaWO+ references only in rdfs:seeAlso
+# Expected: References exist but only as rdfs:seeAlso values
+
+SELECT ?class ?label ?wawoRef WHERE {
+  ?class rdfs:seeAlso ?wawoRef .
+  FILTER(CONTAINS(STR(?wawoRef), "wawo"))
+  ?class rdfs:label ?label .
+}
+ORDER BY ?label
+
+# Query 3.3: Count classes with external ontology references
+SELECT ?ontology (COUNT(?class) as ?count) WHERE {
+  ?class rdfs:seeAlso ?ref .
+
+  BIND(
+    IF(CONTAINS(STR(?ref), "wawo"), "WaWO+",
+    IF(CONTAINS(STR(?ref), "ontocape"), "OntoCAPE",
+    IF(CONTAINS(STR(?ref), "envo"), "ENVO",
+    "Other")))
+    AS ?ontology
+  )
+}
+GROUP BY ?ontology
+ORDER BY DESC(?count)
+
+
+# ================================================================================
+# PHASE 4: Semantic Property Hierarchy
+# ================================================================================
+# Expected: Environmental discharge properties have proper hierarchy
+# flowsTo is parent of dischargesToEnvironment, which is parent of dischargesInto
+# ================================================================================
+
+# Query 4.1: Verify property hierarchy structure
+SELECT ?property ?superProperty ?domain ?range WHERE {
+  VALUES ?property {
+    wf:flowsTo
+    wf:dischargesToEnvironment
+    wf:dischargesInto
+    wf:abstractsFrom
+  }
+  OPTIONAL { ?property rdfs:subPropertyOf ?superProperty }
+  OPTIONAL { ?property rdfs:domain ?domain }
+  OPTIONAL { ?property rdfs:range ?range }
+}
+ORDER BY ?property
+
+# Query 4.2: Find all subproperties of flowsTo
+SELECT ?subProperty ?label ?depth WHERE {
+  ?subProperty rdfs:subPropertyOf+ wf:flowsTo .
+  ?subProperty rdfs:label ?label .
+
+  # Calculate depth in hierarchy
+  ?subProperty rdfs:subPropertyOf ?parent1 .
+  OPTIONAL { ?parent1 rdfs:subPropertyOf ?parent2 }
+  OPTIONAL { ?parent2 rdfs:subPropertyOf ?parent3 }
+
+  BIND(
+    IF(BOUND(?parent3), 3,
+    IF(BOUND(?parent2), 2, 1))
+    AS ?depth
+  )
+}
+ORDER BY ?depth ?label
+
+# Query 4.3: Verify environmental discharge usage
+# Expected: Natural water bodies should be linked via dischargesInto
+SELECT ?component ?waterBody WHERE {
+  ?component wf:dischargesInto ?waterBody .
+  ?waterBody a/rdfs:subClassOf* wf:NaturalWaterBody .
+}
+LIMIT 10
+
+
+# ================================================================================
+# PHASE 5: Conveyance System Hierarchy
+# ================================================================================
+# Expected: Comprehensive sewer modeling hierarchy with CSOs, pipes, splitters
+# 17+ classes under wf:Conveyance
+# ================================================================================
+
+# Query 5.1: List all conveyance types with hierarchy depth
+SELECT ?class ?label ?parent ?depth WHERE {
+  ?class rdfs:subClassOf* wf:Conveyance ;
+         rdfs:label ?label .
+
+  ?class rdfs:subClassOf ?parent .
+
+  # Count hierarchy depth
+  {
+    SELECT ?class (COUNT(?ancestor) as ?depth) WHERE {
+      ?class rdfs:subClassOf* ?ancestor .
+      ?ancestor rdfs:subClassOf* wf:Conveyance .
+    }
+    GROUP BY ?class
+  }
+}
+ORDER BY ?depth ?label
+
+# Query 5.2: Verify CSO hierarchy placement
+# Expected: CSO should be under OverflowStructure
+SELECT ?csoClass ?parent1 ?parent2 ?parent3 WHERE {
+  ?csoClass rdfs:label "Combined sewer overflow"@en .
+  ?csoClass rdfs:subClassOf ?parent1 .
+  OPTIONAL { ?parent1 rdfs:subClassOf ?parent2 }
+  OPTIONAL { ?parent2 rdfs:subClassOf ?parent3 }
+}
+
+# Query 5.3: Count conveyance categories
+SELECT ?category (COUNT(?class) as ?count) WHERE {
+  ?class rdfs:subClassOf* wf:Conveyance .
+
+  BIND(
+    IF(EXISTS { ?class rdfs:subClassOf* wf:Pipe }, "Pipe",
+    IF(EXISTS { ?class rdfs:subClassOf* wf:FlowDivider }, "FlowDivider",
+    IF(EXISTS { ?class rdfs:subClassOf* wf:FlowMerger }, "FlowMerger",
+    IF(EXISTS { ?class rdfs:subClassOf* wf:PumpStation }, "PumpStation",
+    "Other"))))
+    AS ?category
+  )
+}
+GROUP BY ?category
+ORDER BY DESC(?count)
+
+# Query 5.4: Verify conveyance properties
+SELECT ?property ?domain ?range WHERE {
+  VALUES ?property {
+    wf:hasDiameter
+    wf:hasLength
+    wf:hasSlope
+    wf:overflowsTo
+    wf:activationThreshold
+  }
+  ?property rdfs:domain ?domain .
+  ?property rdfs:range ?range .
+}
+ORDER BY ?property
+
+
+# ================================================================================
+# PHASE 6: Temporal Simplification
+# ================================================================================
+# Expected: Scenarios use simple xsd:dateTime timestamps
+# No complex OWL-Time intervals unless needed
+# ================================================================================
+
+# Query 6.1: Verify scenario temporal representation
+SELECT ?scenario ?start ?end ?description WHERE {
+  ?scenario a/rdfs:subClassOf* wf:Scenario .
+
+  OPTIONAL { ?scenario wf:scenarioStartDate ?start }
+  OPTIONAL { ?scenario wf:scenarioEndDate ?end }
+  OPTIONAL { ?scenario wf:temporalDescription ?description }
+}
+ORDER BY ?start
+
+# Query 6.2: Check if any OWL-Time intervals are used
+SELECT ?scenario ?interval ?begin ?end WHERE {
+  ?scenario wf:hasTemporalExtent ?interval .
+  ?interval a time:Interval .
+  OPTIONAL { ?interval time:hasBeginning ?begin }
+  OPTIONAL { ?interval time:hasEnd ?end }
+}
+LIMIT 10
+
+# Query 6.3: Verify temporal property usage
+SELECT ?entity ?property ?value WHERE {
+  VALUES ?property {
+    wf:scenarioStartDate
+    wf:scenarioEndDate
+    wf:scenarioCreationDate
+    sosa:resultTime
+    wf:observedOn
+  }
+  ?entity ?property ?value .
+
+  # Verify it's xsd:dateTime
+  FILTER(DATATYPE(?value) = xsd:dateTime)
+}
+LIMIT 20
+
+
+# ================================================================================
+# PHASE 7: Water Usage Point Hierarchy
+# ================================================================================
+# Expected: Comprehensive usage point types (residential, industrial, commercial)
+# Proper hierarchy under wf:WaterUsagePoint
+# ================================================================================
+
+# Query 7.1: List all usage point types
+SELECT ?class ?label ?parent WHERE {
+  ?class rdfs:subClassOf* wf:WaterUsagePoint ;
+         rdfs:label ?label ;
+         rdfs:subClassOf ?parent .
+
+  FILTER(?parent != owl:Thing)
+}
+ORDER BY ?label
+
+# Query 7.2: Count usage points by category
+SELECT ?category (COUNT(?usagePoint) as ?count) WHERE {
+  ?usagePoint a/rdfs:subClassOf* wf:WaterUsagePoint .
+  ?usagePoint a ?type .
+
+  BIND(
+    IF(EXISTS { ?type rdfs:subClassOf* wf:ResidentialUsagePoint }, "Residential",
+    IF(EXISTS { ?type rdfs:subClassOf* wf:IndustrialUsagePoint }, "Industrial",
+    IF(EXISTS { ?type rdfs:subClassOf* wf:CommercialUsagePoint }, "Commercial",
+    "Other")))
+    AS ?category
+  )
+}
+GROUP BY ?category
+ORDER BY DESC(?count)
+
+# Query 7.3: Verify usage point quality requirements
+SELECT ?usagePoint ?label ?constraints WHERE {
+  ?usagePoint a/rdfs:subClassOf* wf:WaterUsagePoint ;
+              rdfs:label ?label ;
+              wf:requiresQualityConstraints ?constraints .
+}
+LIMIT 20
+
+
+# ================================================================================
+# PHASE 8: Facility Type Hierarchy
+# ================================================================================
+# Expected: Comprehensive facility types with storage and operational properties
+# Facilities have hasStorageCapacity, hasTreatmentCapacity, etc.
+# ================================================================================
+
+# Query 8.1: List all facility types with properties
+SELECT ?facility ?label ?capacity ?treatmentCap WHERE {
+  ?facility a/rdfs:subClassOf* wf:Facility ;
+            rdfs:label ?label .
+
+  OPTIONAL { ?facility wf:hasStorageCapacity ?capacity }
+  OPTIONAL { ?facility wf:hasTreatmentCapacity ?treatmentCap }
+}
+ORDER BY ?label
+LIMIT 30
+
+# Query 8.2: Count facilities by type
+SELECT ?type ?typeName (COUNT(?facility) as ?count) WHERE {
+  ?facility a/rdfs:subClassOf* wf:Facility ;
+            a ?type .
+  ?type rdfs:label ?typeName .
+
+  FILTER(?type != wf:Facility)
+  FILTER(?type != wf:WaterSystemComponent)
+}
+GROUP BY ?type ?typeName
+ORDER BY DESC(?count)
+
+# Query 8.3: Verify facility-to-component relationships
+SELECT ?facility ?component ?componentType WHERE {
+  ?facility a/rdfs:subClassOf* wf:Facility .
+  ?facility wf:hasComponent ?component .
+  ?component a ?componentType .
+}
+LIMIT 20
+
+
+# ================================================================================
+# PHASE 9: Fit-for-Purpose Quality Framework
+# ================================================================================
+# Expected: Source-to-usage matching via quality constraints
+# QualityConstraintSet links sources satisfying constraints to usages requiring them
+# ================================================================================
+
+# Query 9.1: Source-to-usage matching
+SELECT ?source ?sourceLabel ?usage ?usageLabel ?sharedConstraints WHERE {
+  ?source wf:satisfiesConstraints ?sharedConstraints .
+  ?usage wf:requiresQualityConstraints ?sharedConstraints .
+  ?source rdfs:label ?sourceLabel .
+  ?usage rdfs:label ?usageLabel .
+}
+LIMIT 20
+
+# Query 9.2: List all quality constraint sets
+SELECT ?constraintSet ?label ?purpose (COUNT(?constraint) as ?numConstraints) WHERE {
+  ?constraintSet a wf:QualityConstraintSet ;
+                 rdfs:label ?label .
+
+  OPTIONAL { ?constraintSet wf:definesQualityFor ?purpose }
+  OPTIONAL { ?constraintSet wf:includesConstraint ?constraint }
+}
+GROUP BY ?constraintSet ?label ?purpose
+ORDER BY ?label
+
+# Query 9.3: Verify quality requirements structure
+SELECT ?requirement ?parameter ?limitType ?limitValue WHERE {
+  ?requirement a wf:WaterQualityRequirement ;
+               wf:hasWaterQualityParameter ?parameter ;
+               wf:hasLimitType ?limitType ;
+               wf:hasLimitValue ?limitValue .
+}
+LIMIT 20
+
+# Query 9.4: Find quality assessments
+SELECT ?assessment ?water ?constraintSet ?result ?violated WHERE {
+  ?assessment a wf:QualityAssessment ;
+              wf:assessesWater ?water ;
+              wf:againstConstraintSet ?constraintSet ;
+              wf:assessmentResult ?result .
+
+  OPTIONAL { ?assessment wf:violatedConstraint ?violated }
+}
+LIMIT 10
+
+
+# ================================================================================
+# PHASE 10: Integration Validation
+# ================================================================================
+# Verify all phases work together correctly
+# ================================================================================
+
+# Query 10.1: End-to-end scenario validation
+# Verify scenarios include all component types
+SELECT ?scenario ?scenarioName
+       (COUNT(DISTINCT ?facility) as ?facilities)
+       (COUNT(DISTINCT ?conveyance) as ?conveyances)
+       (COUNT(DISTINCT ?usagePoint) as ?usagePoints)
+WHERE {
+  ?scenario a/rdfs:subClassOf* wf:Scenario ;
+            wf:scenarioName ?scenarioName ;
+            wf:scenarioComponent ?component .
+
+  OPTIONAL { ?component a/rdfs:subClassOf* wf:Facility . BIND(?component as ?facility) }
+  OPTIONAL { ?component a/rdfs:subClassOf* wf:Conveyance . BIND(?component as ?conveyance) }
+  OPTIONAL { ?component a/rdfs:subClassOf* wf:WaterUsagePoint . BIND(?component as ?usagePoint) }
+}
+GROUP BY ?scenario ?scenarioName
+ORDER BY ?scenarioName
+
+# Query 10.2: Ontology completeness check
+# Count all major class categories
+SELECT ?category (COUNT(?class) as ?count) WHERE {
+  ?class a owl:Class .
+
+  BIND(
+    IF(EXISTS { ?class rdfs:subClassOf* wf:Facility }, "Facility",
+    IF(EXISTS { ?class rdfs:subClassOf* wf:Conveyance }, "Conveyance",
+    IF(EXISTS { ?class rdfs:subClassOf* wf:WaterUsagePoint }, "WaterUsagePoint",
+    IF(EXISTS { ?class rdfs:subClassOf* wf:WaterFlow }, "WaterFlow",
+    IF(EXISTS { ?class rdfs:subClassOf* wf:WaterComposition }, "WaterComposition",
+    IF(EXISTS { ?class rdfs:subClassOf* wf:Scenario }, "Scenario",
+    "Other"))))))
+    AS ?category
+  )
+}
+GROUP BY ?category
+ORDER BY DESC(?count)
+
+# Query 10.3: Property inventory by category
+SELECT ?category (COUNT(?property) as ?count) WHERE {
+  ?property a owl:ObjectProperty .
+
+  BIND(
+    IF(CONTAINS(STR(?property), "flow"), "Flow",
+    IF(CONTAINS(STR(?property), "quality") || CONTAINS(STR(?property), "Quality"), "Quality",
+    IF(CONTAINS(STR(?property), "scenario") || CONTAINS(STR(?property), "Scenario"), "Scenario",
+    IF(CONTAINS(STR(?property), "discharge"), "Discharge",
+    "Other"))))
+    AS ?category
+  )
+}
+GROUP BY ?category
+ORDER BY DESC(?count)
+
+
+# ================================================================================
+# END OF MASTER VALIDATION SUITE
+# ================================================================================
+#
+# Usage Instructions:
+# 1. Run each phase section separately to validate specific refinements
+# 2. Expected results are documented in comments above each query
+# 3. Any unexpected results indicate implementation issues
+# 4. Use with Apache Jena ARQ or similar SPARQL engine
+#
+# Example:
+#   arq --data=waterframe.ttl --query=master_validation_suite.sparql
+#
+# ================================================================================

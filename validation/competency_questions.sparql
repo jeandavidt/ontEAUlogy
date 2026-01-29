@@ -1,0 +1,387 @@
+# ================================================================================
+# waterFRAME Ontology - Competency Question Validation Queries
+# ================================================================================
+#
+# Purpose: Validate that the ontology can answer the original competency questions
+#          that motivated its design
+#
+# Date: 2026-01-28
+# Related: Phase 10 validation
+#
+# ================================================================================
+
+PREFIX wf: <https://ugentbiomath.github.io/waterframe#>
+PREFIX ghent: <https://ugentbiomath.github.io/waterframe/examples/ghent#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX sosa: <http://www.w3.org/ns/sosa/>
+
+# ================================================================================
+# COMPETENCY QUESTION 1: Water Balance at Each Node
+# ================================================================================
+# Question: What is the water balance (inputs vs outputs) at each node?
+# Use Case: Mass balance verification, flow accounting
+# ================================================================================
+
+# CQ1.1: List all input and output flows for each component
+SELECT ?component ?componentLabel
+       (GROUP_CONCAT(DISTINCT ?inputLabel; separator=", ") AS ?inputs)
+       (GROUP_CONCAT(DISTINCT ?outputLabel; separator=", ") AS ?outputs)
+WHERE {
+  ?component a/rdfs:subClassOf* wf:WaterSystemComponent ;
+             rdfs:label ?componentLabel .
+
+  OPTIONAL {
+    ?component wf:hasInputPort ?input .
+    ?input rdfs:label ?inputLabel .
+  }
+
+  OPTIONAL {
+    ?component wf:hasOutputPort ?output .
+    ?output rdfs:label ?outputLabel .
+  }
+
+  # Filter to components that actually have ports
+  FILTER(EXISTS { ?component wf:hasInputPort|wf:hasOutputPort ?port })
+}
+GROUP BY ?component ?componentLabel
+ORDER BY ?componentLabel
+LIMIT 50
+
+# CQ1.2: Count inputs and outputs for each component
+SELECT ?component ?componentLabel
+       (COUNT(DISTINCT ?input) AS ?numInputs)
+       (COUNT(DISTINCT ?output) AS ?numOutputs)
+WHERE {
+  ?component a/rdfs:subClassOf* wf:WaterSystemComponent ;
+             rdfs:label ?componentLabel .
+
+  OPTIONAL { ?component wf:hasInputPort ?input }
+  OPTIONAL { ?component wf:hasOutputPort ?output }
+
+  FILTER(EXISTS { ?component wf:hasInputPort|wf:hasOutputPort ?port })
+}
+GROUP BY ?component ?componentLabel
+ORDER BY DESC(?numInputs) DESC(?numOutputs)
+LIMIT 30
+
+# CQ1.3: Find components with flow measurements for quantitative balance
+SELECT ?component ?componentLabel ?port ?flowRate ?unit WHERE {
+  ?component a/rdfs:subClassOf* wf:WaterSystemComponent ;
+             rdfs:label ?componentLabel ;
+             wf:hasInputPort|wf:hasOutputPort ?port .
+
+  ?port wf:hasFlowRate ?flowRate .
+
+  OPTIONAL { ?port wf:hasUnit ?unit }
+}
+ORDER BY ?componentLabel
+LIMIT 20
+
+
+# ================================================================================
+# COMPETENCY QUESTION 2: Transformation Processes
+# ================================================================================
+# Question: What transformation processes occur at each facility?
+# Use Case: Understanding treatment operations, process modeling
+# ================================================================================
+
+# CQ2.1: List all processes and the physical units that perform them
+SELECT ?facility ?facilityLabel ?unit ?unitLabel ?process ?processLabel WHERE {
+  ?facility a/rdfs:subClassOf* wf:Facility ;
+            rdfs:label ?facilityLabel ;
+            wf:hasComponent ?unit .
+
+  ?unit rdfs:label ?unitLabel ;
+        wf:performsProcess ?process .
+
+  ?process rdfs:label ?processLabel .
+}
+ORDER BY ?facilityLabel ?unitLabel
+LIMIT 50
+
+# CQ2.2: Count processes by type at each facility
+SELECT ?facility ?facilityLabel ?processType (COUNT(?process) AS ?processCount) WHERE {
+  ?facility a/rdfs:subClassOf* wf:Facility ;
+            rdfs:label ?facilityLabel ;
+            wf:hasComponent ?unit .
+
+  ?unit wf:performsProcess ?process .
+  ?process a ?processType .
+
+  FILTER(?processType != owl:NamedIndividual)
+}
+GROUP BY ?facility ?facilityLabel ?processType
+ORDER BY ?facilityLabel DESC(?processCount)
+LIMIT 30
+
+# CQ2.3: Find treatment sequence (ordered processes)
+SELECT ?facility ?facilityLabel
+       ?unit1 ?process1Label
+       ?unit2 ?process2Label
+WHERE {
+  ?facility a/rdfs:subClassOf* wf:Facility ;
+            rdfs:label ?facilityLabel ;
+            wf:hasComponent ?unit1, ?unit2 .
+
+  ?unit1 wf:hasOutputPort ?out1 ;
+         wf:performsProcess ?process1 .
+  ?process1 rdfs:label ?process1Label .
+
+  ?out1 wf:flowsTo ?in2 .
+
+  ?unit2 wf:hasInputPort ?in2 ;
+         wf:performsProcess ?process2 .
+  ?process2 rdfs:label ?process2Label .
+
+  FILTER(?unit1 != ?unit2)
+}
+ORDER BY ?facilityLabel
+LIMIT 20
+
+
+# ================================================================================
+# COMPETENCY QUESTION 3: Input Sources
+# ================================================================================
+# Question: What are the input water sources for each component?
+# Use Case: Source tracking, contamination tracing
+# ================================================================================
+
+# CQ3.1: Trace upstream connections
+SELECT ?component ?componentLabel ?upstreamComponent ?upstreamLabel WHERE {
+  ?component a/rdfs:subClassOf* wf:WaterSystemComponent ;
+             rdfs:label ?componentLabel ;
+             wf:hasInputPort ?input .
+
+  ?output wf:flowsTo ?input .
+
+  ?upstreamComponent wf:hasOutputPort ?output ;
+                     rdfs:label ?upstreamLabel .
+}
+ORDER BY ?componentLabel
+LIMIT 50
+
+# CQ3.2: Find all natural water sources (rivers, lakes, groundwater)
+SELECT ?component ?componentLabel ?naturalSource ?sourceType WHERE {
+  ?component a/rdfs:subClassOf* wf:WaterSystemComponent ;
+             rdfs:label ?componentLabel .
+
+  ?component wf:abstractsFrom|wf:hasInputPort/wf:connectedTo ?naturalSource .
+
+  ?naturalSource a ?sourceType .
+
+  FILTER EXISTS { ?sourceType rdfs:subClassOf* wf:NaturalWaterBody }
+}
+ORDER BY ?componentLabel
+LIMIT 20
+
+# CQ3.3: Identify components by water source type
+SELECT ?sourceType ?sourceTypeName (COUNT(DISTINCT ?component) AS ?componentCount) WHERE {
+  ?component a/rdfs:subClassOf* wf:WaterSystemComponent ;
+             wf:abstractsFrom|wf:hasInputPort/wf:connectedTo ?source .
+
+  ?source a ?sourceType .
+  ?sourceType rdfs:label ?sourceTypeName .
+
+  FILTER(?sourceType != wf:WaterSystemComponent)
+}
+GROUP BY ?sourceType ?sourceTypeName
+ORDER BY DESC(?componentCount)
+
+
+# ================================================================================
+# COMPETENCY QUESTION 4: Downstream Nodes
+# ================================================================================
+# Question: What nodes are downstream from a given component?
+# Use Case: Impact assessment, contamination propagation
+# ================================================================================
+
+# CQ4.1: Find direct downstream connections
+SELECT ?component ?componentLabel ?downstreamComponent ?downstreamLabel WHERE {
+  ?component a/rdfs:subClassOf* wf:WaterSystemComponent ;
+             rdfs:label ?componentLabel ;
+             wf:hasOutputPort ?output .
+
+  ?output wf:flowsTo ?input .
+
+  ?downstreamComponent wf:hasInputPort ?input ;
+                       rdfs:label ?downstreamLabel .
+}
+ORDER BY ?componentLabel
+LIMIT 50
+
+# CQ4.2: Find all downstream nodes (transitive)
+# Note: This requires property paths and may be computationally expensive
+SELECT ?component ?componentLabel ?downstreamComponent ?downstreamLabel WHERE {
+  ?component a/rdfs:subClassOf* wf:WaterSystemComponent ;
+             rdfs:label ?componentLabel .
+
+  # Transitive closure of flowsTo
+  ?component wf:hasOutputPort/wf:flowsTo+ ?downstreamInput .
+
+  ?downstreamComponent wf:hasInputPort ?downstreamInput ;
+                       rdfs:label ?downstreamLabel .
+
+  FILTER(?component != ?downstreamComponent)
+}
+ORDER BY ?componentLabel
+LIMIT 100
+
+# CQ4.3: Find environmental discharge points
+SELECT ?component ?componentLabel ?environment ?environmentLabel WHERE {
+  ?component a/rdfs:subClassOf* wf:WaterSystemComponent ;
+             rdfs:label ?componentLabel .
+
+  ?component wf:dischargesToEnvironment|wf:dischargesInto ?environment .
+
+  ?environment rdfs:label ?environmentLabel .
+}
+ORDER BY ?componentLabel
+
+
+# ================================================================================
+# COMPETENCY QUESTION 5: Quality Suitability for Usage
+# ================================================================================
+# Question: Is water at a given point suitable for a specific usage?
+# Use Case: Fit-for-purpose water matching, reuse opportunities
+# ================================================================================
+
+# CQ5.1: Find sources that satisfy usage point requirements
+SELECT ?source ?sourceLabel ?usagePoint ?usageLabel ?sharedConstraints WHERE {
+  ?source wf:satisfiesConstraints ?sharedConstraints .
+  ?usagePoint wf:requiresQualityConstraints ?sharedConstraints .
+
+  ?source rdfs:label ?sourceLabel .
+  ?usagePoint rdfs:label ?usageLabel .
+}
+ORDER BY ?sourceLabel ?usageLabel
+
+# CQ5.2: Assess water quality against specific constraint sets
+SELECT ?assessment ?water ?waterLabel ?constraintSet ?constraintLabel ?result WHERE {
+  ?assessment a wf:QualityAssessment ;
+              wf:assessesWater ?water ;
+              wf:againstConstraintSet ?constraintSet ;
+              wf:assessmentResult ?result .
+
+  ?water rdfs:label ?waterLabel .
+  ?constraintSet rdfs:label ?constraintLabel .
+}
+ORDER BY ?waterLabel ?constraintLabel
+
+# CQ5.3: Find which usage points a water source can serve
+SELECT ?source ?sourceLabel
+       (GROUP_CONCAT(DISTINCT ?usageLabel; separator=", ") AS ?canServe)
+WHERE {
+  ?source wf:satisfiesConstraints ?constraints .
+  ?usagePoint wf:requiresQualityConstraints ?constraints ;
+              rdfs:label ?usageLabel .
+
+  ?source rdfs:label ?sourceLabel .
+}
+GROUP BY ?source ?sourceLabel
+ORDER BY ?sourceLabel
+
+# CQ5.4: Find violated quality constraints
+SELECT ?assessment ?water ?waterLabel ?violatedParam ?paramLabel WHERE {
+  ?assessment a wf:QualityAssessment ;
+              wf:assessesWater ?water ;
+              wf:assessmentResult "false"^^xsd:boolean ;
+              wf:violatedConstraint ?constraint .
+
+  ?constraint wf:hasWaterQualityParameter ?violatedParam .
+
+  ?water rdfs:label ?waterLabel .
+  ?violatedParam rdfs:label ?paramLabel .
+}
+ORDER BY ?waterLabel
+
+
+# ================================================================================
+# ADDITIONAL COMPETENCY QUESTIONS
+# ================================================================================
+# These address capabilities added in Phases 1-9
+# ================================================================================
+
+# CQ6: Scenario Comparison
+# Question: What components differ between scenarios?
+SELECT ?scenario1 ?scenario2 ?component ?componentLabel WHERE {
+  VALUES (?scenario1 ?scenario2) {
+    (ghent:BaselineScenario ghent:AlternativeScenario)
+  }
+
+  ?scenario1 wf:scenarioComponent ?component .
+  ?component rdfs:label ?componentLabel .
+
+  FILTER NOT EXISTS {
+    ?scenario2 wf:scenarioComponent ?component
+  }
+}
+ORDER BY ?componentLabel
+
+# CQ7: CSO Activation Conditions
+# Question: Which CSOs activate during wet weather events?
+SELECT ?cso ?csoLabel ?threshold ?dischargePoint WHERE {
+  ?cso a wf:CombinedSewerOverflow ;
+       rdfs:label ?csoLabel ;
+       wf:activationThreshold ?threshold ;
+       wf:overflowsTo ?dischargePoint .
+}
+ORDER BY ?csoLabel
+
+# CQ8: Conveyance Network Topology
+# Question: What is the sewer network structure?
+SELECT ?sewer ?sewerLabel ?type ?diameter ?length ?slope WHERE {
+  ?sewer a/rdfs:subClassOf* wf:SewerPipe ;
+         rdfs:label ?sewerLabel ;
+         a ?type .
+
+  OPTIONAL { ?sewer wf:hasDiameter ?diameter }
+  OPTIONAL { ?sewer wf:hasLength ?length }
+  OPTIONAL { ?sewer wf:hasSlope ?slope }
+
+  FILTER(?type != wf:SewerPipe)
+}
+ORDER BY ?sewerLabel
+
+# CQ9: Storage Capacity Inventory
+# Question: What is the total storage capacity in the system?
+SELECT ?facility ?facilityLabel ?capacity ?unit WHERE {
+  ?facility a/rdfs:subClassOf* wf:Facility ;
+            rdfs:label ?facilityLabel ;
+            wf:hasStorageCapacity ?capacity .
+
+  OPTIONAL { ?facility wf:hasUnit ?unit }
+}
+ORDER BY DESC(?capacity)
+
+# CQ10: Water Quality Parameter Observations
+# Question: What water quality observations exist and their values?
+SELECT ?sample ?sampleLabel ?parameter ?paramLabel ?value ?unit ?time WHERE {
+  ?sample a wf:WaterSample ;
+          rdfs:label ?sampleLabel ;
+          wf:hasMeasurement ?observation .
+
+  ?observation wf:observedParameter ?parameter ;
+               wf:observedValue ?value .
+
+  ?parameter rdfs:label ?paramLabel .
+
+  OPTIONAL { ?observation wf:hasUnit ?unit }
+  OPTIONAL { ?observation wf:observedOn ?time }
+}
+ORDER BY ?sampleLabel ?paramLabel
+
+
+# ================================================================================
+# USAGE INSTRUCTIONS
+# ================================================================================
+#
+# 1. Run these queries against the waterFRAME ontology + instance data
+# 2. Each CQ should return meaningful results if the ontology is correctly designed
+# 3. Empty results may indicate missing data or modeling gaps
+# 4. Use results to validate ontology expressiveness and completeness
+#
+# Example with Apache Jena ARQ:
+#   arq --data=waterframe.ttl --data=ghent_data.ttl --query=competency_questions.sparql
+#
+# ================================================================================

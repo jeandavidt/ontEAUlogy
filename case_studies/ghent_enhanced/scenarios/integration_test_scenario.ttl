@@ -1,0 +1,485 @@
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix ghent: <https://ugentbiomath.github.io/waterframe/examples/ghent#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix envo: <http://purl.obolibrary.org/obo/ENVO_> .
+@prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+
+# ================================================================================
+# Integration Test Scenario - Comprehensive Validation of Phases 1-9
+# ================================================================================
+#
+# Purpose: Demonstrate all ontology refinements working together in a realistic
+#          scenario that exercises every feature from Phases 1-9
+#
+# Date: 2026-01-28
+# Related Plan: /Users/jeandavidt/.claude/plans/lucky-doodling-dongarra.md
+#
+# ================================================================================
+
+# ================================================================================
+# SCENARIO DEFINITION
+# ================================================================================
+# Phase 6: Simple temporal representation with xsd:dateTime
+# Phase 9: Multiple scenarios for comparison
+
+ghent:IntegrationTestScenario a wf:BaselineScenario ;
+    rdfs:label "Integration Test Scenario - All Phases"@en ;
+    wf:scenarioName "Comprehensive Integration Test" ;
+    wf:scenarioPurpose "Validate all ontology refinements (Phases 1-9) work together correctly" ;
+    wf:scenarioDescription """This scenario exercises every major feature added in Phases 1-9:
+    - ENVO-aligned natural water bodies (Phase 1)
+    - Separated physical units from processes (Phase 2)
+    - Uses textual comments for WaWO+ references (Phase 3)
+    - Environmental discharge properties (Phase 4)
+    - Comprehensive sewer network with CSOs (Phase 5)
+    - Simple timestamp representation (Phase 6)
+    - Diverse water usage points (Phase 7)
+    - Storage and pumping facilities (Phase 8)
+    - Fit-for-purpose quality matching (Phase 9)""" ;
+    wf:scenarioStartDate "2026-01-28T00:00:00Z"^^xsd:dateTime ;
+    wf:scenarioEndDate "2026-01-28T23:59:59Z"^^xsd:dateTime ;
+    wf:scenarioCreationDate "2026-01-28T00:00:00Z"^^xsd:dateTime .
+
+
+# ================================================================================
+# PHASE 1: ENVO-Aligned Natural Water Bodies
+# ================================================================================
+# Corrected ENVO references after Phase 1 verification
+
+ghent:ScheldtRiver a wf:River ;
+    rdfs:label "Scheldt River at Ghent"@en ;
+    rdfs:seeAlso envo:00000022 ;  # ENVO river concept (verified correct)
+    rdfs:comment "Natural river receiving treated wastewater discharge. Aligned with ENVO:00000022." ;
+    wf:inScenario ghent:IntegrationTestScenario .
+
+ghent:LeieRiver a wf:River ;
+    rdfs:label "Leie River"@en ;
+    rdfs:seeAlso envo:00000022 ;  # ENVO river concept
+    rdfs:comment "Tributary river, receives CSO discharge during wet weather" ;
+    wf:inScenario ghent:IntegrationTestScenario .
+
+
+# ================================================================================
+# PHASE 2: Physical Units Separated from Processes
+# ================================================================================
+# Physical infrastructure as continuants, processes as occurrents
+
+# Physical Unit (Material Entity - BFO continuant)
+ghent:WWTP_IntegrationTest a wf:WastewaterTreatmentPlant ;
+    rdfs:label "Integration Test WWTP"@en ;
+    rdfs:comment "Demonstrates Phase 2: Physical facility as material entity" ;
+    wf:inScenario ghent:IntegrationTestScenario ;
+    wf:hasComponent ghent:WWTP_AerationTank,
+                    ghent:WWTP_Clarifier,
+                    ghent:WWTP_DisinfectionUnit .
+
+# Physical treatment unit
+ghent:WWTP_AerationTank a wf:AerationTank ;
+    rdfs:label "Aeration Tank - Integration Test"@en ;
+    rdfs:comment "Phase 3: References WaWO+ BiologicalOxidation concept textually" ;
+    rdfs:seeAlso <http://www.semanticweb.org/wawo/BiologicalOxidation> ;
+    wf:performsProcess ghent:BiologicalOxidation_Process ;  # Phase 2: Links to process
+    wf:hasVolume "500.0"^^xsd:double ;
+    wf:hasInputPort ghent:WWTP_AerationIn ;
+    wf:hasOutputPort ghent:WWTP_AerationOut .
+
+# Process (Occurrent - BFO process)
+ghent:BiologicalOxidation_Process a wf:BiologicalOxidationProcess ;
+    rdfs:label "Biological Oxidation Process"@en ;
+    rdfs:comment "Phase 2: Process as occurrent, separate from physical tank" .
+
+ghent:WWTP_Clarifier a wf:SecondarySettler ;
+    rdfs:label "Secondary Clarifier - Integration Test"@en ;
+    rdfs:seeAlso <http://www.semanticweb.org/wawo/Clarification> ;
+    wf:performsProcess ghent:Clarification_Process ;
+    wf:hasInputPort ghent:WWTP_ClarifierIn ;
+    wf:hasOutputPort ghent:WWTP_ClarifierOut .
+
+ghent:Clarification_Process a wf:ClarificationProcess ;
+    rdfs:label "Clarification Process"@en .
+
+ghent:WWTP_DisinfectionUnit a wf:DisinfectionUnit ;
+    rdfs:label "Disinfection Unit - Integration Test"@en ;
+    rdfs:seeAlso <http://www.semanticweb.org/wawo/Disinfection> ;
+    wf:performsProcess ghent:Disinfection_Process ;
+    wf:hasInputPort ghent:WWTP_DisinfectionIn ;
+    wf:hasOutputPort ghent:WWTP_Effluent .
+
+ghent:Disinfection_Process a wf:DisinfectionProcess ;
+    rdfs:label "Disinfection Process"@en .
+
+
+# ================================================================================
+# PHASE 3: WaWO+ References as Comments Only
+# ================================================================================
+# No WaWO+ URIs in object properties, only rdfs:seeAlso and textual comments
+# (Already demonstrated above in physical units)
+
+
+# ================================================================================
+# PHASE 4: Semantic Property Hierarchy for Environmental Discharge
+# ================================================================================
+# Uses dischargesToEnvironment and dischargesInto properties
+
+# WWTP effluent discharges to river using proper property hierarchy
+ghent:WWTP_Effluent wf:dischargesToEnvironment ghent:ScheldtRiver ;
+    wf:dischargesInto ghent:ScheldtRiver ;  # More specific subproperty
+    rdfs:label "WWTP Effluent Port"@en ;
+    rdfs:comment "Phase 4: Uses dischargesInto (subproperty of dischargesToEnvironment)" ;
+    wf:hasFlowType wf:ReclaimedWaterFlow ;
+    wf:satisfiesConstraints ghent:ToiletFlushingConstraints .  # Phase 9: Quality constraints
+
+# Ports
+ghent:WWTP_AerationIn a wf:InputPort ;
+    rdfs:label "Aeration Tank Input"@en .
+
+ghent:WWTP_AerationOut a wf:OutputPort ;
+    rdfs:label "Aeration Tank Output"@en ;
+    wf:flowsTo ghent:WWTP_ClarifierIn .
+
+ghent:WWTP_ClarifierIn a wf:InputPort ;
+    rdfs:label "Clarifier Input"@en .
+
+ghent:WWTP_ClarifierOut a wf:OutputPort ;
+    rdfs:label "Clarifier Output"@en ;
+    wf:flowsTo ghent:WWTP_DisinfectionIn .
+
+ghent:WWTP_DisinfectionIn a wf:InputPort ;
+    rdfs:label "Disinfection Input"@en .
+
+
+# ================================================================================
+# PHASE 5: Comprehensive Sewer Network with CSOs
+# ================================================================================
+# Demonstrates conveyance hierarchy: sewers, CSOs, pumps, junctions
+
+# Combined sewer system
+ghent:CombinedSewer_Main a wf:CombinedSewer ;
+    rdfs:label "Main Combined Sewer - Ghent Center"@en ;
+    rdfs:comment "Phase 5: Combined sewer carrying both wastewater and stormwater" ;
+    wf:hasDiameter "1.5"^^xsd:double ;  # meters
+    wf:hasLength "2500.0"^^xsd:double ;  # meters
+    wf:hasSlope "0.002"^^xsd:double ;  # dimensionless
+    wf:hasOutputPort ghent:Sewer_MainOut ;
+    wf:inScenario ghent:IntegrationTestScenario .
+
+# Junction combining multiple sewers
+ghent:SewerJunction_Central a wf:Junction ;
+    rdfs:label "Central Sewer Junction"@en ;
+    rdfs:comment "Phase 5: Junction merging multiple sewer flows" ;
+    wf:hasInputPort ghent:Junction_In1, ghent:Junction_In2 ;
+    wf:hasOutputPort ghent:Junction_Out ;
+    wf:inScenario ghent:IntegrationTestScenario .
+
+# Combined Sewer Overflow (CSO)
+ghent:CSO_WetWeather a wf:CombinedSewerOverflow ;
+    rdfs:label "CSO - Wet Weather Discharge Point"@en ;
+    rdfs:comment "Phase 5: CSO structure that activates during heavy rainfall" ;
+    wf:hasInputPort ghent:CSO_In ;
+    wf:hasOutputPort ghent:CSO_ToWWTP, ghent:CSO_Overflow ;
+    wf:overflowsTo ghent:LeieRiver ;  # Phase 4 & 5: Discharge to environment
+    wf:activationThreshold ghent:CSO_FlowThreshold ;
+    wf:inScenario ghent:IntegrationTestScenario .
+
+ghent:CSO_FlowThreshold a wf:QuantityValue ;
+    rdfs:label "CSO Activation Threshold"@en ;
+    wf:numericValue "150.0"^^xsd:double ;
+    wf:hasUnit "L/s" ;
+    rdfs:comment "Flow rate above which CSO activates" .
+
+# CSO overflow discharges to river
+ghent:CSO_Overflow a wf:OutputPort ;
+    rdfs:label "CSO Overflow to River"@en ;
+    wf:dischargesInto ghent:LeieRiver .  # Phase 4: Environmental discharge
+
+ghent:CSO_ToWWTP a wf:OutputPort ;
+    rdfs:label "CSO Flow to WWTP"@en ;
+    wf:flowsTo ghent:WWTP_IntegrationTest .
+
+# Pump station (Phase 5)
+ghent:LiftStation_South a wf:LiftStation ;
+    rdfs:label "South Lift Station"@en ;
+    rdfs:comment "Phase 5: Lift station to overcome elevation differences" ;
+    wf:hasPumpCapacity "200.0"^^xsd:double ;
+    wf:hasUnit "L/s" ;
+    wf:hasInputPort ghent:Lift_In ;
+    wf:hasOutputPort ghent:Lift_Out ;
+    wf:inScenario ghent:IntegrationTestScenario .
+
+# Sanitary sewer (separated system)
+ghent:SanitarySewer_NewDevelopment a wf:SanitarySewer ;
+    rdfs:label "Sanitary Sewer - New Development Area"@en ;
+    rdfs:comment "Phase 5: Modern separated sanitary sewer (no stormwater)" ;
+    wf:hasDiameter "0.8"^^xsd:double ;
+    wf:hasLength "800.0"^^xsd:double ;
+    wf:hasSlope "0.003"^^xsd:double ;
+    wf:inScenario ghent:IntegrationTestScenario .
+
+
+# ================================================================================
+# PHASE 6: Simple Temporal Representation
+# ================================================================================
+# Uses xsd:dateTime for timestamps (demonstrated in scenario definition above)
+# Observations use simple timestamps
+
+ghent:WaterQuality_Sample_20260128 a wf:WaterSample ;
+    rdfs:label "WWTP Effluent Sample - 2026-01-28"@en ;
+    rdfs:comment "Phase 6: Simple timestamp representation" ;
+    sosa:resultTime "2026-01-28T14:30:00Z"^^xsd:dateTime ;  # Simple timestamp
+    wf:hasMeasurement ghent:BOD_Obs_20260128, ghent:TSS_Obs_20260128 .
+
+ghent:BOD_Obs_20260128 a wf:WaterQualityObservation ;
+    rdfs:label "BOD Observation"@en ;
+    wf:observedParameter wf:BOD ;
+    wf:observedValue "8.5"^^xsd:double ;
+    wf:hasUnit "mg/L" ;
+    wf:observedOn "2026-01-28T14:30:00Z"^^xsd:dateTime .  # Phase 6: Simple timestamp
+
+ghent:TSS_Obs_20260128 a wf:WaterQualityObservation ;
+    rdfs:label "TSS Observation"@en ;
+    wf:observedParameter wf:TSS ;
+    wf:observedValue "12.0"^^xsd:double ;
+    wf:hasUnit "mg/L" ;
+    wf:observedOn "2026-01-28T14:30:00Z"^^xsd:dateTime .
+
+
+# ================================================================================
+# PHASE 7: Diverse Water Usage Points
+# ================================================================================
+# Residential, industrial, and commercial usage points
+
+# Residential usage points
+ghent:ResidentialBuilding_Test a wf:ResidentialBuilding ;
+    rdfs:label "Residential Building - Integration Test"@en ;
+    rdfs:comment "Phase 7: Residential facility with multiple usage points" ;
+    wf:hasComponent ghent:ResUsage_Kitchen,
+                    ghent:ResUsage_Toilet,
+                    ghent:ResUsage_Shower,
+                    ghent:ResUsage_Laundry ;
+    wf:inScenario ghent:IntegrationTestScenario .
+
+ghent:ResUsage_Kitchen a wf:KitchenSink ;
+    rdfs:label "Kitchen Sink Usage Point"@en ;
+    rdfs:comment "Phase 7: Potable water required for food preparation" ;
+    wf:requiresQualityConstraints ghent:PotableWaterConstraints ;  # Phase 9
+    wf:hasInputPort ghent:Kitchen_In .
+
+ghent:ResUsage_Toilet a wf:ToiletFlush ;
+    rdfs:label "Toilet Flush Usage Point"@en ;
+    rdfs:comment "Phase 7 & 9: Can use reclaimed water meeting toilet constraints" ;
+    wf:requiresQualityConstraints ghent:ToiletFlushingConstraints ;  # Phase 9
+    wf:hasInputPort ghent:Toilet_In .
+
+ghent:ResUsage_Shower a wf:Shower ;
+    rdfs:label "Shower Usage Point"@en ;
+    wf:requiresQualityConstraints ghent:PotableWaterConstraints ;
+    wf:hasInputPort ghent:Shower_In .
+
+ghent:ResUsage_Laundry a wf:LaundryMachine ;
+    rdfs:label "Laundry Usage Point"@en ;
+    wf:requiresQualityConstraints ghent:NonPotableConstraints ;
+    wf:hasInputPort ghent:Laundry_In .
+
+# Industrial usage point
+ghent:IndustrialCooling a wf:IndustrialCoolingSystem ;
+    rdfs:label "Industrial Cooling Tower"@en ;
+    rdfs:comment "Phase 7: Industrial usage point with relaxed quality requirements" ;
+    wf:requiresQualityConstraints ghent:CoolingWaterConstraints ;
+    wf:hasInputPort ghent:Cooling_In ;
+    wf:inScenario ghent:IntegrationTestScenario .
+
+# Commercial usage point
+ghent:CommercialIrrigation a wf:IrrigationSystem ;
+    rdfs:label "Commercial Landscape Irrigation"@en ;
+    rdfs:comment "Phase 7: Commercial irrigation usage point" ;
+    wf:requiresQualityConstraints ghent:IrrigationConstraints ;
+    wf:hasInputPort ghent:Irrigation_In ;
+    wf:inScenario ghent:IntegrationTestScenario .
+
+
+# ================================================================================
+# PHASE 8: Storage and Pumping Facilities
+# ================================================================================
+# Facilities with operational properties
+
+ghent:StorageTank_CSO a wf:StorageTank ;
+    rdfs:label "CSO Storage Tank"@en ;
+    rdfs:comment "Phase 8: Storage facility to reduce CSO events" ;
+    wf:hasStorageCapacity "5000.0"^^xsd:double ;
+    wf:hasUnit "m3" ;
+    wf:hasInputPort ghent:Storage_In ;
+    wf:hasOutputPort ghent:Storage_Out ;
+    wf:inScenario ghent:IntegrationTestScenario .
+
+ghent:WaterTower_Distribution a wf:WaterTower ;
+    rdfs:label "Water Distribution Tower"@en ;
+    rdfs:comment "Phase 8: Elevated storage for pressure maintenance" ;
+    wf:hasStorageCapacity "2000.0"^^xsd:double ;
+    wf:hasUnit "m3" ;
+    wf:hasElevation "45.0"^^xsd:double ;
+    wf:hasInputPort ghent:Tower_In ;
+    wf:hasOutputPort ghent:Tower_Out ;
+    wf:inScenario ghent:IntegrationTestScenario .
+
+ghent:BoosterPump_Station a wf:PumpStation ;
+    rdfs:label "Booster Pump Station"@en ;
+    rdfs:comment "Phase 8: Pumping facility for pressure boost" ;
+    wf:hasPumpCapacity "300.0"^^xsd:double ;
+    wf:hasUnit "L/s" ;
+    wf:hasEnergyConsumption "75.0"^^xsd:double ;
+    wf:hasInputPort ghent:Booster_In ;
+    wf:hasOutputPort ghent:Booster_Out ;
+    wf:inScenario ghent:IntegrationTestScenario .
+
+
+# ================================================================================
+# PHASE 9: Fit-for-Purpose Quality Framework
+# ================================================================================
+# Source-to-usage matching via quality constraints
+
+# Quality constraint sets (defined for various uses)
+ghent:PotableWaterConstraints a wf:QualityConstraintSet ;
+    rdfs:label "Potable Water Quality Constraints"@en ;
+    rdfs:comment "Phase 9: Strict constraints for drinking water" ;
+    wf:definesQualityFor wf:DrinkingWaterQuality ;
+    wf:includesConstraint ghent:Potable_BOD, ghent:Potable_TSS, ghent:Potable_Ecoli .
+
+ghent:Potable_BOD a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:BOD ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "5.0"^^xsd:double ;
+    wf:hasUnit "mg/L" .
+
+ghent:Potable_TSS a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:TSS ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "1.0"^^xsd:double ;
+    wf:hasUnit "mg/L" .
+
+ghent:Potable_Ecoli a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:EColi ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "0"^^xsd:double ;
+    wf:hasUnit "CFU/100mL" .
+
+ghent:ToiletFlushingConstraints a wf:QualityConstraintSet ;
+    rdfs:label "Toilet Flushing Quality Constraints"@en ;
+    rdfs:comment "Phase 9: Relaxed constraints suitable for toilet flushing" ;
+    wf:includesConstraint ghent:Toilet_BOD, ghent:Toilet_TSS .
+
+ghent:Toilet_BOD a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:BOD ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "25.0"^^xsd:double ;
+    wf:hasUnit "mg/L" .
+
+ghent:Toilet_TSS a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:TSS ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "15.0"^^xsd:double ;
+    wf:hasUnit "mg/L" .
+
+ghent:NonPotableConstraints a wf:QualityConstraintSet ;
+    rdfs:label "Non-Potable Water Constraints"@en ;
+    wf:includesConstraint ghent:NonPotable_TSS .
+
+ghent:NonPotable_TSS a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:TSS ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "20.0"^^xsd:double .
+
+ghent:CoolingWaterConstraints a wf:QualityConstraintSet ;
+    rdfs:label "Cooling Water Quality Constraints"@en ;
+    wf:includesConstraint ghent:Cooling_TSS, ghent:Cooling_TDS .
+
+ghent:Cooling_TSS a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:TSS ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "50.0"^^xsd:double .
+
+ghent:Cooling_TDS a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:TDS ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "500.0"^^xsd:double ;
+    wf:hasUnit "mg/L" .
+
+ghent:IrrigationConstraints a wf:QualityConstraintSet ;
+    rdfs:label "Irrigation Water Quality Constraints"@en ;
+    wf:includesConstraint ghent:Irrigation_TSS, ghent:Irrigation_Ecoli .
+
+ghent:Irrigation_TSS a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:TSS ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "30.0"^^xsd:double .
+
+ghent:Irrigation_Ecoli a wf:WaterQualityRequirement ;
+    wf:hasWaterQualityParameter wf:EColi ;
+    wf:hasLimitType wf:MaximumLimit ;
+    wf:hasLimitValue "100"^^xsd:double ;
+    wf:hasUnit "CFU/100mL" .
+
+# Quality assessment demonstrating fit-for-purpose matching
+ghent:FitForPurpose_Assessment a wf:QualityAssessment ;
+    rdfs:label "Fit-for-Purpose Assessment - WWTP Effluent for Toilets"@en ;
+    rdfs:comment "Phase 9: Demonstrates source-to-usage quality matching" ;
+    wf:assessesWater ghent:WWTP_Effluent ;
+    wf:againstConstraintSet ghent:ToiletFlushingConstraints ;
+    wf:assessmentResult "true"^^xsd:boolean ;
+    wf:assessmentDate "2026-01-28T15:00:00Z"^^xsd:dateTime ;
+    rdfs:comment "BOD=8.5 mg/L < 25 mg/L, TSS=12.0 mg/L < 15 mg/L. PASSES all constraints." .
+
+# Demonstrate that same water fails stricter potable requirements
+ghent:Potable_Assessment a wf:QualityAssessment ;
+    rdfs:label "Potable Water Assessment - WWTP Effluent"@en ;
+    wf:assessesWater ghent:WWTP_Effluent ;
+    wf:againstConstraintSet ghent:PotableWaterConstraints ;
+    wf:assessmentResult "false"^^xsd:boolean ;
+    wf:violatedConstraint ghent:Potable_BOD, ghent:Potable_TSS ;
+    wf:assessmentDate "2026-01-28T15:00:00Z"^^xsd:dateTime ;
+    rdfs:comment "FAILS potable standards (BOD too high, TSS too high). Same water passes toilet constraints but not drinking." .
+
+
+# ================================================================================
+# PORT DEFINITIONS
+# ================================================================================
+
+ghent:Sewer_MainOut a wf:OutputPort .
+ghent:Junction_In1 a wf:InputPort .
+ghent:Junction_In2 a wf:InputPort .
+ghent:Junction_Out a wf:OutputPort .
+ghent:CSO_In a wf:InputPort .
+ghent:Lift_In a wf:InputPort .
+ghent:Lift_Out a wf:OutputPort .
+ghent:Storage_In a wf:InputPort .
+ghent:Storage_Out a wf:OutputPort .
+ghent:Tower_In a wf:InputPort .
+ghent:Tower_Out a wf:OutputPort .
+ghent:Booster_In a wf:InputPort .
+ghent:Booster_Out a wf:OutputPort .
+ghent:Kitchen_In a wf:InputPort .
+ghent:Toilet_In a wf:InputPort .
+ghent:Shower_In a wf:InputPort .
+ghent:Laundry_In a wf:InputPort .
+ghent:Cooling_In a wf:InputPort .
+ghent:Irrigation_In a wf:InputPort .
+
+
+# ================================================================================
+# VALIDATION NOTES
+# ================================================================================
+# This scenario file demonstrates:
+#
+# Phase 1: Corrected ENVO references (envo:00000022 for rivers)
+# Phase 2: Physical units (tanks, pipes) separate from processes (oxidation, clarification)
+# Phase 3: WaWO+ references via rdfs:seeAlso only, no URIs in object properties
+# Phase 4: Uses dischargesToEnvironment/dischargesInto property hierarchy
+# Phase 5: Complete sewer network (combined sewers, CSOs, junctions, pumps)
+# Phase 6: Simple xsd:dateTime timestamps (no complex OWL-Time intervals)
+# Phase 7: Residential, industrial, commercial usage points
+# Phase 8: Storage tanks, water towers, pump stations with operational properties
+# Phase 9: Quality constraint sets enabling source-to-usage matching
+#
+# Query this file with master_validation_suite.sparql to verify all features work.
+# ================================================================================
