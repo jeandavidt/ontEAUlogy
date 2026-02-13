@@ -419,4 +419,8 @@ class OntologyStore:
 
 
 # Global ontology store instance
-ontology_store = OntologyStore()
+# Honour ONTOLOGY_BASE_PATH env var so Docker bind-mounts work correctly
+import os as _os
+ontology_store = OntologyStore(
+    ontology_base_path=_os.environ.get("ONTOLOGY_BASE_PATH") or None
+)

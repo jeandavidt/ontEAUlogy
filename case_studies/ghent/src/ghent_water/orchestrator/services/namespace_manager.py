@@ -24,15 +24,14 @@ class NamespaceManager:
             case_study_data_path: Path to case study data directory.
                                   Defaults to ../data relative to case study root.
         """
+        case_study_root = Path(__file__).parent.parent.parent.parent.parent
+
         if ontology_base_path is None:
             # Default: use /app/data for container, or relative path for local dev
             if Path("/app/data").exists():
                 ontology_base_path = Path("/app/data")
             else:
-                case_study_root = Path(__file__).parent.parent.parent.parent.parent
                 ontology_base_path = case_study_root.parent.parent / "data"
-        else:
-            case_study_root = Path(__file__).parent.parent.parent.parent.parent
 
         if case_study_data_path is None:
             case_study_data_path = case_study_root / "data"
@@ -243,4 +242,9 @@ class NamespaceManager:
 
 
 # Global namespace manager instance
-namespace_manager = NamespaceManager()
+# Honour ONTOLOGY_BASE_PATH env var so Docker bind-mounts work correctly
+import os as _os
+_ontology_base_override = _os.environ.get("ONTOLOGY_BASE_PATH")
+namespace_manager = NamespaceManager(
+    ontology_base_path=Path(_ontology_base_override) if _ontology_base_override else None
+)
