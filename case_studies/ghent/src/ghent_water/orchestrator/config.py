@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     ontology_base_path: str = "../../data"
     # Case study specific data
     case_study_data_path: str = "data"
+    # Household case study data path (relative to case_studies/)
+    household_data_path: str = "../household/data"
     # Legacy paths (kept for compatibility but not used by new code)
     ontology_path: str = "data/ontology/waterframe.ttl"
     instances_path: str = "data/ontology/instances/"

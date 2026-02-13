@@ -147,6 +147,14 @@ class OntologyStore:
                         self._graph.parse(str(instance_file), format="turtle")
                         files_loaded += 1
 
+                # 6. Load household case study instances from household/data/instances/
+                household_instances = self._case_study_root.parent / "household" / "data" / "instances"
+                if household_instances.exists():
+                    for ttl_file in sorted(household_instances.glob("**/*.ttl")):
+                        logger.info(f"Loading household instance: {ttl_file}")
+                        self._graph.parse(str(ttl_file), format="turtle")
+                        files_loaded += 1
+
                 self._loaded = True
                 logger.info(
                     f"Ontology loaded successfully: {len(self._graph)} triples from {files_loaded} files"

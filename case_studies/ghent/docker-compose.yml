@@ -391,6 +391,85 @@ services:
       - models
       - backend
 
+  # Household Case Study Model Services
+  household-mbr:
+    build:
+      context: ../household
+      dockerfile: Dockerfile
+    container_name: household-mbr
+    ports:
+      - "8101:8101"
+    environment:
+      - PORT=8101
+      - MODEL_NAME=mbr
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+    command: ["python", "-m", "household_water.runners.model_runner", "--model", "mbr", "--port", "8101"]
+    networks:
+      - ghent-water-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8101/health', timeout=2).status_code == 200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    profiles:
+      - full
+      - household
+      - backend
+
+  household-ro:
+    build:
+      context: ../household
+      dockerfile: Dockerfile
+    container_name: household-ro
+    ports:
+      - "8102:8102"
+    environment:
+      - PORT=8102
+      - MODEL_NAME=ro
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+    command: ["python", "-m", "household_water.runners.model_runner", "--model", "ro", "--port", "8102"]
+    networks:
+      - ghent-water-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8102/health', timeout=2).status_code == 200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    profiles:
+      - full
+      - household
+      - backend
+
+  household-infiltration:
+    build:
+      context: ../household
+      dockerfile: Dockerfile
+    container_name: household-infiltration
+    ports:
+      - "8103:8103"
+    environment:
+      - PORT=8103
+      - MODEL_NAME=infiltration
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+    command: ["python", "-m", "household_water.runners.model_runner", "--model", "infiltration", "--port", "8103"]
+    networks:
+      - ghent-water-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8103/health', timeout=2).status_code == 200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    profiles:
+      - full
+      - household
+      - backend
+
   # Observability Stack - Loki for log aggregation
   loki:
     image: grafana/loki:2.9.3

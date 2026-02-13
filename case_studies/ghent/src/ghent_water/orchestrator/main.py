@@ -52,6 +52,13 @@ from .services.sparql_engine import sparql_engine
 from .services.llm_sparql import get_llm_sparql_translator
 from ..models.config import MODEL_PORTS
 
+# Household model ports for discovery
+HOUSEHOLD_MODEL_PORTS = {
+    "mbr": ("http://household-mbr", 8101),
+    "ro": ("http://household-ro", 8102),
+    "infiltration": ("http://household-infiltration", 8103),
+}
+
 
 async def discover_and_register_models() -> int:
     """Discover running model services and register them with the orchestrator.
@@ -92,6 +99,32 @@ async def discover_and_register_models() -> int:
                 logger.debug(f"Model {model_id} not available at {endpoint}")
             except Exception as e:
                 logger.warning(f"Error registering model {model_id}: {e}")
+
+        # Discover household models
+        for model_id, (host, port) in HOUSEHOLD_MODEL_PORTS.items():
+            endpoint = f"{host}:{port}"
+            try:
+                resp = await client.get(f"{endpoint}/describe")
+                if resp.status_code == 200:
+                    description = resp.json()
+                    graph = description.get("@graph", [{}])
+                    model_info = graph[0] if graph else {}
+                    registry.register_model(
+                        ModelRegistrationRequest(
+                            id=f"household_{model_id}",
+                            name=model_info.get("rdfs:label", model_id.upper()),
+                            description=model_info.get("rdfs:comment", ""),
+                            endpoint=endpoint,
+                            capabilities=["SteadyStateSimulation", "MassBalance"],
+                            entities=[f"housecase1:{model_id.capitalize()}"],
+                        )
+                    )
+                    logger.info(f"Registered household model: {model_id} at {endpoint}")
+                    registered_count += 1
+            except httpx.ConnectError:
+                logger.debug(f"Household model {model_id} not available at {endpoint}")
+            except Exception as e:
+                logger.warning(f"Error registering household model {model_id}: {e}")
 
     return registered_count
 
