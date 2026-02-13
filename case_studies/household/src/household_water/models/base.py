@@ -4,8 +4,11 @@ Adapted from ghent_water BaseWaterModel with household-specific namespace.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from datetime import datetime
+
+from rdflib import Graph, Literal, Namespace, RDF, XSD
+from rdflib.term import BNode
 
 
 class ModelStatus:
@@ -25,6 +28,13 @@ HOUSECASE1 = "https://ugentbiomath.github.io/ontology/index.ttl#"
 
 class BaseHouseholdModel(ABC):
     """Abstract base class for household water system models."""
+
+    # Subclasses may override these class-level attributes.
+    _PARAM_BOUNDS: Dict[str, Tuple[float, float]] = {}
+    _default_params: Dict[str, float] = {}
+    _default_scenario_iri: str = (
+        "https://ugentbiomath.github.io/ontology/index.ttl#Baseline_Scenario"
+    )
 
     def __init__(
         self,
@@ -48,6 +58,7 @@ class BaseHouseholdModel(ABC):
         self._state: Dict[str, Any] = {}
         self._last_run: Optional[datetime] = None
         self._status: str = ModelStatus.READY
+        self._parameters: Dict[str, float] = dict(self._default_params)
 
     @property
     def api_endpoint(self) -> str:
@@ -61,6 +72,109 @@ class BaseHouseholdModel(ABC):
     def entity_iri(self) -> str:
         """IRI of the physical entity in household_case1.ttl."""
         return f"{HOUSECASE1}{self.entity_id}"
+
+    # ------------------------------------------------------------------
+    # Parameter management
+    # ------------------------------------------------------------------
+
+    def get_default_params_dict(self) -> Dict[str, float]:
+        """Return a copy of the class-level default parameters.
+
+        Returns:
+            A shallow copy of ``_default_params``.
+        """
+        return dict(self._default_params)
+
+    def update_parameters(self, params: Dict[str, float]) -> None:
+        """Merge *params* into the instance parameter store.
+
+        Args:
+            params: Mapping of parameter name to new value.
+        """
+        self._parameters.update(params)
+
+    def get_param_bounds(
+        self, names: List[str]
+    ) -> Tuple[List[float], List[float]]:
+        """Return lower and upper bounds for the requested parameter names.
+
+        Args:
+            names: Ordered list of parameter names to look up.
+
+        Returns:
+            A tuple ``(lows, highs)`` where each element is a list
+            aligned with *names*.
+
+        Raises:
+            KeyError: If a name is not present in ``_PARAM_BOUNDS``.
+        """
+        lows = [self._PARAM_BOUNDS[n][0] for n in names]
+        highs = [self._PARAM_BOUNDS[n][1] for n in names]
+        return lows, highs
+
+    def simulate_sync(
+        self,
+        inputs: Dict[str, Any],
+        params_override: Optional[Dict[str, float]] = None,
+    ) -> Dict[str, Any]:
+        """Synchronous simulation entry point.
+
+        Subclasses must override this method.  Any values in
+        *params_override* are merged into ``self._parameters``
+        temporarily before the simulation runs and restored afterwards.
+
+        Args:
+            inputs: Model input values.
+            params_override: Optional parameter overrides applied only
+                for this call.
+
+        Returns:
+            Simulation output dictionary.
+
+        Raises:
+            NotImplementedError: Always — subclasses must override.
+        """
+        raise NotImplementedError(
+            f"{type(self).__name__} does not implement simulate_sync"
+        )
+
+    def params_to_turtle(self, params: Dict[str, float]) -> str:
+        """Serialise *params* as Turtle ``wf:Parameter`` blank nodes.
+
+        Args:
+            params: Mapping of parameter name to numeric value.
+
+        Returns:
+            A Turtle-formatted string with one ``wf:Parameter`` blank
+            node per key-value pair, using the WaterFrame namespace.
+
+        Example::
+
+            @prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+            @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+            [] a wf:Parameter ;
+                wf:parameterName "mu_max" ;
+                rdf:value "6.0"^^xsd:float .
+        """
+        _WF = Namespace(WATERFRAME_BASE)
+        _RDF = RDF
+
+        g = Graph()
+        g.bind("wf", _WF)
+        g.bind("xsd", XSD)
+        g.bind("rdf", _RDF)
+
+        for name, value in params.items():
+            node = BNode()
+            g.add((node, _RDF.type, _WF.Parameter))
+            g.add((node, _WF.parameterName, Literal(name)))
+            g.add((node, _RDF.value, Literal(float(value), datatype=XSD.float)))
+
+        return g.serialize(format="turtle")
+
+    # ------------------------------------------------------------------
+    # Abstract interface
+    # ------------------------------------------------------------------
 
     @abstractmethod
     async def describe(self) -> Dict[str, Any]:
