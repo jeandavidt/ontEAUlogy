@@ -1,0 +1,310 @@
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix cap: <https://ugentbiomath.github.io/waterframe/capability#> .
+@prefix household: <https://w3id.org/waterframe/case/household/> .
+@prefix housecase1: <https://ugentbiomath.github.io/ontology/index.ttl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# =============================================================================
+# Household Case Study — Computational Agents
+# Three treatment unit models: MBR (8101), RO (8102), Infiltration (8103)
+# =============================================================================
+
+# ---------- MBR (Membrane Bioreactor) ----------
+
+household:MBR_Model a wf:SimulationModel ;
+    rdfs:label "Membrane Bioreactor Model" ;
+    rdfs:comment "QSDsan-backed MBR model for household greywater treatment" ;
+    wf:representsEntity housecase1:Membrane_bioreactor ;
+    wf:hasIdentifier "Membrane_bioreactor" ;
+    wf:implementedBy "qsdsan" ;
+    wf:apiEndpoint <http://localhost:8101> ;
+    wf:port 8101 .
+
+household:MBR_Software a wf:SoftwareSystem ;
+    rdfs:label "MBR Model Software" ;
+    wf:apiEndpoint <http://localhost:8101> ;
+    wf:apiVersion "1.0" .
+
+household:MBR_Agent a wf:SimulationAgent ;
+    rdfs:label "MBR Simulation Agent" ;
+    wf:implements household:MBR_Model ;
+    wf:simulates housecase1:Membrane_bioreactor ;
+    wf:runsOn household:MBR_Software ;
+    wf:hasCapability cap:SteadyStateSimulation, cap:MassBalance, cap:WaterQualityPrediction ;
+    wf:offersOperation household:MBR_SimulateOp ;
+    wf:agentVersion "1.0.0" .
+
+household:MBR_SimulateOp a wf:Operation ;
+    rdfs:label "Simulate MBR Greywater Treatment" ;
+    wf:requiresInput
+        household:MBR_InfluentFlow ,
+        household:MBR_InfluentCOD ,
+        household:MBR_InfluentBOD ,
+        household:MBR_InfluentTSS ,
+        household:MBR_InfluentNH4 ,
+        household:MBR_InfluentTP ;
+    wf:producesOutput
+        household:MBR_EffluentFlow ,
+        household:MBR_EffluentCOD ,
+        household:MBR_EffluentTSS ,
+        household:MBR_EnergyUse ,
+        household:MBR_SludgeProduction ,
+        household:MBR_RecoveryFraction ;
+    wf:hasHTTPGrounding [
+        a wf:HTTPGrounding ;
+        wf:httpMethod "POST" ;
+        wf:operationPath "/simulate" ;
+        wf:requestFormat "application/json" ;
+        wf:responseFormat "application/json" ;
+        wf:requiresAuthentication "false"^^xsd:boolean
+    ] ;
+    wf:estimatedExecutionTime "1.0"^^xsd:float ;
+    wf:computationalComplexity "O(1)" .
+
+# MBR Input Variables
+household:MBR_InfluentFlow a wf:ModelInput ;
+    wf:parameterName "influent_flow_m3d" ;
+    wf:hasUnit "m³/d" ;
+    wf:hasDataType "float" .
+
+household:MBR_InfluentCOD a wf:ModelInput ;
+    wf:parameterName "influent_cod_mg_l" ;
+    wf:hasUnit "mg/L" ;
+    wf:hasDataType "float" .
+
+household:MBR_InfluentBOD a wf:ModelInput ;
+    wf:parameterName "influent_bod_mg_l" ;
+    wf:hasUnit "mg/L" ;
+    wf:hasDataType "float" .
+
+household:MBR_InfluentTSS a wf:ModelInput ;
+    wf:parameterName "influent_tss_mg_l" ;
+    wf:hasUnit "mg/L" ;
+    wf:hasDataType "float" .
+
+household:MBR_InfluentNH4 a wf:ModelInput ;
+    wf:parameterName "influent_nh4_mg_l" ;
+    wf:hasUnit "mg/L" ;
+    wf:hasDataType "float" .
+
+household:MBR_InfluentTP a wf:ModelInput ;
+    wf:parameterName "influent_tp_mg_l" ;
+    wf:hasUnit "mg/L" ;
+    wf:hasDataType "float" .
+
+# MBR Output Variables
+household:MBR_EffluentFlow a wf:ModelOutput ;
+    wf:parameterName "effluent_flow_m3d" ;
+    wf:hasUnit "m³/d" ;
+    wf:hasDataType "float" .
+
+household:MBR_EffluentCOD a wf:ModelOutput ;
+    wf:parameterName "effluent_cod_mg_l" ;
+    wf:hasUnit "mg/L" ;
+    wf:hasDataType "float" .
+
+household:MBR_EffluentTSS a wf:ModelOutput ;
+    wf:parameterName "effluent_tss_mg_l" ;
+    wf:hasUnit "mg/L" ;
+    wf:hasDataType "float" .
+
+household:MBR_EnergyUse a wf:ModelOutput ;
+    wf:parameterName "energy_kwh_d" ;
+    wf:hasUnit "kWh/d" ;
+    wf:hasDataType "float" .
+
+household:MBR_SludgeProduction a wf:ModelOutput ;
+    wf:parameterName "sludge_kg_d" ;
+    wf:hasUnit "kg/d" ;
+    wf:hasDataType "float" .
+
+household:MBR_RecoveryFraction a wf:ModelOutput ;
+    wf:parameterName "recovery_fraction" ;
+    wf:hasUnit "-" ;
+    wf:hasDataType "float" .
+
+
+# ---------- RO (Reverse Osmosis) ----------
+
+household:RO_Model a wf:SimulationModel ;
+    rdfs:label "Reverse Osmosis Model" ;
+    rdfs:comment "RO model for household rainwater purification (recovery=0.75, rejection=0.99)" ;
+    wf:representsEntity housecase1:Reverse_osmosis ;
+    wf:hasIdentifier "Reverse_osmosis" ;
+    wf:implementedBy "qsdsan" ;
+    wf:apiEndpoint <http://localhost:8102> ;
+    wf:port 8102 .
+
+household:RO_Software a wf:SoftwareSystem ;
+    rdfs:label "RO Model Software" ;
+    wf:apiEndpoint <http://localhost:8102> ;
+    wf:apiVersion "1.0" .
+
+household:RO_Agent a wf:SimulationAgent ;
+    rdfs:label "RO Simulation Agent" ;
+    wf:implements household:RO_Model ;
+    wf:simulates housecase1:Reverse_osmosis ;
+    wf:runsOn household:RO_Software ;
+    wf:hasCapability cap:SteadyStateSimulation, cap:MassBalance, cap:WaterQualityPrediction ;
+    wf:offersOperation household:RO_SimulateOp ;
+    wf:agentVersion "1.0.0" .
+
+household:RO_SimulateOp a wf:Operation ;
+    rdfs:label "Simulate RO Rainwater Treatment" ;
+    wf:requiresInput
+        household:RO_FeedFlow ,
+        household:RO_FeedTDS ,
+        household:RO_FeedTurbidity ,
+        household:RO_FeedConductivity ;
+    wf:producesOutput
+        household:RO_PermeateFlow ,
+        household:RO_ConcentrateFlow ,
+        household:RO_PermeateTDS ,
+        household:RO_RecoveryFraction ,
+        household:RO_EnergyUse ;
+    wf:hasHTTPGrounding [
+        a wf:HTTPGrounding ;
+        wf:httpMethod "POST" ;
+        wf:operationPath "/simulate" ;
+        wf:requestFormat "application/json" ;
+        wf:responseFormat "application/json" ;
+        wf:requiresAuthentication "false"^^xsd:boolean
+    ] ;
+    wf:estimatedExecutionTime "1.0"^^xsd:float ;
+    wf:computationalComplexity "O(1)" .
+
+household:RO_FeedFlow a wf:ModelInput ;
+    wf:parameterName "feed_flow_m3d" ;
+    wf:hasUnit "m³/d" ;
+    wf:hasDataType "float" .
+
+household:RO_FeedTDS a wf:ModelInput ;
+    wf:parameterName "feed_tds_mg_l" ;
+    wf:hasUnit "mg/L" ;
+    wf:hasDataType "float" .
+
+household:RO_FeedTurbidity a wf:ModelInput ;
+    wf:parameterName "feed_turbidity_ntu" ;
+    wf:hasUnit "NTU" ;
+    wf:hasDataType "float" .
+
+household:RO_FeedConductivity a wf:ModelInput ;
+    wf:parameterName "feed_conductivity_us_cm" ;
+    wf:hasUnit "µS/cm" ;
+    wf:hasDataType "float" .
+
+household:RO_PermeateFlow a wf:ModelOutput ;
+    wf:parameterName "permeate_flow_m3d" ;
+    wf:hasUnit "m³/d" ;
+    wf:hasDataType "float" .
+
+household:RO_ConcentrateFlow a wf:ModelOutput ;
+    wf:parameterName "concentrate_flow_m3d" ;
+    wf:hasUnit "m³/d" ;
+    wf:hasDataType "float" .
+
+household:RO_PermeateTDS a wf:ModelOutput ;
+    wf:parameterName "permeate_tds_mg_l" ;
+    wf:hasUnit "mg/L" ;
+    wf:hasDataType "float" .
+
+household:RO_RecoveryFraction a wf:ModelOutput ;
+    wf:parameterName "recovery_fraction" ;
+    wf:hasUnit "-" ;
+    wf:hasDataType "float" .
+
+household:RO_EnergyUse a wf:ModelOutput ;
+    wf:parameterName "energy_kwh_d" ;
+    wf:hasUnit "kWh/d" ;
+    wf:hasDataType "float" .
+
+
+# ---------- Infiltration ----------
+
+household:Infiltration_Model a wf:SimulationModel ;
+    rdfs:label "Infiltration Unit Model" ;
+    rdfs:comment "First-order soil treatment model for blackwater/overflow infiltration (no native QSDsan unit)" ;
+    wf:representsEntity housecase1:Infiltration ;
+    wf:hasIdentifier "Infiltration" ;
+    wf:implementedBy "custom-first-order" ;
+    wf:apiEndpoint <http://localhost:8103> ;
+    wf:port 8103 .
+
+household:Infiltration_Software a wf:SoftwareSystem ;
+    rdfs:label "Infiltration Model Software" ;
+    wf:apiEndpoint <http://localhost:8103> ;
+    wf:apiVersion "1.0" .
+
+household:Infiltration_Agent a wf:SimulationAgent ;
+    rdfs:label "Infiltration Simulation Agent" ;
+    wf:implements household:Infiltration_Model ;
+    wf:simulates housecase1:Infiltration ;
+    wf:runsOn household:Infiltration_Software ;
+    wf:hasCapability cap:SteadyStateSimulation, cap:MassBalance ;
+    wf:offersOperation household:Infiltration_SimulateOp ;
+    wf:agentVersion "1.0.0" .
+
+household:Infiltration_SimulateOp a wf:Operation ;
+    rdfs:label "Simulate Infiltration Treatment" ;
+    wf:requiresInput
+        household:Infiltration_InfluentFlow ,
+        household:Infiltration_InfluentCOD ,
+        household:Infiltration_InfluentTSS ,
+        household:Infiltration_InfluentNH4 ;
+    wf:producesOutput
+        household:Infiltration_InfiltratedFlow ,
+        household:Infiltration_RemovedCODFraction ,
+        household:Infiltration_RemovedTSSFraction ,
+        household:Infiltration_RemovedNH4Fraction ;
+    wf:hasHTTPGrounding [
+        a wf:HTTPGrounding ;
+        wf:httpMethod "POST" ;
+        wf:operationPath "/simulate" ;
+        wf:requestFormat "application/json" ;
+        wf:responseFormat "application/json" ;
+        wf:requiresAuthentication "false"^^xsd:boolean
+    ] ;
+    wf:estimatedExecutionTime "0.5"^^xsd:float ;
+    wf:computationalComplexity "O(1)" .
+
+household:Infiltration_InfluentFlow a wf:ModelInput ;
+    wf:parameterName "influent_flow_m3d" ;
+    wf:hasUnit "m³/d" ;
+    wf:hasDataType "float" .
+
+household:Infiltration_InfluentCOD a wf:ModelInput ;
+    wf:parameterName "influent_cod_mg_l" ;
+    wf:hasUnit "mg/L" ;
+    wf:hasDataType "float" .
+
+household:Infiltration_InfluentTSS a wf:ModelInput ;
+    wf:parameterName "influent_tss_mg_l" ;
+    wf:hasUnit "mg/L" ;
+    wf:hasDataType "float" .
+
+household:Infiltration_InfluentNH4 a wf:ModelInput ;
+    wf:parameterName "influent_nh4_mg_l" ;
+    wf:hasUnit "mg/L" ;
+    wf:hasDataType "float" .
+
+household:Infiltration_InfiltratedFlow a wf:ModelOutput ;
+    wf:parameterName "infiltrated_flow_m3d" ;
+    wf:hasUnit "m³/d" ;
+    wf:hasDataType "float" .
+
+household:Infiltration_RemovedCODFraction a wf:ModelOutput ;
+    wf:parameterName "removed_cod_fraction" ;
+    wf:hasUnit "-" ;
+    wf:hasDataType "float" .
+
+household:Infiltration_RemovedTSSFraction a wf:ModelOutput ;
+    wf:parameterName "removed_tss_fraction" ;
+    wf:hasUnit "-" ;
+    wf:hasDataType "float" .
+
+household:Infiltration_RemovedNH4Fraction a wf:ModelOutput ;
+    wf:parameterName "removed_nh4_fraction" ;
+    wf:hasUnit "-" ;
+    wf:hasDataType "float" .
