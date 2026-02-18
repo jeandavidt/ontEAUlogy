@@ -191,3 +191,12 @@ housecase1:Reverse_osmosis wf:flowsTo housecase1:Potable_water_storage ;
 housecase1:Potable_water_storage wf:flowsTo housecase1:Kitchen_sink ;
     wf:hasFlowType wf:PotableWaterFlow ;
     wf:hasFlowDirection wf:ConditionalFlow .
+
+# ---------- Scenarios ----------
+housecase1:Baseline_Scenario a wf:BaselineScenario ;
+    rdfs:label "Household Case 1 — Baseline" ;
+    rdfs:comment "Default baseline scenario for household water management case study" ;
+    wf:scenarioComponent 
+        housecase1:Membrane_bioreactor ,
+        housecase1:Reverse_osmosis ,
+        housecase1:Infiltration .
