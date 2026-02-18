@@ -39,6 +39,13 @@ interface D3Link extends d3.SimulationLinkDatum<D3Node> {
     target: string | D3Node;
 }
 
+export type TopologyLayout = 'geographic' | 'linear';
+
+interface WaterTopologyProps {
+    layout?: TopologyLayout;
+    linearOrder?: string[];
+}
+
 // Custom edge styles for better visibility
 const EDGE_STYLE = {
     stroke: '#495057',
@@ -53,7 +60,10 @@ const EDGE_ANIMATED_STYLE = {
 };
 
 // Inner component that uses React Flow hooks
-const WaterTopologyInner: React.FC = () => {
+const WaterTopologyInner: React.FC<WaterTopologyProps> = ({ 
+    layout = 'geographic',
+    linearOrder = [] 
+}) => {
     const { data: entities, isLoading: loadingEntities } = useEntities();
     const { data: relationships, isLoading: loadingRels } = useRelationships();
 
@@ -95,69 +105,91 @@ const WaterTopologyInner: React.FC = () => {
         );
 
         // --- D3 Force Layout with collision detection and improved spacing ---
-        const d3Nodes = filteredEntities.map(e => ({
-            id: e.id,
-            x: 0,
-            y: 0,
-            // Group nodes by type for better clustering
-            group: e.id.includes('residential') ? 'residential' :
-                   e.id.includes('industry') ? 'industry' :
-                   e.id.includes('dwp') ? 'dwp' :
-                   e.id.includes('wwtp') ? 'wwtp' :
-                   e.id.includes('river') ? 'river' : 'other'
-        }));
-        const d3Links = filteredRels.map(r => ({ source: r.source, target: r.target }));
-
-        // Create the simulation with multiple forces
-        const simulation = d3.forceSimulation<D3Node>(d3Nodes)
-            // Link force with variable distance based on relationship
-            .force("link", d3.forceLink<D3Node, D3Link>(d3Links)
-                .id((d) => d.id)
-                .distance(() => 180)
-            )
-            // Charge force for repulsion (nodes push each other apart)
-            .force("charge", d3.forceManyBody().strength(-800))
-            // Center force to keep graph in view
-            .force("center", d3.forceCenter(400, 300))
-            // Collision detection to prevent overlapping
-            .force("collide", d3.forceCollide().radius(100).iterations(3))
-            // Force to spread out nodes horizontally based on groups
-            .force("x", d3.forceX<D3Node>((d) => {
-                const groupPositions: Record<string, number> = {
-                    residential: 100,
-                    industry: 250,
-                    dwp: 400,
-                    wwtp: 550,
-                    river: 700,
-                    other: 400
+        
+        let flowNodes: Node[];
+        
+        if (layout === 'linear' && linearOrder.length > 0) {
+            // Linear layout: arrange nodes in a horizontal line based on linearOrder
+            const nodeWidth = 200;
+            const startX = 100;
+            
+            flowNodes = filteredEntities.map((entity, index) => {
+                const orderIndex = linearOrder.indexOf(entity.id);
+                const x = orderIndex >= 0 ? startX + orderIndex * nodeWidth : startX + index * nodeWidth;
+                const y = 300;
+                return {
+                    id: entity.id,
+                    data: { label: entity.label },
+                    position: { x, y },
+                    style: {
+                        background: '#ffffff',
+                        border: '1px solid #adb5bd',
+                        borderRadius: '8px',
+                        padding: '10px',
+                        width: 160,
+                        fontSize: 12,
+                    },
                 };
-                return groupPositions[d.group] || 400;
-            }).strength(0.3))
-            .force("y", d3.forceY<D3Node>(300).strength(0.1))
-            .stop();
+            });
+        } else {
+            // Geographic/DAG layout: use D3 force simulation
+            const d3Nodes = filteredEntities.map(e => ({
+                id: e.id,
+                x: 0,
+                y: 0,
+                group: e.id.includes('residential') ? 'residential' :
+                       e.id.includes('industry') ? 'industry' :
+                       e.id.includes('dwp') ? 'dwp' :
+                       e.id.includes('wwtp') ? 'wwtp' :
+                       e.id.includes('river') ? 'river' : 'other'
+            }));
+            const d3Links = filteredRels.map(r => ({ source: r.source, target: r.target }));
 
-        // Run simulation for more ticks to get better positions
-        for (let i = 0; i < 200; ++i) simulation.tick();
+            // Create the simulation with multiple forces
+            const simulation = d3.forceSimulation<D3Node>(d3Nodes)
+                .force("link", d3.forceLink<D3Node, D3Link>(d3Links)
+                    .id((d) => d.id)
+                    .distance(() => 180)
+                )
+                .force("charge", d3.forceManyBody().strength(-800))
+                .force("center", d3.forceCenter(400, 300))
+                .force("collide", d3.forceCollide().radius(100).iterations(3))
+                .force("x", d3.forceX<D3Node>((d) => {
+                    const groupPositions: Record<string, number> = {
+                        residential: 100,
+                        industry: 250,
+                        dwp: 400,
+                        wwtp: 550,
+                        river: 700,
+                        other: 400
+                    };
+                    return groupPositions[d.group] || 400;
+                }).strength(0.3))
+                .force("y", d3.forceY<D3Node>(300).strength(0.1))
+                .stop();
 
-        const flowNodes: Node[] = filteredEntities.map((entity) => {
-            const d3Node = d3Nodes.find(n => n.id === entity.id);
-            const isAnchor = entity.id === topologyAnchorId;
-            return {
-                id: entity.id,
-                data: { label: entity.label },
-                position: { x: d3Node?.x || 0, y: d3Node?.y || 0 },
-                style: {
-                    background: isAnchor ? '#e7f5ff' : '#ffffff',
-                    border: isAnchor ? '2px solid #228be6' : '1px solid #adb5bd',
-                    borderRadius: '8px',
-                    padding: '10px',
-                    width: 160,
-                    fontSize: 12,
-                    fontWeight: isAnchor ? 600 : 400,
-                    boxShadow: isAnchor ? '0 0 0 2px rgba(34, 139, 230, 0.2)' : 'none',
-                },
-            };
-        });
+            for (let i = 0; i < 200; ++i) simulation.tick();
+
+            flowNodes = filteredEntities.map((entity) => {
+                const d3Node = d3Nodes.find(n => n.id === entity.id);
+                const isAnchor = entity.id === topologyAnchorId;
+                return {
+                    id: entity.id,
+                    data: { label: entity.label },
+                    position: { x: d3Node?.x || 0, y: d3Node?.y || 0 },
+                    style: {
+                        background: isAnchor ? '#e7f5ff' : '#ffffff',
+                        border: isAnchor ? '2px solid #228be6' : '1px solid #adb5bd',
+                        borderRadius: '8px',
+                        padding: '10px',
+                        width: 160,
+                        fontSize: 12,
+                        fontWeight: isAnchor ? 600 : 400,
+                        boxShadow: isAnchor ? '0 0 0 2px rgba(34, 139, 230, 0.2)' : 'none',
+                    },
+                };
+            });
+        }
 
         // Create edges with arrow markers for directionality
         const flowEdges: Edge[] = filteredRels.map((rel: Relationship) => {
@@ -293,12 +325,13 @@ const WaterTopologyInner: React.FC = () => {
 };
 
 // Wrapper component with ReactFlowProvider for proper context
-const WaterTopology: React.FC = () => {
+const WaterTopology: React.FC<WaterTopologyProps> = (props) => {
     return (
         <ReactFlowProvider>
-            <WaterTopologyInner />
+            <WaterTopologyInner {...props} />
         </ReactFlowProvider>
     );
 };
 
 export default WaterTopology;
+export type { WaterTopologyProps, TopologyLayout };
