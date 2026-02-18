@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Container, Tabs, Paper, Group, Stack, Box } from '@mantine/core';
-import { IconMap, IconHierarchy2 } from '@tabler/icons-react';
+import { IconMap, IconHierarchy2, IconTimeline } from '@tabler/icons-react';
 import WaterMap from '../components/map/WaterMap.tsx';
 import WaterTopology from '../components/topology/WaterTopology.tsx';
 import SimulationForm from '../components/simulation/SimulationForm.tsx';
 import SimulationCharts from '../components/results/SimulationCharts.tsx';
 import SPARQLSection from '../components/common/SPARQLSection.tsx';
 import SensorVisualizer from '../components/common/SensorVisualizer.tsx';
+import TimelinePage from './TimelinePage.tsx';
 import { useSelectionStore } from '../stores/useSelectionStore';
 import { useEntityState } from '../api/queries';
 
@@ -24,6 +25,9 @@ const Dashboard: React.FC = () => {
                     </Tabs.Tab>
                     <Tabs.Tab value="topology" leftSection={<IconHierarchy2 size={16} />}>
                         Logic View (DAG)
+                    </Tabs.Tab>
+                    <Tabs.Tab value="timeline" leftSection={<IconTimeline size={16} />}>
+                        Agent Timeline
                     </Tabs.Tab>
                 </Tabs.List>
 
@@ -50,6 +54,10 @@ const Dashboard: React.FC = () => {
                     <Paper withBorder shadow="sm" radius="md" h={600} style={{ position: 'relative' }}>
                         <WaterTopology />
                     </Paper>
+                </Tabs.Panel>
+
+                <Tabs.Panel value="timeline">
+                    <TimelinePage />
                 </Tabs.Panel>
             </Tabs>
 
