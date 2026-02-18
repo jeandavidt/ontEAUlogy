@@ -198,7 +198,7 @@ app.add_middleware(
 
 
 # Import and include routers
-from .routers import discovery, query, simulation, ontology, websocket, sensors
+from .routers import discovery, query, simulation, ontology, websocket, sensors, trace
 
 
 # Background task to generate and broadcast sensor data every second
@@ -310,6 +310,7 @@ app.include_router(simulation.router)
 app.include_router(ontology.router)
 app.include_router(websocket.router)
 app.include_router(sensors.router)
+app.include_router(trace.router)
 
 
 # Root redirect to docs
