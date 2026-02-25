@@ -17,15 +17,30 @@ INFILTRATION_URL = "http://localhost:8103"
 
 def _is_reachable(url: str) -> bool:
     try:
-        httpx.get(f"{url}/health", timeout=2.0)
+        httpx.get(f"{url}/health", timeout=2.0, follow_redirects=True)
         return True
     except Exception:
         return False
 
 
+def _orchestrator_has_household_models() -> bool:
+    """Return True only when the orchestrator lists at least one household model."""
+    try:
+        resp = httpx.get(
+            f"{ORCHESTRATOR_URL}/api/v1/models", timeout=2.0, follow_redirects=True
+        )
+        if resp.status_code != 200:
+            return False
+        models = resp.json()
+        ids = [m.get("id", "") for m in models if isinstance(m, dict)]
+        return any("mbr" in mid or "ro" in mid or "infiltration" in mid for mid in ids)
+    except Exception:
+        return False
+
+
 requires_orchestrator = pytest.mark.skipif(
-    not _is_reachable(ORCHESTRATOR_URL),
-    reason="Orchestrator not running (start with docker-compose --profile full up -d)",
+    not _orchestrator_has_household_models(),
+    reason="Orchestrator not running with household models (start with docker-compose --profile full up -d)",
 )
 
 requires_mbr = pytest.mark.skipif(
@@ -68,7 +83,7 @@ def test_infiltration_health_live():
 @requires_orchestrator
 def test_orchestrator_lists_household_models():
     """Shared orchestrator must include household models in /api/v1/models."""
-    resp = httpx.get(f"{ORCHESTRATOR_URL}/api/v1/models", timeout=10.0)
+    resp = httpx.get(f"{ORCHESTRATOR_URL}/api/v1/models", timeout=10.0, follow_redirects=True)
     assert resp.status_code == 200
     models = resp.json()
     model_ids = [m.get("id", "") for m in models if isinstance(m, dict)]

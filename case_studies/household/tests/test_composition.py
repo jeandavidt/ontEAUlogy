@@ -111,9 +111,10 @@ class TestCascadeComposition:
     basic validation. Full integration tests require running services.
     """
 
-    @pytest.mark.asyncio
-    async def test_cascade_mismatched_lengths_raises(self):
+    def test_cascade_mismatched_lengths_raises(self):
         """Cascade raises error if iris and endpoints lengths mismatch."""
+        import asyncio
+
         request = CompositionRequest(
             unit_iri="https://example.com/test-train",
             sub_unit_iris=["unit1", "unit2"],
@@ -126,7 +127,7 @@ class TestCascadeComposition:
         from household_water.composition.cascade import cascade_simulate
 
         with pytest.raises(ValueError, match="must have same length"):
-            await cascade_simulate(request)
+            asyncio.run(cascade_simulate(request))
 
 
 class TestAssemblyComposition:
