@@ -17,10 +17,9 @@ wf:WaterSystemComponent rdfs:subClassOf bfo:BFO_0000040 ;
     rdfs:label "Water system component" ;
     rdfs:comment "Any physical object that is part of a water system" .
 
-# Storage tanks
-wf:StorageTank rdfs:subClassOf wf:WaterSystemComponent ;
-    rdfs:label "Storage tank" ;
-    rdfs:comment "Vessel for storing water of various types" .
+# Storage tanks (specialized by water type)
+# NOTE: StorageTank base class defined in FACILITIES section
+# These are specific types of storage tanks based on water type stored
 
 wf:RainwaterStorageTank rdfs:subClassOf wf:StorageTank ;
     rdfs:label "Rainwater storage tank" ;
@@ -45,11 +44,11 @@ wf:TreatmentUnit rdfs:subClassOf wf:WaterSystemComponent ;
 
 wf:MembraneBioreactorUnit rdfs:subClassOf wf:TreatmentUnit ;
     rdfs:label "Membrane bioreactor unit" ;
-    rdfs:comment "Physical MBR system for biological treatment and membrane filtration" .
+    rdfs:comment "Physical MBR system for biological treatment and membrane filtration. Conceptually related to WaWO+ MembraneFiltration process (unpublished ontology)." .
 
 wf:ReverseOsmosisUnit rdfs:subClassOf wf:TreatmentUnit ;
     rdfs:label "Reverse osmosis unit" ;
-    rdfs:comment "Physical RO system for advanced water purification" .
+    rdfs:comment "Physical RO system for advanced water purification. Conceptually related to WaWO+ ReverseOsmosis process (unpublished ontology)." .
 
 wf:InfiltrationUnit rdfs:subClassOf wf:TreatmentUnit ;
     rdfs:label "Infiltration unit" ;
@@ -58,23 +57,74 @@ wf:InfiltrationUnit rdfs:subClassOf wf:TreatmentUnit ;
 # Water usage points (fixtures and appliances)
 wf:WaterUsagePoint rdfs:subClassOf wf:WaterSystemComponent ;
     rdfs:label "Water usage point" ;
-    rdfs:comment "Physical fixture or appliance where water is used" .
+    rdfs:comment """Physical fixture where water is consumed for END-USE purposes that extend beyond
+system operation. Distinguished from infrastructure by purpose: a sink enables washing (end use),
+while a pipe only enables flow (system function). Includes fixtures for human needs, production
+processes, agriculture, but excludes pumps, valves, and conveyance elements.""" .
 
-wf:BathingFixture rdfs:subClassOf wf:WaterUsagePoint ;
+# Human welfare uses
+wf:HumanWelfareUsagePoint rdfs:subClassOf wf:WaterUsagePoint ;
+    rdfs:label "Human welfare usage point" ;
+    rdfs:comment "Fixtures serving human health, hygiene, and basic needs." .
+
+wf:BathingFixture rdfs:subClassOf wf:HumanWelfareUsagePoint ;
     rdfs:label "Bathing fixture" ;
-    rdfs:comment "Fixtures for bathing and showering" .
+    rdfs:comment "Fixtures for bathing and showering (showers, tubs)." .
 
-wf:CleaningFixture rdfs:subClassOf wf:WaterUsagePoint ;
+wf:CleaningFixture rdfs:subClassOf wf:HumanWelfareUsagePoint ;
     rdfs:label "Cleaning fixture" ;
-    rdfs:comment "Fixtures for cleaning activities" .
+    rdfs:comment "Fixtures for washing and cleaning (sinks, faucets)." .
 
+wf:Toilet rdfs:subClassOf wf:HumanWelfareUsagePoint ;
+    rdfs:label "Toilet" ;
+    rdfs:comment "Sanitary fixture for human waste disposal." .
+
+wf:DrinkingWaterPoint rdfs:subClassOf wf:HumanWelfareUsagePoint ;
+    rdfs:label "Drinking water point" ;
+    rdfs:comment "Fixture for potable water consumption (drinking fountains, taps)." .
+
+# Appliances
 wf:Appliance rdfs:subClassOf wf:WaterUsagePoint ;
     rdfs:label "Water-using appliance" ;
-    rdfs:comment "Household appliances that use water" .
+    rdfs:comment "Household or commercial appliances that consume water." .
 
-wf:Toilet rdfs:subClassOf wf:WaterUsagePoint ;
-    rdfs:label "Toilet" ;
-    rdfs:comment "Sanitary fixture for human waste disposal" .
+wf:LaundryAppliance rdfs:subClassOf wf:Appliance ;
+    rdfs:label "Laundry appliance" ;
+    rdfs:comment "Washing machines for clothing and linens." .
+
+wf:DishwashingAppliance rdfs:subClassOf wf:Appliance ;
+    rdfs:label "Dishwashing appliance" ;
+    rdfs:comment "Dishwashers for cleaning dishes and utensils." .
+
+# Industrial uses
+wf:IndustrialUsagePoint rdfs:subClassOf wf:WaterUsagePoint ;
+    rdfs:label "Industrial usage point" ;
+    rdfs:comment "Points where water is consumed in industrial processes." .
+
+wf:ProcessWaterPoint rdfs:subClassOf wf:IndustrialUsagePoint ;
+    rdfs:label "Process water point" ;
+    rdfs:comment "Water incorporated into products (e.g., brewing, food processing)." .
+
+wf:CoolingWaterPoint rdfs:subClassOf wf:IndustrialUsagePoint ;
+    rdfs:label "Cooling water point" ;
+    rdfs:comment "Water used for cooling (not incorporated into product)." .
+
+wf:BoilerFeedPoint rdfs:subClassOf wf:IndustrialUsagePoint ;
+    rdfs:label "Boiler feed point" ;
+    rdfs:comment "Water input to boilers for steam generation." .
+
+# Agricultural uses
+wf:AgriculturalUsagePoint rdfs:subClassOf wf:WaterUsagePoint ;
+    rdfs:label "Agricultural usage point" ;
+    rdfs:comment "Points where water is used in agricultural operations." .
+
+wf:IrrigationPoint rdfs:subClassOf wf:AgriculturalUsagePoint ;
+    rdfs:label "Irrigation point" ;
+    rdfs:comment "Water delivery for crop irrigation." .
+
+wf:LivestockWateringPoint rdfs:subClassOf wf:AgriculturalUsagePoint ;
+    rdfs:label "Livestock watering point" ;
+    rdfs:comment "Water delivery for animal consumption." .
 
 # Water sources (collection infrastructure)
 wf:WaterSource rdfs:subClassOf wf:WaterSystemComponent ;
@@ -90,10 +140,84 @@ wf:Household rdfs:subClassOf bfo:BFO_0000040 ;
     rdfs:label "Household" ;
     rdfs:comment "A dwelling or building containing water system components" .
 
-# Conveyance (implicit pipes made explicit)
+# ========== CONVEYANCE SYSTEMS ==========
+# Section 5: Comprehensive conveyance hierarchy for sewer modeling
+# Supports pipes, CSOs, splitters, junctions, and pumping infrastructure
+
 wf:Conveyance rdfs:subClassOf wf:WaterSystemComponent ;
-    rdfs:label "Conveyance system" ;
-    rdfs:comment "Physical infrastructure for water transport between components" .
+    rdfs:label "Conveyance system component" ;
+    rdfs:comment "Physical infrastructure for water transport between system components. Includes pipes, channels, overflow structures, and flow control elements." .
+
+# === PIPES AND CONDUITS ===
+wf:Pipe rdfs:subClassOf wf:Conveyance ;
+    rdfs:label "Pipe" ;
+    rdfs:comment "Enclosed conduit for water transport." .
+
+wf:PressurizedPipe rdfs:subClassOf wf:Pipe ;
+    rdfs:label "Pressurized pipe" ;
+    rdfs:comment "Pipe operating under positive pressure (e.g., water mains)." .
+
+wf:GravityPipe rdfs:subClassOf wf:Pipe ;
+    rdfs:label "Gravity pipe" ;
+    rdfs:comment "Pipe where water flows by gravity (negative pressure or atmospheric)." .
+
+wf:SewerPipe rdfs:subClassOf wf:GravityPipe ;
+    rdfs:label "Sewer pipe" ;
+    rdfs:comment "Underground pipe for wastewater or stormwater collection." .
+
+wf:CombinedSewer rdfs:subClassOf wf:SewerPipe ;
+    rdfs:label "Combined sewer" ;
+    rdfs:comment "Sewer carrying both sanitary wastewater and stormwater in the same pipe." .
+
+wf:SanitarySewer rdfs:subClassOf wf:SewerPipe ;
+    rdfs:label "Sanitary sewer" ;
+    rdfs:comment "Sewer carrying only domestic and industrial wastewater (no stormwater)." .
+
+wf:StormSewer rdfs:subClassOf wf:SewerPipe ;
+    rdfs:label "Storm sewer" ;
+    rdfs:comment "Sewer carrying only stormwater runoff." .
+
+wf:Canal rdfs:subClassOf wf:Conveyance ;
+    rdfs:label "Canal" ;
+    rdfs:comment "Open channel for water transport." .
+
+# === FLOW DIVIDERS ===
+wf:FlowDivider rdfs:subClassOf wf:Conveyance ;
+    rdfs:label "Flow divider" ;
+    rdfs:comment "Structure that splits one inflow into multiple outflows." .
+
+wf:Splitter rdfs:subClassOf wf:FlowDivider ;
+    rdfs:label "Splitter" ;
+    rdfs:comment "Controlled flow division with specified split ratios." .
+
+wf:OverflowStructure rdfs:subClassOf wf:FlowDivider ;
+    rdfs:label "Overflow structure" ;
+    rdfs:comment "Structure that diverts excess flow when capacity threshold is exceeded." .
+
+wf:CombinedSewerOverflow rdfs:subClassOf wf:OverflowStructure ;
+    rdfs:label "Combined sewer overflow (CSO)" ;
+    rdfs:comment "Overflow structure in combined sewer systems that discharges excess flow (mixed wastewater and stormwater) to receiving waters during wet weather events." .
+
+wf:StormwaterOutfall rdfs:subClassOf wf:OverflowStructure ;
+    rdfs:label "Stormwater outfall" ;
+    rdfs:comment "Structure for controlled stormwater discharge to receiving waters." .
+
+wf:EmergencyOverflow rdfs:subClassOf wf:OverflowStructure ;
+    rdfs:label "Emergency overflow" ;
+    rdfs:comment "Safety overflow activated during extreme events or system failures." .
+
+# === FLOW MERGERS ===
+wf:FlowMerger rdfs:subClassOf wf:Conveyance ;
+    rdfs:label "Flow merger" ;
+    rdfs:comment "Structure that combines multiple inflows into one outflow." .
+
+wf:Junction rdfs:subClassOf wf:FlowMerger ;
+    rdfs:label "Junction" ;
+    rdfs:comment "Meeting point of multiple pipes or channels (e.g., manhole, confluence)." .
+
+# === PUMPING ===
+# NOTE: PumpStation and LiftStation are now defined as Facilities (see FACILITIES section)
+# Pumps are infrastructure for moving water, functioning as both conveyance and facility
 
 # ========== PORTS (Connection Points) ==========
 # Following OntoCAPE pattern: ports are physical interfaces for material flow
@@ -101,85 +225,197 @@ wf:Conveyance rdfs:subClassOf wf:WaterSystemComponent ;
 wf:Port a owl:Class ;
     rdfs:subClassOf bfo:BFO_0000040 ;
     rdfs:label "Connection port" ;
-    rdfs:comment "Physical interface point on a water system component through which material flow occurs. Based on OntoCAPE terminal/port concept (Marquardt et al. 2010)." .
+    rdfs:comment "Physical interface point on a water system component through which material flow occurs. Based on OntoCAPE terminal/port concept (Marquardt et al. 2010)." ;
+    rdfs:seeAlso <http://www.theworldavatar.com/ontology/ontocape/chemical_process_system/CPS_realization/plant.owl#Terminal> ;
+    rdfs:comment "Inspired by OntoCAPE Terminal concept for process system realization (Marquardt et al. 2010)" .
 
 wf:InputPort a owl:Class ;
     rdfs:subClassOf wf:Port ;
     rdfs:label "Input port" ;
-    rdfs:comment "Port through which material enters a component" .
+    rdfs:comment "Port through which material enters a component" ;
+    rdfs:seeAlso <http://www.theworldavatar.com/ontology/ontocape/chemical_process_system/CPS_realization/plant.owl#Terminal> .
 
 wf:OutputPort a owl:Class ;
     rdfs:subClassOf wf:Port ;
     rdfs:label "Output port" ;
-    rdfs:comment "Port through which material exits a component" .
+    rdfs:comment "Port through which material exits a component" ;
+    rdfs:seeAlso <http://www.theworldavatar.com/ontology/ontocape/chemical_process_system/CPS_realization/plant.owl#Terminal> .
 
-# ========== WATER TREATMENT FACILITIES ==========
-# Section 4.3: Extensions for process models and facilities
+# ========== FACILITIES ==========
+# Section 8: Facility hierarchy for urban water infrastructure
 
-wf:DrinkingWaterPlant rdfs:subClassOf bfo:BFO_0000040 ;
+# Root facility class
+wf:Facility rdfs:subClassOf bfo:BFO_0000040 ;
+    rdfs:label "Facility" ;
+    rdfs:comment "Built infrastructure entity for water system operations, including treatment, storage, pumping, and monitoring." .
+
+# === TREATMENT FACILITIES ===
+wf:WaterTreatmentFacility rdfs:subClassOf wf:Facility ;
+    rdfs:label "Water treatment facility" ;
+    rdfs:comment "Facility dedicated to water or wastewater treatment operations." .
+
+wf:DrinkingWaterPlant rdfs:subClassOf wf:WaterTreatmentFacility ;
     rdfs:label "Drinking water plant" ;
-    rdfs:comment "A facility that treats source water to produce potable water." .
+    rdfs:comment "Facility that treats source water to produce potable water." .
 
-wf:WastewaterTreatmentPlant rdfs:subClassOf bfo:BFO_0000040 ;
+wf:WastewaterTreatmentPlant rdfs:subClassOf wf:WaterTreatmentFacility ;
     rdfs:label "Wastewater treatment plant" ;
-    rdfs:comment "A facility that treats wastewater to produce effluent meeting discharge standards." .
+    rdfs:comment "Facility that treats wastewater to produce effluent meeting discharge standards." .
 
-# WWTP process units (adapted from OntoCAPE process_units/)
-wf:WWTPTreatmentProcess rdfs:subClassOf wf:WaterSystemComponent ;
-    rdfs:label "WWTP treatment process" ;
-    rdfs:comment "A treatment process within a wastewater treatment plant." .
+# === STORAGE FACILITIES ===
+wf:StorageFacility a owl:Class ;
+    rdfs:subClassOf wf:Facility ;
+    rdfs:label "Storage facility" ;
+    rdfs:comment "Facility designed for water storage, including tanks, reservoirs, and balancing storage." .
 
-wf:PrimaryTreatment rdfs:subClassOf wf:WWTPTreatmentProcess ;
-    rdfs:label "Primary treatment" ;
-    rdfs:comment "Physical treatment process for removing settleable solids." .
+wf:StorageTank a owl:Class ;
+    rdfs:subClassOf wf:StorageFacility ;
+    rdfs:label "Storage tank" ;
+    rdfs:comment "Enclosed tank for storing treated water in distribution systems." .
 
-wf:SecondaryTreatment rdfs:subClassOf wf:WWTPTreatmentProcess ;
-    rdfs:label "Secondary treatment" ;
-    rdfs:comment "Biological treatment process for removing organic matter." .
+wf:Reservoir a owl:Class ;
+    rdfs:subClassOf wf:StorageFacility ;
+    rdfs:label "Reservoir" ;
+    rdfs:comment "Large water storage basin, may be open or covered." .
 
-wf:TertiaryTreatment rdfs:subClassOf wf:WWTPTreatmentProcess ;
-    rdfs:label "Tertiary treatment" ;
-    rdfs:comment "Advanced treatment process for nutrient removal and polishing." .
+wf:BalancingReservoir a owl:Class ;
+    rdfs:subClassOf wf:Reservoir ;
+    rdfs:label "Balancing reservoir" ;
+    rdfs:comment "Reservoir for balancing supply and demand fluctuations in distribution systems." .
 
-wf:Screening rdfs:subClassOf wf:PrimaryTreatment ;
-    rdfs:label "Screening" ;
-    rdfs:comment "Removal of large solids through screens." .
+wf:ServiceReservoir a owl:Class ;
+    rdfs:subClassOf wf:Reservoir ;
+    rdfs:label "Service reservoir" ;
+    rdfs:comment "Reservoir providing gravity-fed water supply to a distribution zone." .
 
-wf:GritRemoval rdfs:subClassOf wf:PrimaryTreatment ;
-    rdfs:label "Grit removal" ;
-    rdfs:comment "Removal of heavy inorganic solids." .
+# === PUMPING FACILITIES ===
+wf:PumpingFacility a owl:Class ;
+    rdfs:subClassOf wf:Facility ;
+    rdfs:label "Pumping facility" ;
+    rdfs:comment "Facility housing pumps for water conveyance or pressure boosting." .
 
-wf:PrimarySettler rdfs:subClassOf wf:PrimaryTreatment ;
-    rdfs:label "Primary settler" ;
-    rdfs:comment "Settling tank for primary sludge removal." .
+wf:PumpStation a owl:Class ;
+    rdfs:subClassOf wf:PumpingFacility ;
+    rdfs:label "Pump station" ;
+    rdfs:comment "Facility with pumps for moving water through distribution systems or into storage." .
 
-wf:AerationTank rdfs:subClassOf wf:SecondaryTreatment ;
-    rdfs:label "Aeration tank" ;
-    rdfs:comment "Tank where biological oxidation of organic matter occurs." .
+wf:LiftStation a owl:Class ;
+    rdfs:subClassOf wf:PumpingFacility ;
+    rdfs:label "Lift station" ;
+    rdfs:comment "Pumping station in sewer systems for lifting wastewater to higher elevations." .
 
-wf:SecondarySettler rdfs:subClassOf wf:SecondaryTreatment ;
-    rdfs:label "Secondary settler" ;
-    rdfs:comment "Settling tank for biological sludge separation." .
+# === MONITORING FACILITIES ===
+wf:MonitoringFacility a owl:Class ;
+    rdfs:subClassOf wf:Facility ;
+    rdfs:label "Monitoring facility" ;
+    rdfs:comment "Facility for water quality monitoring, flow measurement, or system observation." .
 
-wf:MembraneBioreactor rdfs:subClassOf wf:SecondaryTreatment ;
-    rdfs:label "Membrane bioreactor" ;
-    rdfs:comment "Combined biological treatment and membrane filtration." .
+wf:SamplingPoint a owl:Class ;
+    rdfs:subClassOf wf:MonitoringFacility ;
+    rdfs:label "Sampling point" ;
+    rdfs:comment "Designated location for water quality sample collection and testing." .
 
-wf:NitrificationTank rdfs:subClassOf wf:TertiaryTreatment ;
-    rdfs:label "Nitrification tank" ;
-    rdfs:comment "Tank for biological ammonia oxidation." .
+# ==============================================================================
+# WWTP Physical Treatment Units (BFO:0000040 - Material Entities)
+# ==============================================================================
+# NOTE: These are PHYSICAL INFRASTRUCTURE (material entities/continuants).
+# For the PROCESSES that occur in these units, see modules/core/processes.ttl
+# The wf:performsProcess property links these physical units to their processes.
 
-wf:DenitrificationTank rdfs:subClassOf wf:TertiaryTreatment ;
-    rdfs:label "Denitrification tank" ;
-    rdfs:comment "Tank for biological nitrate reduction." .
+# Screening Infrastructure
+wf:ScreeningUnit rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Screening unit"@en ;
+    rdfs:comment "Physical equipment with screens or bars for removing large debris from water. A material entity (BFO:0000040) that enables the screening process. Conceptually related to WaWO+ Screening process (unpublished ontology)."@en .
 
-wf:PhosphorusRemovalTank rdfs:subClassOf wf:TertiaryTreatment ;
-    rdfs:label "Phosphorus removal tank" ;
-    rdfs:comment "Tank for biological or chemical phosphorus removal." .
+# Alternative name for backward compatibility with case studies
+wf:Screening rdfs:subClassOf wf:ScreeningUnit ;
+    rdfs:label "Screening"@en ;
+    rdfs:comment "Synonym for ScreeningUnit. Physical equipment for large solids removal. Conceptually related to WaWO+ Screening process (unpublished ontology)."@en .
 
-wf:DisinfectionUnit rdfs:subClassOf wf:TertiaryTreatment ;
-    rdfs:label "Disinfection unit" ;
-    rdfs:comment "Unit for pathogen inactivation (UV, chlorination, etc.)." .
+# Grit Removal Infrastructure
+wf:GritChamber rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Grit chamber"@en ;
+    rdfs:comment "Physical chamber designed for settling heavy inorganic solids (sand, grit). A material entity (BFO:0000040) that enables the grit removal process. Conceptually related to WaWO+ GritRemoval process (unpublished ontology)."@en .
+
+# Alternative name for backward compatibility
+wf:GritRemoval rdfs:subClassOf wf:GritChamber ;
+    rdfs:label "Grit removal"@en ;
+    rdfs:comment "Synonym for GritChamber. Physical chamber for heavy solids removal. Conceptually related to WaWO+ GritRemoval process (unpublished ontology)."@en .
+
+# Primary Clarification Infrastructure
+wf:PrimaryClarifier rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Primary clarifier"@en ;
+    rdfs:comment "Physical settling tank for gravity separation of primary sludge. A material entity (BFO:0000040) that enables the primary clarification process. Conceptually related to WaWO+ PrimaryClarification process (unpublished ontology)."@en .
+
+# Alternative name for backward compatibility
+wf:PrimarySettler rdfs:subClassOf wf:PrimaryClarifier ;
+    rdfs:label "Primary settler"@en ;
+    rdfs:comment "Synonym for PrimaryClarifier. Physical settling tank for primary sludge removal. Conceptually related to WaWO+ PrimaryClarification process (unpublished ontology)."@en .
+
+# Biological Treatment Infrastructure
+wf:AerationBasin rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Aeration basin"@en ;
+    rdfs:comment "Physical tank where aerobic biological treatment occurs. A material entity (BFO:0000040) that enables biological oxidation processes. Conceptually related to WaWO+ BiologicalOxidation process (unpublished ontology)."@en .
+
+# Alternative name for backward compatibility
+wf:AerationTank rdfs:subClassOf wf:AerationBasin ;
+    rdfs:label "Aeration tank"@en ;
+    rdfs:comment "Synonym for AerationBasin. Physical tank for biological oxidation. Conceptually related to WaWO+ BiologicalOxidation process (unpublished ontology)."@en .
+
+# Secondary Clarification Infrastructure
+wf:SecondaryClarifier rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Secondary clarifier"@en ;
+    rdfs:comment "Physical settling tank for separating biomass from treated water. A material entity (BFO:0000040) that enables the secondary clarification process. Conceptually related to WaWO+ Clarification process (unpublished ontology)."@en .
+
+# Alternative name for backward compatibility
+wf:SecondarySettler rdfs:subClassOf wf:SecondaryClarifier ;
+    rdfs:label "Secondary settler"@en ;
+    rdfs:comment "Synonym for SecondaryClarifier. Physical settling tank for biomass separation. Conceptually related to WaWO+ Clarification process (unpublished ontology)."@en .
+
+# Membrane Filtration Infrastructure
+wf:MembraneFilterUnit rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Membrane filter unit"@en ;
+    rdfs:comment "Physical filtration system using semi-permeable membranes. A material entity (BFO:0000040) that enables membrane filtration processes. Conceptually related to WaWO+ MembraneFiltration process (unpublished ontology)."@en .
+
+# Combined biological + membrane unit
+wf:MembraneBioreactor rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Membrane bioreactor"@en ;
+    rdfs:comment "Physical unit combining biological treatment with integrated membrane filtration. A material entity (BFO:0000040) that enables both biological oxidation and membrane filtration processes. Conceptually related to WaWO+ MembraneFiltration process (unpublished ontology)."@en .
+
+# Nitrification Infrastructure
+wf:NitrificationReactor rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Nitrification reactor"@en ;
+    rdfs:comment "Physical tank designed for aerobic nitrification process. A material entity (BFO:0000040) that enables ammonia oxidation to nitrate. Conceptually related to WaWO+ Nitrification process (unpublished ontology)."@en .
+
+# Alternative name for backward compatibility
+wf:NitrificationTank rdfs:subClassOf wf:NitrificationReactor ;
+    rdfs:label "Nitrification tank"@en ;
+    rdfs:comment "Synonym for NitrificationReactor. Physical tank for ammonia oxidation. Conceptually related to WaWO+ Nitrification process (unpublished ontology)."@en .
+
+# Denitrification Infrastructure
+wf:DenitrificationReactor rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Denitrification reactor"@en ;
+    rdfs:comment "Physical tank designed for anoxic denitrification process. A material entity (BFO:0000040) that enables nitrate reduction to nitrogen gas. Conceptually related to WaWO+ Denitrification process (unpublished ontology)."@en .
+
+# Alternative name for backward compatibility
+wf:DenitrificationTank rdfs:subClassOf wf:DenitrificationReactor ;
+    rdfs:label "Denitrification tank"@en ;
+    rdfs:comment "Synonym for DenitrificationReactor. Physical tank for nitrate reduction. Conceptually related to WaWO+ Denitrification process (unpublished ontology)."@en .
+
+# Phosphorus Removal Infrastructure
+wf:PhosphorusRemovalTank rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Phosphorus removal tank"@en ;
+    rdfs:comment "Physical tank for biological or chemical phosphorus removal. A material entity (BFO:0000040) that enables phosphorus removal processes. Conceptually related to WaWO+ PhosphorusRemoval process (unpublished ontology)."@en .
+
+# Disinfection Infrastructure
+wf:DisinfectionChamber rdfs:subClassOf wf:TreatmentUnit ;
+    rdfs:label "Disinfection chamber"@en ;
+    rdfs:comment "Physical chamber where disinfection occurs (UV, chlorination, ozonation, etc.). A material entity (BFO:0000040) that enables disinfection processes. Conceptually related to WaWO+ Disinfection process (unpublished ontology)."@en .
+
+# Alternative name for backward compatibility
+wf:DisinfectionUnit rdfs:subClassOf wf:DisinfectionChamber ;
+    rdfs:label "Disinfection unit"@en ;
+    rdfs:comment "Synonym for DisinfectionChamber. Physical unit for pathogen inactivation. Conceptually related to WaWO+ Disinfection process (unpublished ontology)."@en .
 
 # ========== INDUSTRIAL FACILITIES ==========
 # Section 4.3: Industrial facility types

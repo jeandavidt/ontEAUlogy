@@ -95,6 +95,11 @@ housecase1:house a wf:Household ;
         housecase1:Cleaning .
 
 # ---------- Flow Connections ----------
+# Rainwater collection to storage
+housecase1:Rainwater wf:flowsTo housecase1:Rainwater_storage ;
+    wf:hasFlowType wf:RainwaterFlow ;
+    wf:hasFlowDirection wf:UnidirectionalFlow .
+
 # Greywater flows to MBR
 housecase1:Bath_and_Shower wf:flowsTo housecase1:Membrane_bioreactor ;
     wf:hasFlowType wf:GreywaterFlow ;

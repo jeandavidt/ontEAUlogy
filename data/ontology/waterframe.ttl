@@ -16,15 +16,16 @@
 
     # Import core modules (currently available)
     owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/material_entities> ;
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/processes> ;
     owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/properties> ;
 
-    # Information module - Model metadata (CQ18-20)
+    # Information module - Model metadata 
     owl:imports <https://ugentbiomath.github.io/waterframe/modules/information> ;
 
     # Capabilities module - Simulation capabilities
     owl:imports <https://ugentbiomath.github.io/waterframe/modules/capabilities> ;
 
-    # Qualities module - Water quality parameters (CQ15-17)
+    # Qualities module - Water quality parameters 
     owl:imports <https://ugentbiomath.github.io/waterframe/modules/qualities> ;
 
     # Sampling module - Sample metadata for regulatory compliance
@@ -33,11 +34,17 @@
     # Compliance module - Compliance checking and violation tracking
     owl:imports <https://ugentbiomath.github.io/waterframe/modules/compliance> ;
 
-    # Agents module - Computational agents and operations (CQ-AG1 to CQ-AG5)
+    # Agents module - Computational agents and operations 
     owl:imports <https://ugentbiomath.github.io/waterframe/modules/agents> ;
 
+    # Scenarios module - Scenario modeling with OWL-Time integration
+    owl:imports <https://ugentbiomath.github.io/waterframe/modules/scenarios> ;
+
+    # External ontology imports
+    owl:imports <http://www.w3.org/2006/time#> ;  # OWL-Time for temporal representation
+    owl:imports <http://www.w3.org/ns/prov#> ;  # PROV-O for provenance tracking
+
     # Future module imports (placeholder for when modules are created)
-    # owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/processes> ;
     # owl:imports <https://ugentbiomath.github.io/waterframe/modules/core/roles> ;
 
     # Bridge module imports
@@ -47,16 +54,8 @@
     # owl:imports <https://ugentbiomath.github.io/waterframe/bridges/qudt_alignment> .
 
     # Module organization annotations
-    rdfs:comment "Core modules available: material_entities, properties" ;
-    rdfs:comment "Information modules: information, capabilities, qualities, agents" ;
+    rdfs:comment "Core modules available: material_entities, processes, properties" ;
+    rdfs:comment "Information modules: information, capabilities, qualities, agents, scenarios" ;
     rdfs:comment "Regulatory modules: sampling, compliance" ;
-    rdfs:comment "Bridge modules: SOSA (observations), ENVO (environmental context), PROV-O (provenance), QUDT (units)" ;
-
-    # Competency question scope
-    rdfs:comment "Currently answers CQ1-5 (system topology, flow connections)" ;
-    rdfs:comment "Answers CQ10-11 (water quality parameters, regulatory limits)" ;
-    rdfs:comment "Answers CQ15-20 (water quality, model metadata, decision variables)" ;
-    rdfs:comment "Answers CQ-AG1 to CQ-AG5 (agent discovery, capability-based search, compositional reasoning, workflow sequencing, HTTP invocation)" ;
-    rdfs:comment "New: Supports regulatory compliance checking across any jurisdiction (EU, USEPA, WHO, etc.)" ;
-    rdfs:comment "New: Enables computational agent composition and service discovery" ;
-    rdfs:comment "Target: Answer all competency questions across system topology, treatment, water quality, model metadata, optimization, and agent composition domains" .
+    rdfs:comment "Bridge modules: SOSA (observations), ENVO (environmental context), QUDT (units)" ;
+    rdfs:comment "External ontology imports: OWL-Time (temporal representation), PROV-O (provenance tracking)". 

@@ -6,6 +6,9 @@
 @prefix wf: <https://ugentbiomath.github.io/waterframe#> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix gn: <http://www.geonames.org/ontology#> .
+@prefix ex: <https://ugentbiomath.github.io/waterframe/examples#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
 
 <https://ugentbiomath.github.io/waterframe/modules/qualities>
     a owl:Ontology ;
@@ -309,17 +312,27 @@ wf:GroundwaterRechargeWater a owl:Class ;
 
 # ========== OBSERVED VALUE ==========
 # Following Entity_Feature_Value pattern: observation -> parameter -> value
+# PROV-O Integration: Observations are prov:Entity for provenance tracking
 
 wf:WaterQualityObservation a owl:Class ;
     rdfs:subClassOf bfo:BFO_0000052 ;  # Processual entity (observation event)
+    rdfs:subClassOf prov:Entity ;  # PROV-O: Observation is an entity with provenance
     rdfs:label "Water quality observation" ;
-    rdfs:comment "An observation event where water quality is measured." .
+    rdfs:comment "An observation event where water quality is measured. As a prov:Entity, observations can be traced to their source (who measured, when, using what equipment), enabling full data provenance for regulatory compliance and quality assurance." .
 
 wf:observedParameter a owl:ObjectProperty ;
     rdfs:label "observed parameter" ;
     rdfs:comment "Links an observation to the parameter being measured" ;
     rdfs:domain wf:WaterQualityObservation ;
     rdfs:range wf:WaterQualityParameter .
+
+# PROV-O Integration: Attribution of observations to agents
+wf:observedBy a owl:ObjectProperty ;
+    rdfs:subPropertyOf prov:wasAttributedTo ;  # PROV-O: Attribution to agent
+    rdfs:label "observed by" ;
+    rdfs:comment "Links an observation to the agent (sensor, equipment, or person) responsible for making the measurement. As a subproperty of prov:wasAttributedTo, this enables provenance tracking of data sources for regulatory reporting and quality assurance." ;
+    rdfs:domain wf:WaterQualityObservation ;
+    rdfs:range prov:Agent .
 
 wf:observedValue a owl:DatatypeProperty ;
     rdfs:label "observed value" ;
@@ -355,3 +368,252 @@ wf:observedOn a owl:DatatypeProperty ;
 #     wf:observedValue "12.5"^^xsd:double ;
 #     wf:observedAt "Outfall_Monitoring_Point_A" ;
 #     wf:observedOn "2024-01-15T10:30:00"^^xsd:dateTime .
+
+# ========== WATER COMPOSITION CLASSIFICATION ==========
+# Phase 1: Quality-Based Water Classification with Jurisdictional Awareness
+
+wf:WaterComposition a owl:Class ;
+    rdfs:label "Water composition" ;
+    rdfs:comment """Classification of water based on quality characteristics.
+
+    IMPORTANT: Quality thresholds are JURISDICTION-DEPENDENT. The same measured values
+    may be classified as 'drinking water' in one regulatory framework but not another.""" ;
+    rdfs:subClassOf bfo:BFO_0000019 .  # quality
+
+# Regulatory Framework class
+wf:RegulatoryFramework a owl:Class ;
+    rdfs:label "Regulatory framework" ;
+    rdfs:comment "A set of water quality regulations, standards, or guidelines from a specific authority" .
+
+wf:appliesInJurisdiction a owl:ObjectProperty ;
+    rdfs:label "applies in jurisdiction" ;
+    rdfs:comment "Links a regulatory framework to the geographic jurisdiction where it applies" ;
+    rdfs:domain wf:RegulatoryFramework ;
+    rdfs:range gn:Feature .  # GeoNames location
+
+wf:definingFramework a owl:ObjectProperty ;
+    rdfs:label "defining framework" ;
+    rdfs:comment "Links a water composition classification to the regulatory framework that defines its thresholds" ;
+    rdfs:domain wf:WaterComposition ;
+    rdfs:range wf:RegulatoryFramework .
+
+# Generic composition classes (framework-independent)
+wf:DrinkingWaterQuality rdfs:subClassOf wf:WaterComposition ;
+    rdfs:label "Drinking water quality" ;
+    rdfs:comment """Water meeting drinking water standards.
+
+    Specific thresholds depend on regulatory framework. Common parameters:
+    - BOD (typically ≤ 3-5 mg/L)
+    - COD (typically ≤ 10-20 mg/L)
+    - TSS (typically ≤ 5-10 mg/L)
+    - TN (typically ≤ 1-2 mg/L)
+    - TP (typically ≤ 0.1-0.5 mg/L)
+    - Microbiological parameters (E. coli, coliforms)
+
+    Always check definingFramework to know which specific thresholds apply. Conceptually related to WaWO+ DrinkingWaterComposition (unpublished ontology).""" .
+
+wf:WastewaterQuality rdfs:subClassOf wf:WaterComposition ;
+    rdfs:label "Wastewater quality" ;
+    rdfs:comment """Water with untreated wastewater characteristics.
+
+    Typical raw sewage (framework-independent indicators):
+    - BOD > 200-400 mg/L
+    - COD > 400-800 mg/L
+    - TSS > 200-400 mg/L
+
+    Discharge limits for treated wastewater are jurisdiction-specific. Conceptually related to WaWO+ WastewaterComposition (unpublished ontology).""" .
+
+wf:ReclaimedWaterQuality rdfs:subClassOf wf:WaterComposition ;
+    rdfs:label "Reclaimed water quality" ;
+    rdfs:comment """Treated water suitable for non-potable reuse.
+
+    Quality depends on intended use AND jurisdiction:
+    - Irrigation: Different crops have different tolerance
+    - Industrial cooling: Varies by process
+    - Urban non-potable: Toilet flushing, landscaping
+
+    EU Regulation 2020/741 defines classes A, B, C, D for different uses.
+    US EPA Guidelines distinguish urban, industrial, agricultural reuse.""" .
+
+wf:GreywaterQuality rdfs:subClassOf wf:WaterComposition ;
+    rdfs:label "Greywater quality" ;
+    rdfs:comment """Lightly contaminated water from domestic sources (excluding toilet).
+
+    Characteristics (generally consistent across jurisdictions):
+    - BOD: 100-200 mg/L
+    - COD: 200-500 mg/L
+    - Lower pathogen load than blackwater
+
+    Reuse regulations vary widely by jurisdiction.""" .
+
+wf:BlackwaterQuality rdfs:subClassOf wf:WaterComposition ;
+    rdfs:label "Blackwater quality" ;
+    rdfs:comment """Toilet wastewater with high contamination.
+
+    Characteristics (generally consistent):
+    - BOD: 300-400 mg/L
+    - COD: 500-800 mg/L
+    - High pathogen and nutrient content""" .
+
+# Link composition to water entities
+wf:hasWaterComposition a owl:ObjectProperty ;
+    rdfs:label "has water composition" ;
+    rdfs:comment "Links a water sample or port to its quality-based composition class" ;
+    rdfs:domain [owl:unionOf (wf:WaterSample wf:Port)] ;
+    rdfs:range wf:WaterComposition .
+
+# Example framework instances
+ex:EU_WaterFrameworkDirective a wf:RegulatoryFramework ;
+    rdfs:label "EU Water Framework Directive" ;
+    wf:appliesInJurisdiction gn:6695072 ;  # European Union
+    rdfs:seeAlso <https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02000L0060> .
+
+ex:WHO_DrinkingWaterGuidelines a wf:RegulatoryFramework ;
+    rdfs:label "WHO Guidelines for Drinking-water Quality" ;
+    rdfs:comment "Global guidelines, often adapted by countries" ;
+    rdfs:seeAlso <https://www.who.int/publications/i/item/9789240045064> .
+
+ex:EU_WaterReuseRegulation a wf:RegulatoryFramework ;
+    rdfs:label "EU Water Reuse Regulation 2020/741" ;
+    wf:appliesInJurisdiction gn:6695072 ;  # European Union
+    rdfs:seeAlso <https://eur-lex.europa.eu/eli/reg/2020/741> .
+
+# ========== FIT-FOR-PURPOSE QUALITY FRAMEWORK ==========
+# Phase 9: Enable purpose-driven water classification and reuse planning
+# Allows the same water to be evaluated for different purposes with different quality requirements
+
+wf:QualityConstraintSet a owl:Class ;
+    rdfs:label "Quality constraint set" ;
+    rdfs:comment """Collection of water quality requirements defining fitness for a specific purpose.
+Enables purpose-driven water classification: the same water may be fit for toilet flushing (relaxed constraints)
+but not for drinking (strict constraints). Central to fit-for-purpose water reuse planning.""" .
+
+wf:WaterQualityRequirement a owl:Class ;
+    rdfs:label "Water quality requirement" ;
+    rdfs:comment "Single quality parameter constraint (e.g., BOD ≤ 5 mg/L). Part of a QualityConstraintSet." .
+
+wf:LimitType a owl:Class ;
+    rdfs:label "Limit type" ;
+    rdfs:comment "Type of quality constraint limit (maximum, minimum, or range)." .
+
+# Individuals for limit types
+wf:MaximumLimit a wf:LimitType ;
+    rdfs:label "Maximum limit" ;
+    rdfs:comment "Parameter value must not exceed this threshold." .
+
+wf:MinimumLimit a wf:LimitType ;
+    rdfs:label "Minimum limit" ;
+    rdfs:comment "Parameter value must meet or exceed this threshold." .
+
+wf:RangeLimit a wf:LimitType ;
+    rdfs:label "Range limit" ;
+    rdfs:comment "Parameter value must fall within specified range." .
+
+# Usage purpose classification
+wf:FitForPurpose a owl:Class ;
+    rdfs:label "Fit for purpose" ;
+    rdfs:comment "Classification of water fitness for a specific use (drinking, toilet flushing, irrigation, etc.)." .
+
+# Properties for constraint sets
+wf:includesConstraint a owl:ObjectProperty ;
+    rdfs:label "includes constraint" ;
+    rdfs:domain wf:QualityConstraintSet ;
+    rdfs:range wf:WaterQualityRequirement ;
+    rdfs:comment "Links a constraint set to individual quality requirements it contains." .
+
+wf:definesQualityFor a owl:ObjectProperty ;
+    rdfs:label "defines quality for" ;
+    rdfs:domain wf:QualityConstraintSet ;
+    rdfs:range wf:FitForPurpose ;
+    rdfs:comment "Links constraint set to the purpose/classification it defines." .
+
+# Properties for individual requirements
+wf:hasLimitType a owl:ObjectProperty ;
+    rdfs:label "has limit type" ;
+    rdfs:domain wf:WaterQualityRequirement ;
+    rdfs:range wf:LimitType ;
+    rdfs:comment "Links a quality requirement to its limit type (maximum, minimum, or range)." .
+
+wf:hasWaterQualityParameter a owl:ObjectProperty ;
+    rdfs:label "has water quality parameter" ;
+    rdfs:domain wf:WaterQualityRequirement ;
+    rdfs:range wf:WaterQualityParameter ;
+    rdfs:comment "Links a quality requirement to the parameter it constrains (e.g., BOD, TSS, E.coli)." .
+
+wf:hasLimitValue a owl:DatatypeProperty ;
+    rdfs:label "has limit value" ;
+    rdfs:domain wf:WaterQualityRequirement ;
+    rdfs:range xsd:double ;
+    rdfs:comment "The numeric threshold value for the constraint." .
+
+wf:hasMinimumValue a owl:DatatypeProperty ;
+    rdfs:label "has minimum value" ;
+    rdfs:domain wf:WaterQualityRequirement ;
+    rdfs:range xsd:double ;
+    rdfs:comment "For range limits: minimum acceptable value." .
+
+wf:hasMaximumValue a owl:DatatypeProperty ;
+    rdfs:label "has maximum value" ;
+    rdfs:domain wf:WaterQualityRequirement ;
+    rdfs:range xsd:double ;
+    rdfs:comment "For range limits: maximum acceptable value." .
+
+wf:hasUnit a owl:DatatypeProperty ;
+    rdfs:label "has unit" ;
+    rdfs:domain wf:WaterQualityRequirement ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Unit of measurement for the limit value (e.g., 'mg/L', 'CFU/100mL')." .
+
+# Properties linking usage points and ports to requirements
+wf:requiresQualityConstraints a owl:ObjectProperty ;
+    rdfs:label "requires quality constraints" ;
+    rdfs:domain [owl:unionOf (wf:WaterUsagePoint wf:InputPort wf:Agent)] ;
+    rdfs:range wf:QualityConstraintSet ;
+    rdfs:comment """Links a water consumer (usage point, input port, or agent) to quality constraints
+it requires. Enables agent-level quality declarations: facilities can specify their water quality needs.
+Critical for answering 'Which sources can serve which usage points?'""" .
+
+wf:satisfiesConstraints a owl:ObjectProperty ;
+    rdfs:label "satisfies constraints" ;
+    rdfs:domain [owl:unionOf (wf:OutputPort wf:WaterSample)] ;
+    rdfs:range wf:QualityConstraintSet ;
+    rdfs:comment "Declares that water at this point/sample satisfies the specified quality constraints." .
+
+# ========== QUALITY ASSESSMENT ==========
+# Evaluation of water quality against constraint sets
+
+wf:QualityAssessment a owl:Class ;
+    rdfs:label "Quality assessment" ;
+    rdfs:comment """Evaluation of water quality against a constraint set. Result indicates pass/fail
+and identifies violated constraints if any. Can be computed from sensor/lab observations.
+Enables fitness assessment from measurement data.""" .
+
+wf:assessesWater a owl:ObjectProperty ;
+    rdfs:label "assesses water" ;
+    rdfs:domain wf:QualityAssessment ;
+    rdfs:range [owl:unionOf (wf:Port wf:WaterSample)] ;
+    rdfs:comment "Links assessment to the water being evaluated." .
+
+wf:againstConstraintSet a owl:ObjectProperty ;
+    rdfs:label "against constraint set" ;
+    rdfs:domain wf:QualityAssessment ;
+    rdfs:range wf:QualityConstraintSet ;
+    rdfs:comment "Links assessment to the quality constraints being evaluated against." .
+
+wf:assessmentResult a owl:DatatypeProperty ;
+    rdfs:label "assessment result" ;
+    rdfs:domain wf:QualityAssessment ;
+    rdfs:range xsd:boolean ;
+    rdfs:comment "True if water satisfies all constraints, false if any constraint is violated." .
+
+wf:violatedConstraint a owl:ObjectProperty ;
+    rdfs:label "violated constraint" ;
+    rdfs:domain wf:QualityAssessment ;
+    rdfs:range wf:WaterQualityRequirement ;
+    rdfs:comment "Links assessment to constraints that failed (if assessmentResult = false)." .
+
+wf:assessmentDate a owl:DatatypeProperty ;
+    rdfs:label "assessment date" ;
+    rdfs:domain wf:QualityAssessment ;
+    rdfs:range xsd:dateTime ;
+    rdfs:comment "Date and time when the quality assessment was performed." .

@@ -1,0 +1,83 @@
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# === Execution Event Vocabulary ===
+# Tracks execution of agents during query resolution using PROV-O primitives.
+
+wf:ExecutionEvent
+    a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Execution Event"@en ;
+    rdfs:comment "One agent invocation within a query resolution trace"@en .
+
+wf:ExecutionScenario
+    a owl:Class ;
+    rdfs:subClassOf prov:Bundle ;
+    rdfs:label "Execution Scenario"@en ;
+    rdfs:comment "One parallel branch within a multi-scenario query"@en .
+
+wf:EventParameter
+    a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Event Parameter"@en ;
+    rdfs:comment "An input or output datum for an agent execution event"@en .
+
+# === Properties on ExecutionEvent ===
+
+wf:inLayer
+    a owl:DatatypeProperty ;
+    rdfs:domain wf:ExecutionEvent ;
+    rdfs:range xsd:integer ;
+    rdfs:label "in layer"@en ;
+    rdfs:comment "Composition layer index for this execution event"@en .
+
+wf:inScenario
+    a owl:ObjectProperty ;
+    rdfs:domain wf:ExecutionEvent ;
+    rdfs:range wf:ExecutionScenario ;
+    rdfs:label "in scenario"@en .
+
+# === Properties on ExecutionScenario ===
+
+wf:parentScenario
+    a owl:ObjectProperty ;
+    rdfs:domain wf:ExecutionScenario ;
+    rdfs:range wf:ExecutionScenario ;
+    rdfs:label "parent scenario"@en .
+
+wf:branchPoint
+    a owl:ObjectProperty ;
+    rdfs:domain wf:ExecutionScenario ;
+    rdfs:range wf:ExecutionEvent ;
+    rdfs:label "branch point"@en ;
+    rdfs:comment "The event that triggered this scenario branch"@en .
+
+# === Properties on EventParameter ===
+
+wf:parameterValue
+    a owl:DatatypeProperty ;
+    rdfs:domain wf:EventParameter ;
+    rdfs:range xsd:string ;
+    rdfs:label "parameter value"@en .
+
+wf:parameterUnit
+    a owl:DatatypeProperty ;
+    rdfs:domain wf:EventParameter ;
+    rdfs:range xsd:string ;
+    rdfs:label "parameter unit"@en .
+
+wf:refersToKGNode
+    a owl:ObjectProperty ;
+    rdfs:domain wf:EventParameter ;
+    rdfs:label "refers to KG node"@en ;
+    rdfs:comment "Links an event parameter to the corresponding KG entity (e.g. household:MBR_EffluentCOD)"@en .
+
+# === Reused PROV-O properties (informational annotations) ===
+# prov:used           — agent consumed this input parameter
+# prov:wasGeneratedBy — output produced by this event
+# prov:startedAtTime  — ISO datetime when event started
+# prov:endedAtTime    — ISO datetime when event ended
+# prov:wasAssociatedWith — links ExecutionEvent to wf:ComputationalAgent

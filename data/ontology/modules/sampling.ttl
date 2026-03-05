@@ -6,6 +6,7 @@
 @prefix wf: <https://ugentbiomath.github.io/waterframe#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
 
 <https://ugentbiomath.github.io/waterframe/modules/sampling>
     a owl:Ontology ;
@@ -17,11 +18,13 @@
 # ========== WATER SAMPLE ==========
 # A physical sample of water taken for analysis
 # Adapted from WHOKG WaterSample pattern
+# PROV-O Integration: WaterSample is a prov:Entity for provenance tracking
 
 wf:WaterSample a owl:Class ;
     rdfs:subClassOf bfo:BFO_0000040 ;  # Material entity
+    rdfs:subClassOf prov:Entity ;  # PROV-O: Sample is an entity with provenance
     rdfs:label "Water sample" ;
-    rdfs:comment "A physical sample of water taken for quality analysis. Links observations to sampling context including location, method, and time." .
+    rdfs:comment "A physical sample of water taken for quality analysis. Links observations to sampling context including location, method, and time. As a prov:Entity, samples can be tracked through their collection, handling, and analysis chain." .
 
 # ========== SAMPLING POINT ==========
 # Physical location where samples are taken
@@ -89,12 +92,23 @@ wf:ContinuousSampling a owl:Class ;
     rdfs:label "Continuous sampling" ;
     rdfs:comment "Continuous monitoring with online sensors." .
 
+# ========== SAMPLING ACTIVITY ==========
+# PROV-O Integration: The act of sampling is a prov:Activity
+
+wf:SamplingActivity a owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000015 ;  # Process
+    rdfs:subClassOf prov:Activity ;  # PROV-O: Sampling is an activity
+    rdfs:label "Sampling activity" ;
+    rdfs:comment "The act of collecting a water sample. As a prov:Activity, this enables tracking who performed the sampling, when it occurred, what equipment was used, and what samples were generated. Links to prov:Entity (samples) via prov:generated and to prov:Agent (equipment/personnel) via prov:wasAssociatedWith." .
+
 # ========== SAMPLING EQUIPMENT ==========
+# PROV-O Integration: Equipment and sensors are prov:Agent entities
 
 wf:SamplingEquipment a owl:Class ;
     rdfs:subClassOf bfo:BFO_0000040 ;  # Material entity
+    rdfs:subClassOf prov:Agent ;  # PROV-O: Equipment is an agent responsible for sampling
     rdfs:label "Sampling equipment" ;
-    rdfs:comment "Equipment used to collect water samples." .
+    rdfs:comment "Equipment used to collect water samples. As a prov:Agent, equipment can be attributed responsibility for generating samples and observations, enabling full chain-of-custody tracking." .
 
 wf:Autosampler a owl:Class ;
     rdfs:subClassOf wf:SamplingEquipment ;
@@ -104,7 +118,7 @@ wf:Autosampler a owl:Class ;
 wf:OnlineSensor a owl:Class ;
     rdfs:subClassOf wf:SamplingEquipment ;
     rdfs:label "Online sensor" ;
-    rdfs:comment "Continuous monitoring sensor installed in the process or water body." .
+    rdfs:comment "Continuous monitoring sensor installed in the process or water body. Inherits prov:Agent status from SamplingEquipment for attribution of continuous observations." .
 
 wf:ManualSampler a owl:Class ;
     rdfs:subClassOf wf:SamplingEquipment ;
@@ -176,9 +190,11 @@ wf:usedSamplingMethod a owl:ObjectProperty ;
     rdfs:range wf:SamplingMethod .
 
 # Sample to equipment
+# PROV-O Integration: collectedBy is a specialization of prov:wasAttributedTo
 wf:collectedBy a owl:ObjectProperty ;
+    rdfs:subPropertyOf prov:wasAttributedTo ;  # PROV-O: Attribution to agent
     rdfs:label "collected by" ;
-    rdfs:comment "Links a sample to the equipment used for collection" ;
+    rdfs:comment "Links a sample to the equipment used for collection. As a subproperty of prov:wasAttributedTo, this enables provenance tracking of which agent (equipment/personnel) was responsible for collecting the sample." ;
     rdfs:domain wf:WaterSample ;
     rdfs:range wf:SamplingEquipment .
 
@@ -231,6 +247,14 @@ wf:collectedOn a owl:DatatypeProperty ;
     rdfs:label "collected on" ;
     rdfs:comment "Date and time when the sample was collected" ;
     rdfs:domain wf:WaterSample ;
+    rdfs:range xsd:dateTime .
+
+# PROV-O Integration: Sampling time for activities
+wf:samplingTime a owl:DatatypeProperty ;
+    rdfs:subPropertyOf prov:generatedAtTime ;  # PROV-O: When entity was generated
+    rdfs:label "sampling time" ;
+    rdfs:comment "The date and time when a sampling activity generated a sample. As a subproperty of prov:generatedAtTime, this integrates with PROV-O's temporal provenance model." ;
+    rdfs:domain wf:SamplingActivity ;
     rdfs:range xsd:dateTime .
 
 # Sample ID (for chain of custody)

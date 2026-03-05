@@ -1,7 +1,9 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix bfo: <http://purl.obolibrary.org/obo/> .
+@prefix envo: <http://purl.obolibrary.org/obo/ENVO_> .
 @prefix dc: <http://purl.org/dc/terms/> .
 @prefix wf: <https://ugentbiomath.github.io/waterframe#> .
 
@@ -43,7 +45,11 @@ wf:hasOutputPort rdfs:subPropertyOf wf:hasPort .
 
 wf:flowsTo a owl:ObjectProperty ;
     rdfs:label "flows to" ;
-    rdfs:comment "Direct water flow connection from output port to input port" ;
+    rdfs:comment """Direct water flow connection from output port to input port within engineered systems.
+Represents precise, operational topology for simulation and design.
+
+Distinct from wf:dischargesInto which represents environmental discharge at component level for
+regulatory compliance and ecological impact assessment. Both perspectives serve different competency questions.""" ;
     rdfs:domain wf:OutputPort ;
     rdfs:range wf:InputPort ;
     owl:inverseOf wf:receivesFlowFrom .
@@ -106,6 +112,31 @@ wf:ReclaimedWaterFlow a owl:Class ;
     rdfs:label "Reclaimed water flow" ;
     rdfs:comment "Flow of treated water for reuse" .
 
+# Phase 1: Industry-specific process water flows
+wf:ProcessWaterFlow rdfs:subClassOf wf:WaterFlow ;
+    rdfs:label "Process water flow" ;
+    rdfs:comment """Water used in industrial manufacturing processes.
+
+    Quality requirements are INDUSTRY-SPECIFIC and must be defined per facility type.
+    This is a general classification - specific quality is determined by the industrial process.""" .
+
+wf:IndustrialWastewaterFlow rdfs:subClassOf wf:WaterFlow ;
+    rdfs:label "Industrial wastewater flow" ;
+    rdfs:comment """Wastewater from industrial processes.
+
+    Characteristics vary by industry:
+    - Brewery: high BOD/COD, organic matter
+    - Textile: dyes, chemicals, variable pH
+    - Electronics: low contaminants but high volume
+    - Food processing: organic load, fats/oils/grease""" .
+
+# Link flow type to facility type for context
+wf:fromFacilityType a owl:ObjectProperty ;
+    rdfs:label "from facility type" ;
+    rdfs:comment "Indicates which type of industrial facility produced this water flow" ;
+    rdfs:domain wf:ProcessWaterFlow ;
+    rdfs:range wf:IndustrialFacility .
+
 # Property to classify flow type at ports
 wf:hasFlowType a owl:ObjectProperty ;
     rdfs:label "has flow type" ;
@@ -166,3 +197,113 @@ wf:correspondsToModelOutput a owl:ObjectProperty ;
     rdfs:comment "Port corresponds to an output variable in a computational model" ;
     rdfs:domain wf:OutputPort ;
     rdfs:range owl:Thing .  # Range will be specified in information.ttl module
+
+# ========== ENVIRONMENTAL DISCHARGE PROPERTIES ==========
+# Phase 4: Property hierarchy connecting engineered systems to natural environment
+
+# Generic discharge property (root of hierarchy)
+wf:dischargesToEnvironment a owl:ObjectProperty ;
+    rdfs:label "discharges to environment" ;
+    rdfs:comment "Links a water system component to an environmental recipient (natural water body, soil, atmosphere)." ;
+    rdfs:domain wf:WaterSystemComponent ;
+    rdfs:range bfo:BFO_0000040 .  # material entity (environmental recipients are material entities)
+
+# Specialized for aquatic features (subproperty with constrained range)
+wf:dischargesInto rdfs:subPropertyOf wf:dischargesToEnvironment ;
+    rdfs:label "discharges into" ;
+    rdfs:domain wf:WaterSystemComponent ;
+    rdfs:range envo:00000063 ;  # aquatic feature (more specific)
+    rdfs:comment "Specialized discharge to natural aquatic features (rivers, lakes, coastal waters). A subproperty of dischargesToEnvironment with range constrained to ENVO aquatic features." .
+
+# Source abstraction (inverse flow direction)
+wf:abstractsFrom a owl:ObjectProperty ;
+    rdfs:label "abstracts from" ;
+    rdfs:comment "Links a water system component to the natural water body it draws water from. Related to but distinct from dischargesInto (opposite flow direction)." ;
+    rdfs:domain wf:WaterSystemComponent ;
+    rdfs:range envo:00000063 .  # aquatic feature
+
+# ========== CONVEYANCE PROPERTIES ==========
+# Phase 5: Properties specific to conveyance system components for hydraulic modeling
+
+# Geometric properties for pipes
+wf:hasDiameter a owl:DatatypeProperty ;
+    rdfs:label "has diameter" ;
+    rdfs:domain wf:Pipe ;
+    rdfs:range xsd:double ;
+    rdfs:comment "Internal diameter of pipe in meters." .
+
+wf:hasLength a owl:DatatypeProperty ;
+    rdfs:label "has length" ;
+    rdfs:domain wf:Conveyance ;
+    rdfs:range xsd:double ;
+    rdfs:comment "Length of conveyance element in meters." .
+
+wf:hasSlope a owl:DatatypeProperty ;
+    rdfs:label "has slope" ;
+    rdfs:domain wf:Pipe ;
+    rdfs:range xsd:double ;
+    rdfs:comment "Slope of pipe (dimensionless, positive for downward flow)." .
+
+# Overflow structure properties
+wf:overflowsTo a owl:ObjectProperty ;
+    rdfs:label "overflows to" ;
+    rdfs:domain wf:OverflowStructure ;
+    rdfs:range wf:WaterSystemComponent ;
+    rdfs:comment "Links an overflow structure to where excess water is discharged (another component or natural water body via port-based connection)." .
+
+wf:activationThreshold a owl:ObjectProperty ;
+    rdfs:label "activation threshold" ;
+    rdfs:domain wf:OverflowStructure ;
+    rdfs:range owl:Thing ;  # Will be wf:QuantityValue when qualities module is integrated
+    rdfs:comment "Flow rate or water level that triggers overflow activation. Range should be wf:QuantityValue from qualities module." .
+
+# ========== USAGE POINT PROPERTIES ==========
+# Phase 7: Properties for usage point fit-for-purpose integration
+
+wf:servesPurpose a owl:DatatypeProperty ;
+    rdfs:label "serves purpose" ;
+    rdfs:domain wf:WaterUsagePoint ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Textual description of the end-use purpose served by this usage point." .
+
+wf:requiresQuality a owl:ObjectProperty ;
+    rdfs:label "requires quality" ;
+    rdfs:domain wf:WaterUsagePoint ;
+    rdfs:range owl:Thing ;  # Will be wf:QualityConstraintSet when fit-for-purpose module is created
+    rdfs:comment "Links a usage point to the water quality requirements it must satisfy. Range will be wf:QualityConstraintSet from fit-for-purpose module." .
+
+# ========== FACILITY PROPERTIES ==========
+# Phase 8: Properties for storage, pumping, and monitoring facilities
+
+# Storage facility properties
+wf:hasStorageCapacity a owl:DatatypeProperty ;
+    rdfs:label "has storage capacity" ;
+    rdfs:domain wf:StorageFacility ;
+    rdfs:range xsd:double ;
+    rdfs:comment "Storage capacity in cubic meters (m³)." .
+
+wf:hasMaximumVolume a owl:DatatypeProperty ;
+    rdfs:label "has maximum volume" ;
+    rdfs:domain wf:StorageFacility ;
+    rdfs:range xsd:double ;
+    rdfs:comment "Maximum design volume in cubic meters (m³)." .
+
+wf:hasMinimumOperatingLevel a owl:DatatypeProperty ;
+    rdfs:label "has minimum operating level" ;
+    rdfs:domain wf:StorageFacility ;
+    rdfs:range xsd:double ;
+    rdfs:comment "Minimum water level for normal operation in meters." .
+
+# Pumping facility properties
+wf:hasPumpingCapacity a owl:DatatypeProperty ;
+    rdfs:label "has pumping capacity" ;
+    rdfs:domain wf:PumpingFacility ;
+    rdfs:range xsd:double ;
+    rdfs:comment "Design pumping capacity in cubic meters per day (m³/day)." .
+
+# General facility properties
+wf:hasElevation a owl:DatatypeProperty ;
+    rdfs:label "has elevation" ;
+    rdfs:domain wf:Facility ;
+    rdfs:range xsd:double ;
+    rdfs:comment "Elevation above sea level in meters." .
