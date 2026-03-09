@@ -48,7 +48,7 @@ housecase1:BathroomSink_Output a wf:OutputPort ;
     wf:hasFlowType wf:GreywaterFlow .
 
 # Washing Machine
-housecase1:Washing_machine a wf:Appliance ;
+housecase1:Washing_machine_and_Handwash_clothes a wf:Appliance ;
     rdfs:label "Washing Machine and Handwash" ;
     wf:hasInputPort housecase1:WashingMachine_Input ;
     wf:hasOutputPort housecase1:WashingMachine_Output .
