@@ -44,3 +44,5 @@ research/ontologies/envo-*/
 # Planning files (session-specific)
 .planning/
 **/.planning/
+
+**/node_modules/*
