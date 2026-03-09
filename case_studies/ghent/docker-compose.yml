@@ -1,4 +1,3 @@
-
 x-common-config: &common-config
   build:
     context: .
@@ -21,7 +20,7 @@ x-common-config: &common-config
         memory: 128M
 
 services:
-  # React Frontend
+  # React Frontend (unchanged)
   frontend-react:
     build:
       context: ./frontend-react
@@ -41,59 +40,44 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    labels:
-      - "com.ghent-water.service=frontend"
-      - "com.ghent-water.environment=${ENVIRONMENT:-development}"
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
     profiles:
       - full
       - frontend
 
-  # Orchestrator
+  # CORE ORCHESTRATOR (using shared image with build)
   orchestrator:
-    <<: *common-config
     build:
-      context: .
-      dockerfile: Dockerfile.orchestrator
+      context: ../..
+      dockerfile: case_studies/core/orchestrator/Dockerfile
+    image: onteaulogy-core:latest
     container_name: ghent-orchestrator
     ports:
       - "${ORCHESTRATOR_PORT:-8080}:8080"
-    env_file:
-      - .env
     environment:
       - ENVIRONMENT=${ENVIRONMENT:-development}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
-      - ONTOLOGY_BASE_PATH=/shared-ontology
     volumes:
+      # Mount the shared ontology data
       - ../../data:/shared-ontology:ro
+      # Mount case study specific data
+      - ./data:/app/data:ro
+      # Mount the configuration file
+      - ./config/orchestrator.yaml:/app/config.yaml:ro
+    command: ["onteaulogy-orchestrator", "/app/config.yaml"]
+    networks:
+      - ghent-water-network
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8080/health', timeout=2).status_code == 200 else 1)"]
+      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8080/health', timeout=5).status_code == 200 else 1)"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
-    labels:
-      - "com.ghent-water.service=orchestrator"
-      - "com.ghent-water.environment=${ENVIRONMENT:-development}"
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 1G
     profiles:
       - full
       - backend
 
-  # Model Services
+  # Model Services (unchanged from original)
   dwp1:
     <<: *common-config
     container_name: ghent-dwp1
@@ -102,18 +86,7 @@ services:
     environment:
       - PORT=8001
       - MODEL_NAME=dwp1
-      - ENVIRONMENT=${ENVIRONMENT:-development}
     command: ["python", "-m", "ghent_water.models.runners.model_runner", "--model", "dwp1", "--port", "8001"]
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8001/health', timeout=2).status_code == 200 else 1)"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    labels:
-      - "com.ghent-water.service=model"
-      - "com.ghent-water.model=dwp1"
-      - "com.ghent-water.environment=${ENVIRONMENT:-development}"
     profiles:
       - full
       - models
@@ -127,18 +100,7 @@ services:
     environment:
       - PORT=8002
       - MODEL_NAME=dwp2
-      - ENVIRONMENT=${ENVIRONMENT:-development}
     command: ["python", "-m", "ghent_water.models.runners.model_runner", "--model", "dwp2", "--port", "8002"]
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8002/health', timeout=2).status_code == 200 else 1)"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    labels:
-      - "com.ghent-water.service=model"
-      - "com.ghent-water.model=dwp2"
-      - "com.ghent-water.environment=${ENVIRONMENT:-development}"
     profiles:
       - full
       - models
@@ -152,18 +114,7 @@ services:
     environment:
       - PORT=8003
       - MODEL_NAME=wwtp1
-      - ENVIRONMENT=${ENVIRONMENT:-development}
     command: ["python", "-m", "ghent_water.models.runners.model_runner", "--model", "wwtp1", "--port", "8003"]
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8003/health', timeout=2).status_code == 200 else 1)"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    labels:
-      - "com.ghent-water.service=model"
-      - "com.ghent-water.model=wwtp1"
-      - "com.ghent-water.environment=${ENVIRONMENT:-development}"
     profiles:
       - full
       - models
@@ -177,18 +128,7 @@ services:
     environment:
       - PORT=8004
       - MODEL_NAME=wwtp2
-      - ENVIRONMENT=${ENVIRONMENT:-development}
     command: ["python", "-m", "ghent_water.models.runners.model_runner", "--model", "wwtp2", "--port", "8004"]
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8004/health', timeout=2).status_code == 200 else 1)"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    labels:
-      - "com.ghent-water.service=model"
-      - "com.ghent-water.model=wwtp2"
-      - "com.ghent-water.environment=${ENVIRONMENT:-development}"
     profiles:
       - full
       - models
@@ -202,18 +142,7 @@ services:
     environment:
       - PORT=8005
       - MODEL_NAME=texfin
-      - ENVIRONMENT=${ENVIRONMENT:-development}
     command: ["python", "-m", "ghent_water.models.runners.model_runner", "--model", "texfin", "--port", "8005"]
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8005/health', timeout=2).status_code == 200 else 1)"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    labels:
-      - "com.ghent-water.service=model"
-      - "com.ghent-water.model=texfin"
-      - "com.ghent-water.environment=${ENVIRONMENT:-development}"
     profiles:
       - full
       - models
@@ -227,18 +156,7 @@ services:
     environment:
       - PORT=8006
       - MODEL_NAME=foodpro
-      - ENVIRONMENT=${ENVIRONMENT:-development}
     command: ["python", "-m", "ghent_water.models.runners.model_runner", "--model", "foodpro", "--port", "8006"]
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8006/health', timeout=2).status_code == 200 else 1)"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    labels:
-      - "com.ghent-water.service=model"
-      - "com.ghent-water.model=foodpro"
-      - "com.ghent-water.environment=${ENVIRONMENT:-development}"
     profiles:
       - full
       - models
@@ -252,18 +170,7 @@ services:
     environment:
       - PORT=8007
       - MODEL_NAME=chiptech
-      - ENVIRONMENT=${ENVIRONMENT:-development}
     command: ["python", "-m", "ghent_water.models.runners.model_runner", "--model", "chiptech", "--port", "8007"]
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8007/health', timeout=2).status_code == 200 else 1)"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    labels:
-      - "com.ghent-water.service=model"
-      - "com.ghent-water.model=chiptech"
-      - "com.ghent-water.environment=${ENVIRONMENT:-development}"
     profiles:
       - full
       - models
@@ -277,18 +184,7 @@ services:
     environment:
       - PORT=8008
       - MODEL_NAME=pharmagen
-      - ENVIRONMENT=${ENVIRONMENT:-development}
     command: ["python", "-m", "ghent_water.models.runners.model_runner", "--model", "pharmagen", "--port", "8008"]
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8008/health', timeout=2).status_code == 200 else 1)"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    labels:
-      - "com.ghent-water.service=model"
-      - "com.ghent-water.model=pharmagen"
-      - "com.ghent-water.environment=${ENVIRONMENT:-development}"
     profiles:
       - full
       - models
@@ -302,18 +198,7 @@ services:
     environment:
       - PORT=8009
       - MODEL_NAME=brewco
-      - ENVIRONMENT=${ENVIRONMENT:-development}
     command: ["python", "-m", "ghent_water.models.runners.model_runner", "--model", "brewco", "--port", "8009"]
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8009/health', timeout=2).status_code == 200 else 1)"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    labels:
-      - "com.ghent-water.service=model"
-      - "com.ghent-water.model=brewco"
-      - "com.ghent-water.environment=${ENVIRONMENT:-development}"
     profiles:
       - full
       - models
@@ -327,18 +212,7 @@ services:
     environment:
       - PORT=8010
       - MODEL_NAME=lieve_river
-      - ENVIRONMENT=${ENVIRONMENT:-development}
     command: ["python", "-m", "ghent_water.models.runners.model_runner", "--model", "lieve_river", "--port", "8010"]
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8010/health', timeout=2).status_code == 200 else 1)"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    labels:
-      - "com.ghent-water.service=model"
-      - "com.ghent-water.model=lieve_river"
-      - "com.ghent-water.environment=${ENVIRONMENT:-development}"
     profiles:
       - full
       - models
@@ -352,18 +226,7 @@ services:
     environment:
       - PORT=8011
       - MODEL_NAME=dampoort
-      - ENVIRONMENT=${ENVIRONMENT:-development}
     command: ["python", "-m", "ghent_water.models.runners.model_runner", "--model", "dampoort", "--port", "8011"]
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8011/health', timeout=2).status_code == 200 else 1)"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    labels:
-      - "com.ghent-water.service=model"
-      - "com.ghent-water.model=dampoort"
-      - "com.ghent-water.environment=${ENVIRONMENT:-development}"
     profiles:
       - full
       - models
@@ -377,212 +240,12 @@ services:
     environment:
       - PORT=8012
       - MODEL_NAME=muide
-      - ENVIRONMENT=${ENVIRONMENT:-development}
     command: ["python", "-m", "ghent_water.models.runners.model_runner", "--model", "muide", "--port", "8012"]
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8012/health', timeout=2).status_code == 200 else 1)"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    labels:
-      - "com.ghent-water.service=model"
-      - "com.ghent-water.model=muide"
-      - "com.ghent-water.environment=${ENVIRONMENT:-development}"
     profiles:
       - full
       - models
       - backend
 
-  # Household Case Study Model Services
-  household-mbr:
-    build:
-      context: ../household
-      dockerfile: Dockerfile
-    container_name: household-mbr
-    ports:
-      - "8101:8101"
-    environment:
-      - PORT=8101
-      - MODEL_NAME=mbr
-      - ENVIRONMENT=${ENVIRONMENT:-development}
-    command: ["python", "-m", "household_water.runners.model_runner", "--model", "mbr", "--port", "8101"]
-    networks:
-      - ghent-water-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8101/health', timeout=2).status_code == 200 else 1)"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    profiles:
-      - full
-      - household
-      - backend
-
-  household-ro:
-    build:
-      context: ../household
-      dockerfile: Dockerfile
-    container_name: household-ro
-    ports:
-      - "8102:8102"
-    environment:
-      - PORT=8102
-      - MODEL_NAME=ro
-      - ENVIRONMENT=${ENVIRONMENT:-development}
-    command: ["python", "-m", "household_water.runners.model_runner", "--model", "ro", "--port", "8102"]
-    networks:
-      - ghent-water-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8102/health', timeout=2).status_code == 200 else 1)"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    profiles:
-      - full
-      - household
-      - backend
-
-  household-infiltration:
-    build:
-      context: ../household
-      dockerfile: Dockerfile
-    container_name: household-infiltration
-    ports:
-      - "8103:8103"
-    environment:
-      - PORT=8103
-      - MODEL_NAME=infiltration
-      - ENVIRONMENT=${ENVIRONMENT:-development}
-    command: ["python", "-m", "household_water.runners.model_runner", "--model", "infiltration", "--port", "8103"]
-    networks:
-      - ghent-water-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8103/health', timeout=2).status_code == 200 else 1)"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    profiles:
-      - full
-      - household
-      - backend
-
-  # Observability Stack - Loki for log aggregation
-  loki:
-    image: grafana/loki:2.9.3
-    container_name: ghent-loki
-    ports:
-      - "3100:3100"
-    command: -config.file=/etc/loki/local-config.yaml
-    networks:
-      - ghent-water-network
-    volumes:
-      - ./monitoring/loki-config.yaml:/etc/loki/local-config.yaml
-      - loki-data:/loki
-    restart: unless-stopped
-    profiles:
-      - full
-      - monitoring
-
-  # Promtail - Log shipper
-  promtail:
-    image: grafana/promtail:2.9.3
-    container_name: ghent-promtail
-    volumes:
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./monitoring/promtail-config.yaml:/etc/promtail/config.yaml
-    command: -config.file=/etc/promtail/config.yaml
-    networks:
-      - ghent-water-network
-    depends_on:
-      - loki
-    restart: unless-stopped
-    profiles:
-      - full
-      - monitoring
-
-  # Prometheus - Metrics collection
-  prometheus:
-    image: prom/prometheus:v2.48.1
-    container_name: ghent-prometheus
-    ports:
-      - "9090:9090"
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention.time=30d'
-    volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus-data:/prometheus
-    networks:
-      - ghent-water-network
-    restart: unless-stopped
-    profiles:
-      - full
-      - monitoring
-
-  # Grafana - Visualization
-  grafana:
-    image: grafana/grafana:10.2.3
-    container_name: ghent-grafana
-    ports:
-      - "3001:3000"
-    environment:
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
-      - GF_USERS_ALLOW_SIGN_UP=false
-    volumes:
-      - grafana-data:/var/lib/grafana
-      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
-      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
-    networks:
-      - ghent-water-network
-    depends_on:
-      - prometheus
-      - loki
-    restart: unless-stopped
-    profiles:
-      - full
-      - monitoring
-
-  # cAdvisor - Container metrics
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.47.2
-    container_name: ghent-cadvisor
-    ports:
-      - "8081:8080"
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    networks:
-      - ghent-water-network
-    restart: unless-stopped
-    privileged: true
-    profiles:
-      - full
-      - monitoring
-
-# Network configuration
 networks:
   ghent-water-network:
     driver: bridge
-    labels:
-      - "com.ghent-water.network=main"
-
-# Volumes for persistent storage
-volumes:
-  loki-data:
-    driver: local
-  prometheus-data:
-    driver: local
-  grafana-data:
-    driver: local

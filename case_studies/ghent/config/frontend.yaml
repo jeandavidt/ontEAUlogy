@@ -1,0 +1,91 @@
+# Ghent Case Study Frontend Configuration
+
+app:
+  name: "ontEAUlogy Ghent"
+  title: "Ghent Water System"
+  description: "Interactive water system visualization for Ghent"
+  version: "0.1.0"
+
+branding:
+  logo: "/assets/ghent-logo.svg"
+  primary_color: "#0066CC"
+  secondary_color: "#00A3E0"
+
+api:
+  base_url: "/api"
+  orchestrator_url: "http://localhost:8080"
+  timeout: 30000
+
+features:
+  sparql_query: true
+  natural_language: true
+  simulation: true
+  sensors: true
+  map: true
+  topology: true
+  timeline: true
+
+map:
+  default_center:
+    lat: 51.05
+    lng: 3.73
+  default_zoom: 13
+  max_bounds:
+    south: 50.9
+    west: 3.5
+    north: 51.2
+    east: 4.0
+
+entities:
+  show_types:
+    - "wf:DrinkingWaterPlant"
+    - "wf:WasteWaterTreatmentPlant"
+    - "wf:Industry"
+    - "wf:River"
+    - "wf:ResidentialArea"
+  default_icon: "droplet"
+
+models:
+  available:
+    - id: "dwp1"
+      name: "DWP1"
+      icon: "faucet"
+    - id: "dwp2"
+      name: "DWP2"
+      icon: "faucet"
+    - id: "wwtp1"
+      name: "WWTP1"
+      icon: "recycle"
+    - id: "wwtp2"
+      name: "WWTP2"
+      icon: "recycle"
+    - id: "texfin"
+      name: "TexFin"
+      icon: "building-factory"
+    - id: "foodpro"
+      name: "FoodPro"
+      icon: "building-factory"
+    - id: "chiptech"
+      name: "ChipTech"
+      icon: "building-factory"
+    - id: "pharmagen"
+      name: "PharmaGen"
+      icon: "building-factory"
+    - id: "brewco"
+      name: "BrewCo"
+      icon: "beer"
+    - id: "lieve_river"
+      name: "Lieve River"
+      icon: "waves"
+    - id: "dampoort"
+      name: "Dampoort"
+      icon: "home"
+    - id: "muide"
+      name: "Muide"
+      icon: "home"
+
+namespaces:
+  - prefix: "ghent"
+    uri: "https://ugentbiomath.github.io/ontology/index.ttl#"
+  - prefix: "wf"
+    uri: "https://ugentbiomath.github.io/waterframe#"

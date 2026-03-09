@@ -3,6 +3,7 @@
 import asyncio
 import logging
 import traceback
+from typing import Any, Dict, Set
 from fastapi import APIRouter, HTTPException
 from ..schemas.models import (
     SparqlQueryRequest,
@@ -14,6 +15,18 @@ from ..services.ontology_store import ontology_store
 from ..services.sparql_engine import sparql_engine
 from ..services.llm_sparql import get_llm_sparql_translator
 from ..services.execution_trace import execution_trace_service, AgentType
+from ..services.agent_composer import get_agent_composer, CompositionResult
+from ..services.query_analyzer import get_query_analyzer
+from ..services.kg_analyzer import get_kg_analyzer
+from ..services.model_registry import registry
+from ..schemas.models import (
+    AgentCompositionRequest,
+    AgentCompositionResponse,
+    CompositionLayerResponse,
+)
+
+import httpx
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -374,3 +387,188 @@ async def translate_question(question: str):
     except Exception as e:
         logger.error(f"Translation failed: {e}\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# =============================================================================
+# Agent Composition Endpoints
+# =============================================================================
+
+
+@router.post("/compose", response_model=AgentCompositionResponse)
+async def discover_composition(request: AgentCompositionRequest):
+    """
+    Discover agent composition to answer a query.
+    
+    Returns the execution plan without executing simulations.
+    """
+    logger.info(f"Composition discovery request: target={request.target_outputs}")
+    
+    await ontology_store.load_ontology()
+    
+    composer = get_agent_composer()
+    
+    result = await composer.compose(
+        initial_data=set(request.initial_parameters.keys()),
+        target_outputs=set(request.target_outputs),
+        timeout_seconds=request.timeout_seconds
+    )
+    
+    return AgentCompositionResponse(
+        composition_found=result.found,
+        execution_plan=result.describe_plan(),
+        layers=[
+            CompositionLayerResponse(
+                layer_index=layer.layer_index,
+                agent_ids=[a.id for a in layer.agents],
+                agent_names=[a.name for a in layer.agents],
+                parallelizable=len(layer.agents) > 1,
+                inputs_needed={},  # Could be populated from ontology
+                outputs_produced=list(layer.produced_outputs)
+            )
+            for layer in result.layers
+        ],
+        total_agents=sum(len(layer.agents) for layer in result.layers),
+        estimated_execution_time_seconds=len(result.layers) * 5.0  # Rough estimate
+    )
+
+
+@router.post("/compose-and-execute")
+async def compose_and_execute(request: AgentCompositionRequest):
+    """
+    Discover composition and immediately execute it.
+    
+    Returns final query results after all simulations complete.
+    """
+    logger.info(f"Compose-and-execute request: target={request.target_outputs}")
+    
+    await ontology_store.load_ontology()
+    
+    # Step 1: Discover composition
+    composer = get_agent_composer()
+    composition = await composer.compose(
+        initial_data=set(request.initial_parameters.keys()),
+        target_outputs=set(request.target_outputs),
+        timeout_seconds=request.timeout_seconds
+    )
+    
+    if not composition.found:
+        return {
+            "success": False,
+            "error": f"Cannot satisfy query: {composition.describe_plan()}",
+            "missing": list(composition.missing)
+        }
+    
+    # Step 2: Execute the composition layers
+    try:
+        execution_results = await execute_composition_layers(composition)
+        
+        return {
+            "success": True,
+            "execution_plan": composition.describe_plan(),
+            "layers_executed": len(composition.layers),
+            "results": execution_results
+        }
+        
+    except Exception as e:
+        logger.error(f"Composition execution failed: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "execution_plan": composition.describe_plan()
+        }
+
+
+async def execute_composition_layers(composition: CompositionResult) -> Dict[str, Any]:
+    """
+    Execute agents in the discovered composition layers.
+    
+    Executes layers sequentially, with agents within a layer in parallel.
+    """
+    all_results = {}
+    
+    for layer in composition.layers:
+        logger.info(f"Executing layer {layer.layer_index} with {len(layer.agents)} agents")
+        
+        # Execute agents in this layer in parallel
+        tasks = []
+        for agent in layer.agents:
+            # Get inputs from previous results or initial data
+            inputs = gather_inputs_for_agent(agent, all_results, composition.initial_data)
+            
+            task = execute_agent_simulation(agent, inputs)
+            tasks.append(task)
+        
+        # Wait for all agents in layer to complete
+        layer_results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Store results
+        for agent, result in zip(layer.agents, layer_results):
+            if isinstance(result, Exception):
+                logger.error(f"Agent {agent.id} failed: {result}")
+                raise result
+            all_results[agent.id] = result
+    
+    return all_results
+
+
+async def execute_agent_simulation(agent, inputs: Dict[str, float]) -> Dict[str, Any]:
+    """Execute a single agent simulation via HTTP."""
+    
+    model_id = agent.model_id or agent.id
+    
+    # Check if model is registered
+    model = registry.get_model(model_id)
+    if not model:
+        # Try on-demand registration
+        from .simulation import try_register_model
+        if await try_register_model(model_id):
+            model = registry.get_model(model_id)
+    
+    if not model:
+        raise ValueError(f"Model {model_id} not available")
+    
+    # Call model endpoint
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"{model.endpoint}/simulate",
+            json=inputs,
+            timeout=300.0
+        )
+        response.raise_for_status()
+        return response.json()
+
+
+def gather_inputs_for_agent(
+    agent, 
+    all_results: Dict[str, Any], 
+    initial_data: Set[str]
+) -> Dict[str, float]:
+    """
+    Gather inputs for an agent from previous results or initial data.
+    
+    Maps parameter names between connected agents using simple heuristics.
+    """
+    inputs = {}
+    
+    for input_param in agent.required_inputs:
+        # Check if it's produced by a previous agent
+        for agent_id, results in all_results.items():
+            # Map parameter names (e.g., mbr_effluent_cod → ro_feed_cod)
+            mapped = map_parameter_name(input_param, agent_id, agent.id)
+            if mapped in results:
+                inputs[input_param] = results[mapped]
+                break
+    
+    return inputs
+
+
+def map_parameter_name(param: str, source_agent: str, target_agent: str) -> str:
+    """
+    Map parameter names between agents.
+    
+    Example: mbr.effluent_cod → ro.feed_cod
+    """
+    # Simple mapping - could use ontology wf:compatibleWith
+    if "effluent" in param and target_agent == "ro":
+        return param.replace("effluent", "feed")
+    return param

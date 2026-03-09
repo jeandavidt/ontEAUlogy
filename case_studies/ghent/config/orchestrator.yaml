@@ -1,0 +1,128 @@
+# Ghent Case Study Orchestrator Configuration
+
+app:
+  name: "ontEAUlogy Ghent Backend"
+  version: "0.1.0"
+  description: "FastAPI orchestrator for Ghent water system"
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  cors_origins: ["*"]
+
+ontology:
+  base_path: "/shared-ontology"
+  case_study_path: "/app/data"
+  files:
+    - "system.ttl"
+    - "display_metadata.ttl"
+
+models:
+  discovery:
+    - id: "dwp1"
+      endpoint: "http://ghent-dwp1:8001"
+      entity: "ghent:DWP1"
+      name: "DWP1"
+      capabilities: ["SteadyStateSimulation", "MassBalance"]
+    
+    - id: "dwp2"
+      endpoint: "http://ghent-dwp2:8002"
+      entity: "ghent:DWP2"
+      name: "DWP2"
+      capabilities: ["SteadyStateSimulation", "MassBalance"]
+    
+    - id: "wwtp1"
+      endpoint: "http://ghent-wwtp1:8003"
+      entity: "ghent:WWTP1"
+      name: "WWTP1"
+      capabilities: ["SteadyStateSimulation", "MassBalance"]
+    
+    - id: "wwtp2"
+      endpoint: "http://ghent-wwtp2:8004"
+      entity: "ghent:WWTP2"
+      name: "WWTP2"
+      capabilities: ["SteadyStateSimulation", "MassBalance"]
+    
+    - id: "texfin"
+      endpoint: "http://ghent-texfin:8005"
+      entity: "ghent:TEXFIN"
+      name: "TexFin"
+      capabilities: ["SteadyStateSimulation", "MassBalance"]
+    
+    - id: "foodpro"
+      endpoint: "http://ghent-foodpro:8006"
+      entity: "ghent:FOODPRO"
+      name: "FoodPro"
+      capabilities: ["SteadyStateSimulation", "MassBalance"]
+    
+    - id: "chiptech"
+      endpoint: "http://ghent-chiptech:8007"
+      entity: "ghent:CHIPTECH"
+      name: "ChipTech"
+      capabilities: ["SteadyStateSimulation", "MassBalance"]
+    
+    - id: "pharmagen"
+      endpoint: "http://ghent-pharmagen:8008"
+      entity: "ghent:PHARMAGEN"
+      name: "PharmaGen"
+      capabilities: ["SteadyStateSimulation", "MassBalance"]
+    
+    - id: "brewco"
+      endpoint: "http://ghent-brewco:8009"
+      entity: "ghent:BREWCO"
+      name: "BrewCo"
+      capabilities: ["SteadyStateSimulation", "MassBalance"]
+    
+    - id: "lieve_river"
+      endpoint: "http://ghent-lieve-river:8010"
+      entity: "ghent:Lieve_River"
+      name: "Lieve River"
+      capabilities: ["SteadyStateSimulation", "MassBalance"]
+    
+    - id: "dampoort"
+      endpoint: "http://ghent-dampoort:8011"
+      entity: "ghent:Dampoort"
+      name: "Dampoort"
+      capabilities: ["SteadyStateSimulation", "MassBalance"]
+    
+    - id: "muide"
+      endpoint: "http://ghent-muide:8012"
+      entity: "ghent:Muide"
+      name: "Muide"
+      capabilities: ["SteadyStateSimulation", "MassBalance"]
+    
+    # Household models (if available)
+    - id: "household_mbr"
+      endpoint: "http://household-mbr:8101"
+      entity: "housecase1:Mbr"
+      name: "Household MBR"
+      capabilities: ["SteadyStateSimulation", "DynamicSimulation", "Calibration"]
+    
+    - id: "household_ro"
+      endpoint: "http://household-ro:8102"
+      entity: "housecase1:Ro"
+      name: "Household RO"
+      capabilities: ["SteadyStateSimulation", "DynamicSimulation", "Calibration"]
+    
+    - id: "household_infiltration"
+      endpoint: "http://household-infiltration:8103"
+      entity: "housecase1:Infiltration"
+      name: "Household Infiltration"
+      capabilities: ["SteadyStateSimulation", "DynamicSimulation", "Calibration"]
+
+namespaces:
+  namespaces:
+    - prefix: "ghent"
+      uri: "https://ugentbiomath.github.io/ontology/index.ttl#"
+    - prefix: "housecase1"
+      uri: "https://ugentbiomath.github.io/ontology/index.ttl#"
+    - prefix: "wf"
+      uri: "https://ugentbiomath.github.io/waterframe#"
+    - prefix: "cap"
+      uri: "https://ugentbiomath.github.io/waterframe/capability#"
+
+llm:
+  provider: "auto"
+  max_retries: 3
+
+log_level: "INFO"

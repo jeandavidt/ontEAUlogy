@@ -218,3 +218,33 @@ class ErrorResponse(BaseModel):
     error: str
     detail: Optional[str] = None
     request_id: Optional[str] = None
+
+
+# === Agent Composition Models ===
+
+
+class AgentCompositionRequest(BaseModel):
+    """Request agent composition discovery."""
+    initial_parameters: Dict[str, float] = Field(default_factory=dict)
+    target_outputs: List[str]  # Parameter names needed
+    max_layers: int = 10
+    timeout_seconds: float = 30.0
+
+
+class CompositionLayerResponse(BaseModel):
+    """Serializable layer representation."""
+    layer_index: int
+    agent_ids: List[str]
+    agent_names: List[str]
+    parallelizable: bool
+    inputs_needed: Dict[str, str]  # Parameter → source
+    outputs_produced: List[str]
+
+
+class AgentCompositionResponse(BaseModel):
+    """Response with discovered composition."""
+    composition_found: bool
+    execution_plan: str
+    layers: List[CompositionLayerResponse]
+    total_agents: int
+    estimated_execution_time_seconds: float
