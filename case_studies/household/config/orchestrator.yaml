@@ -1,0 +1,52 @@
+# Household Case Study Orchestrator Configuration
+
+app:
+  name: "ontEAUlogy Household Backend"
+  version: "0.1.0"
+  description: "FastAPI orchestrator for Household water treatment system"
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  cors_origins: ["*"]
+
+ontology:
+  base_path: "/shared-ontology"
+  case_study_path: "/shared-ontology/ontology/instances"
+  files:
+    - "household_case1.ttl"
+
+models:
+  discovery:
+    - id: "mbr"
+      endpoint: "http://household-mbr:8101"
+      entity: "housecase1:Mbr"
+      name: "MBR"
+      capabilities: ["SteadyStateSimulation", "DynamicSimulation", "Calibration"]
+    
+    - id: "ro"
+      endpoint: "http://household-ro:8102"
+      entity: "housecase1:Ro"
+      name: "RO"
+      capabilities: ["SteadyStateSimulation", "DynamicSimulation", "Calibration"]
+    
+    - id: "infiltration"
+      endpoint: "http://household-infiltration:8103"
+      entity: "housecase1:Infiltration"
+      name: "Infiltration"
+      capabilities: ["SteadyStateSimulation", "DynamicSimulation", "Calibration"]
+
+namespaces:
+  namespaces:
+    - prefix: "housecase1"
+      uri: "https://ugentbiomath.github.io/ontology/index.ttl#"
+    - prefix: "wf"
+      uri: "https://ugentbiomath.github.io/waterframe#"
+    - prefix: "cap"
+      uri: "https://ugentbiomath.github.io/waterframe/capability#"
+
+llm:
+  provider: "auto"
+  max_retries: 3
+
+log_level: "INFO"

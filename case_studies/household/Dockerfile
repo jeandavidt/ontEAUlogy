@@ -1,9 +1,14 @@
 FROM python:3.11-slim
 
+# Set working directory
 WORKDIR /app
 
-COPY pyproject.toml .
-COPY src/ src/
-RUN pip install --no-cache-dir .
+# Copy project files
+COPY pyproject.toml ./
+COPY src/ ./src/
 
-CMD ["python", "-m", "household_water.runners.model_runner", "--model", "mbr"]
+# Install dependencies
+RUN pip install --no-cache-dir -e .[dev]
+
+# Command to run (will be overridden in docker-compose)
+CMD ["python", "-m", "household_water.runners.model_runner", "--model", "mbr", "--port", "8101"]

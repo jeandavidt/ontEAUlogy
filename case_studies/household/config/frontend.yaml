@@ -1,0 +1,72 @@
+# Household Case Study Frontend Configuration
+
+app:
+  name: "ontEAUlogy Household"
+  title: "Household Water Treatment"
+  description: "Interactive visualization for household water treatment systems"
+  version: "0.1.0"
+
+branding:
+  logo: "/assets/household-logo.svg"
+  primary_color: "#2E7D32"
+  secondary_color: "#4CAF50"
+
+api:
+  base_url: "/api"
+  orchestrator_url: "http://localhost:8080"
+  timeout: 30000
+
+features:
+  sparql_query: true
+  natural_language: true
+  simulation: true
+  sensors: true
+  map: false
+  topology: true
+  timeline: false
+
+entities:
+  show_types:
+    - "wf:MembraneBioreactor"
+    - "wf:ReverseOsmosis"
+    - "wf:InfiltrationSystem"
+  default_icon: "droplet"
+
+models:
+  available:
+    - id: "mbr"
+      name: "MBR"
+      icon: "filter"
+      description: "Membrane Bioreactor"
+    - id: "ro"
+      name: "RO"
+      icon: "droplet-half"
+      description: "Reverse Osmosis"
+    - id: "infiltration"
+      name: "Infiltration"
+      icon: "arrow-down-to-line"
+      description: "Soil Infiltration System"
+
+pages:
+  - id: "dashboard"
+    name: "Dashboard"
+    icon: "layout-dashboard"
+    path: "/"
+  - id: "mbr"
+    name: "MBR"
+    icon: "filter"
+    path: "/mbr"
+  - id: "ro"
+    name: "RO"
+    icon: "droplet-half"
+    path: "/ro"
+  - id: "infiltration"
+    name: "Infiltration"
+    icon: "arrow-down-to-line"
+    path: "/infiltration"
+
+namespaces:
+  - prefix: "housecase1"
+    uri: "https://ugentbiomath.github.io/ontology/index.ttl#"
+  - prefix: "wf"
+    uri: "https://ugentbiomath.github.io/waterframe#"

@@ -1,0 +1,63 @@
+# Test configuration for household orchestrator
+# Identical to orchestrator.yaml but loads additional test fixture TTL
+# containing the WaterQualityAnalyzer agent for 2-layer chain tests.
+
+app:
+  name: "ontEAUlogy Household Backend (Test)"
+  version: "0.1.0"
+  description: "Test configuration for household case study"
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  cors_origins: ["*"]
+
+ontology:
+  base_path: "/shared-ontology"
+  case_study_path: "/shared-ontology/ontology/instances"
+  files:
+    - "household_case1.ttl"
+    - "test_agents_chain.ttl"
+
+models:
+  discovery:
+    - id: "mbr"
+      endpoint: "http://household-mbr:8101"
+      entity: "housecase1:Mbr"
+      name: "MBR"
+      capabilities: ["SteadyStateSimulation", "DynamicSimulation", "Calibration"]
+
+    - id: "ro"
+      endpoint: "http://household-ro:8102"
+      entity: "housecase1:Ro"
+      name: "RO"
+      capabilities: ["SteadyStateSimulation", "DynamicSimulation", "Calibration"]
+
+    - id: "infiltration"
+      endpoint: "http://household-infiltration:8103"
+      entity: "housecase1:Infiltration"
+      name: "Infiltration"
+      capabilities: ["SteadyStateSimulation", "DynamicSimulation", "Calibration"]
+
+    - id: "wqa"
+      endpoint: "http://localhost:8104"
+      entity: "household:WQA_Software"
+      name: "Water Quality Analyzer"
+      capabilities: ["WaterQualityPrediction"]
+
+namespaces:
+  namespaces:
+    - prefix: "housecase1"
+      uri: "https://ugentbiomath.github.io/ontology/index.ttl#"
+    - prefix: "wf"
+      uri: "https://ugentbiomath.github.io/waterframe#"
+    - prefix: "cap"
+      uri: "https://ugentbiomath.github.io/waterframe/capability#"
+    - prefix: "household"
+      uri: "https://w3id.org/waterframe/case/household/"
+
+llm:
+  provider: "auto"
+  max_retries: 3
+
+log_level: "INFO"

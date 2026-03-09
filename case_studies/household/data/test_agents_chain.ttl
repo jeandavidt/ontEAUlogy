@@ -1,0 +1,43 @@
+@prefix wf: <https://ugentbiomath.github.io/waterframe#> .
+@prefix household: <https://w3id.org/waterframe/case/household/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# =============================================================================
+# Test fixture: WaterQualityAnalyzer agent (2-layer chain)
+#
+# This agent accepts MBR outputs (effluent_cod, effluent_tss, effluent_flow)
+# and produces water quality scores, enabling a 2-layer composition chain:
+#
+#   Layer 0: MBR_Agent   → effluent_cod, effluent_tss, effluent_flow
+#   Layer 1: WQA_Agent   → water_quality_score, treatment_efficiency
+#
+# Loaded ONLY in test config (orchestrator_test.yaml) — not in production.
+# =============================================================================
+
+household:WQA_Software
+    a wf:SoftwareSystem ;
+    rdfs:label "Water Quality Analyzer Service" ;
+    wf:apiEndpoint <http://localhost:8104> .
+
+household:WQA_Agent
+    a wf:ComputationalAgent ;
+    rdfs:label "Water Quality Analyzer" ;
+    wf:runsOn household:WQA_Software ;
+    wf:offersOperation household:WQA_AnalyzeOp .
+
+household:WQA_AnalyzeOp
+    a wf:Operation ;
+    rdfs:label "Analyze Effluent Quality" ;
+    wf:requiresInput
+        [ a wf:ModelInput ; wf:parameterName "effluent_cod" ],
+        [ a wf:ModelInput ; wf:parameterName "effluent_tss" ],
+        [ a wf:ModelInput ; wf:parameterName "effluent_flow" ] ;
+    wf:producesOutput
+        [ a wf:ModelOutput ; wf:parameterName "water_quality_score" ],
+        [ a wf:ModelOutput ; wf:parameterName "treatment_efficiency" ] ;
+    wf:hasHTTPGrounding [
+        wf:httpMethod "POST" ;
+        wf:operationPath "/analyze" ;
+        wf:requestFormat "application/json" ;
+        wf:responseFormat "application/json" ;
+    ] .

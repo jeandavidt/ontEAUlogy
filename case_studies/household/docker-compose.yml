@@ -1,0 +1,163 @@
+x-common-config: &common-config
+  networks:
+    - household-water-network
+  restart: unless-stopped
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "3"
+  deploy:
+    resources:
+      limits:
+        cpus: '0.5'
+        memory: 256M
+      reservations:
+        cpus: '0.1'
+        memory: 64M
+
+services:
+  # React Frontend (Household-specific)
+  frontend-react:
+    build:
+      context: ./frontend-react
+      dockerfile: Dockerfile
+    container_name: household-frontend-react
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    networks:
+      - household-water-network
+    restart: unless-stopped
+    depends_on:
+      orchestrator:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:80 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    profiles:
+      - full
+      - frontend
+
+  # CORE ORCHESTRATOR (using shared image with build)
+  orchestrator:
+    build:
+      context: ../..
+      dockerfile: case_studies/core/orchestrator/Dockerfile
+    image: onteaulogy-core:latest
+    container_name: household-orchestrator
+    ports:
+      - "${ORCHESTRATOR_PORT:-8080}:8080"
+    env_file:
+      - ../../.env
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      # Mount the shared ontology data
+      - ../../data:/shared-ontology:ro
+      # Mount case study specific data
+      - ./data:/app/data:ro
+      # Mount the configuration file
+      - ./config/orchestrator.yaml:/app/config.yaml:ro
+    command: ["onteaulogy-orchestrator", "/app/config.yaml"]
+    networks:
+      - household-water-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8080/health', timeout=5).status_code == 200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    profiles:
+      - full
+      - backend
+
+  # Household Model Services
+  household-mbr:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: household-mbr
+    ports:
+      - "8101:8101"
+    env_file:
+      - ../../.env
+    environment:
+      - PORT=8101
+      - MODEL_NAME=mbr
+    command: ["python", "-m", "household_water.runners.model_runner", "--model", "mbr", "--port", "8101"]
+    networks:
+      - household-water-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8101/health', timeout=2).status_code == 200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    profiles:
+      - full
+      - models
+      - backend
+
+  household-ro:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: household-ro
+    ports:
+      - "8102:8102"
+    env_file:
+      - ../../.env
+    environment:
+      - PORT=8102
+      - MODEL_NAME=ro
+    command: ["python", "-m", "household_water.runners.model_runner", "--model", "ro", "--port", "8102"]
+    networks:
+      - household-water-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8102/health', timeout=2).status_code == 200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    profiles:
+      - full
+      - models
+      - backend
+
+  household-infiltration:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: household-infiltration
+    ports:
+      - "8103:8103"
+    env_file:
+      - ../../.env
+    environment:
+      - PORT=8103
+      - MODEL_NAME=infiltration
+    command: ["python", "-m", "household_water.runners.model_runner", "--model", "infiltration", "--port", "8103"]
+    networks:
+      - household-water-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://localhost:8103/health', timeout=2).status_code == 200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    profiles:
+      - full
+      - models
+      - backend
+
+networks:
+  household-water-network:
+    driver: bridge

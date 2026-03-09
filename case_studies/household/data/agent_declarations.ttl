@@ -1,0 +1,219 @@
+@prefix wf: <https://w3id.org/waterframe/> .
+@prefix cap: <https://w3id.org/waterframe/capability/> .
+@prefix case: <https://w3id.org/waterframe/case/household/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ==================== Services ====================
+
+case:MBR_Service a wf:SoftwareSystem ;
+    rdfs:label "MBR Model Service" ;
+    wf:apiEndpoint "http://localhost:8101" ;
+    wf:serviceId "mbr" .
+
+case:RO_Service a wf:SoftwareSystem ;
+    rdfs:label "RO Model Service" ;
+    wf:apiEndpoint "http://localhost:8102" ;
+    wf:serviceId "ro" .
+
+case:Infiltration_Service a wf:SoftwareSystem ;
+    rdfs:label "Infiltration Model Service" ;
+    wf:apiEndpoint "http://localhost:8103" ;
+    wf:serviceId "infiltration" .
+
+# ==================== Agents ====================
+
+case:MBR_Agent a wf:ComputationalAgent ;
+    rdfs:label "Membrane Bioreactor Model" ;
+    wf:hasCapability cap:DynamicSimulation, cap:MassBalance, cap:WaterQualityPrediction ;
+    wf:implements case:Membrane_bioreactor_Model ;
+    wf:runsOn case:MBR_Service ;
+    wf:offersOperation case:MBR_Simulation .
+
+case:RO_Agent a wf:ComputationalAgent ;
+    rdfs:label "Reverse Osmosis Model" ;
+    wf:hasCapability cap:DynamicSimulation, cap:MassBalance, cap:WaterQualityPrediction ;
+    wf:implements case:Reverse_osmosis_Model ;
+    wf:runsOn case:RO_Service ;
+    wf:offersOperation case:RO_Simulation .
+
+case:Infiltration_Agent a wf:ComputationalAgent ;
+    rdfs:label "Soil Infiltration Model" ;
+    wf:hasCapability cap:DynamicSimulation, cap:MassBalance ;
+    wf:implements case:Infiltration_Model ;
+    wf:runsOn case:Infiltration_Service ;
+    wf:offersOperation case:Infiltration_Simulation .
+
+# ==================== Operations ====================
+
+case:MBR_Simulation a wf:Operation ;
+    rdfs:label "Run MBR Simulation" ;
+    wf:requiresInput case:MBR_Influent_Flow, 
+                     case:MBR_Influent_COD ;
+    wf:producesOutput case:MBR_Effluent_Flow, 
+                      case:MBR_Effluent_COD,
+                      case:MBR_Biomass_Concentration,
+                      case:MBR_Energy_Consumption,
+                      case:MBR_Sludge_Production ;
+    wf:hasPrecondition [
+        a wf:Precondition ;
+        wf:constrainsParameter case:MBR_Influent_Flow ;
+        wf:constraintExpression "influent_flow_m3d > 0" ;
+        rdfs:comment "Flow rate must be positive"
+    ] ;
+    wf:hasPrecondition [
+        a wf:Precondition ;
+        wf:constrainsParameter case:MBR_Influent_COD ;
+        wf:constraintExpression "influent_cod_mg_l >= 0" ;
+        rdfs:comment "COD cannot be negative"
+    ] ;
+    wf:hasPostcondition [
+        a wf:Postcondition ;
+        wf:constraintExpression "mass_balance_satisfied(COD)" ;
+        rdfs:comment "Mass balance maintained"
+    ] ;
+    wf:hasHTTPGrounding [
+        a wf:HTTPGrounding ;
+        wf:httpMethod "POST" ;
+        wf:operationPath "/simulate/mbr" ;
+        wf:requestFormat "application/json" ;
+        wf:responseFormat "application/json" ;
+        wf:requiresAuthentication "false"^^xsd:boolean
+    ] ;
+    wf:estimatedExecutionTime "2.5"^^xsd:float ;
+    wf:computationalComplexity "O(n*m)" .
+
+case:RO_Simulation a wf:Operation ;
+    rdfs:label "Run RO Simulation" ;
+    wf:requiresInput case:RO_Feed_Flow, 
+                     case:RO_Feed_COD ;
+    wf:producesOutput case:RO_Permeate_Flow, 
+                      case:RO_Permeate_COD,
+                      case:RO_Concentrate_Flow,
+                      case:RO_Energy_Consumption ;
+    wf:hasPrecondition [
+        a wf:Precondition ;
+        wf:constrainsParameter case:RO_Feed_Flow ;
+        wf:constraintExpression "feed_flow_m3d > 0" ;
+        rdfs:comment "Feed flow must be positive"
+    ] ;
+    wf:hasHTTPGrounding [
+        a wf:HTTPGrounding ;
+        wf:httpMethod "POST" ;
+        wf:operationPath "/simulate/ro" ;
+        wf:requestFormat "application/json" ;
+        wf:responseFormat "application/json" ;
+        wf:requiresAuthentication "false"^^xsd:boolean
+    ] ;
+    wf:estimatedExecutionTime "1.5"^^xsd:float ;
+    wf:computationalComplexity "O(n)" .
+
+case:Infiltration_Simulation a wf:Operation ;
+    rdfs:label "Run Infiltration Simulation" ;
+    wf:requiresInput case:INF_Influent_Flow ;
+    wf:producesOutput case:INF_Outflow,
+                      case:INF_COD_Removed ;
+    wf:hasPrecondition [
+        a wf:Precondition ;
+        wf:constrainsParameter case:INF_Influent_Flow ;
+        wf:constraintExpression "influent_flow_m3d > 0" ;
+        rdfs:comment "Influent flow must be positive"
+    ] ;
+    wf:hasHTTPGrounding [
+        a wf:HTTPGrounding ;
+        wf:httpMethod "POST" ;
+        wf:operationPath "/simulate/infiltration" ;
+        wf:requestFormat "application/json" ;
+        wf:responseFormat "application/json" ;
+        wf:requiresAuthentication "false"^^xsd:boolean
+    ] ;
+    wf:estimatedExecutionTime "1.0"^^xsd:float ;
+    wf:computationalComplexity "O(1)" .
+
+# ==================== Parameters ====================
+
+# MBR Inputs (using InputParameter for backward compatibility with existing tests)
+case:MBR_Influent_Flow a wf:InputParameter ;
+    wf:parameterName "influent_flow_m3d" ;
+    wf:hasUnit "m³/d" ;
+    wf:minValue "0.0"^^xsd:float ;
+    wf:maxValue "1000.0"^^xsd:float .
+
+case:MBR_Influent_COD a wf:InputParameter ;
+    wf:parameterName "influent_cod_mg_l" ;
+    wf:hasUnit "mg/L" ;
+    wf:minValue "0.0"^^xsd:float ;
+    wf:maxValue "5000.0"^^xsd:float .
+
+# MBR Outputs
+case:MBR_Effluent_Flow a wf:OutputParameter ;
+    wf:parameterName "effluent_flow_m3d" ;
+    wf:hasUnit "m³/d" ;
+    wf:compatibleWith case:RO_Feed_Flow .
+
+case:MBR_Effluent_COD a wf:OutputParameter ;
+    wf:parameterName "effluent_cod_mg_l" ;
+    wf:hasUnit "mg/L" ;
+    wf:compatibleWith case:RO_Feed_COD .
+
+case:MBR_Biomass_Concentration a wf:OutputParameter ;
+    wf:parameterName "biomass_concentration_g_l" ;
+    wf:hasUnit "g/L" .
+
+case:MBR_Energy_Consumption a wf:OutputParameter ;
+    wf:parameterName "energy_kwh_d" ;
+    wf:hasUnit "kWh/d" .
+
+case:MBR_Sludge_Production a wf:OutputParameter ;
+    wf:parameterName "sludge_production_kg_d" ;
+    wf:hasUnit "kg/d" .
+
+# RO Inputs (linked to MBR outputs via compatibleWith)
+case:RO_Feed_Flow a wf:InputParameter ;
+    wf:parameterName "feed_flow_m3d" ;
+    wf:hasUnit "m³/d" ;
+    wf:minValue "0.0"^^xsd:float ;
+    wf:maxValue "1000.0"^^xsd:float .
+
+case:RO_Feed_COD a wf:InputParameter ;
+    wf:parameterName "feed_cod_mg_l" ;
+    wf:hasUnit "mg/L" ;
+    wf:minValue "0.0"^^xsd:float ;
+    wf:maxValue "5000.0"^^xsd:float .
+
+# RO Outputs
+case:RO_Permeate_Flow a wf:OutputParameter ;
+    wf:parameterName "permeate_flow_m3d" ;
+    wf:hasUnit "m³/d" .
+
+case:RO_Permeate_COD a wf:OutputParameter ;
+    wf:parameterName "permeate_cod_mg_l" ;
+    wf:hasUnit "mg/L" .
+
+case:RO_Concentrate_Flow a wf:OutputParameter ;
+    wf:parameterName "concentrate_flow_m3d" ;
+    wf:hasUnit "m³/d" .
+
+case:RO_Energy_Consumption a wf:OutputParameter ;
+    wf:parameterName "ro_energy_kwh_d" ;
+    wf:hasUnit "kWh/d" .
+
+# Infiltration Parameters
+case:INF_Influent_Flow a wf:InputParameter ;
+    wf:parameterName "influent_flow_m3d" ;
+    wf:hasUnit "m³/d" ;
+    wf:minValue "0.0"^^xsd:float ;
+    wf:maxValue "100.0"^^xsd:float .
+
+case:INF_Outflow a wf:OutputParameter ;
+    wf:parameterName "outflow_m3d" ;
+    wf:hasUnit "m³/d" .
+
+case:INF_COD_Removed a wf:OutputParameter ;
+    wf:parameterName "cod_removed_kg_d" ;
+    wf:hasUnit "kg/d" .
+
+# ==================== Data Flows ====================
+
+# Explicit data flow relationships
+case:MBR_Simulation wf:dataFlowsTo case:RO_Simulation .
